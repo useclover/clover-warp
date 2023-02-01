@@ -1,0 +1,98 @@
+import type { NextApiRequest, NextApiResponse } from "next";
+import * as ethers from 'ethers';
+import { db } from '../../../app/firebase';
+import { ref, get, set, child } from "firebase/database";
+import { balanceABI } from "../../../app/components/extras/abi";
+
+
+type Data = {
+  message: string;
+  daos?: any[];
+  error: boolean
+}
+
+export default function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<Data>
+) {
+
+    const provider = new ethers.providers.JsonRpcProvider("https://api.hyperspace.node.glif.io/rpc/v1");
+
+    if (req.method == 'POST') {
+
+        const { hash, address } = req.body;
+        
+        const validateAddress = ethers.utils.verifyMessage("Welcome back to clover", hash);
+
+
+        if ((validateAddress).toLowerCase() == address.toLowerCase()) {
+
+            get(child(ref(db), "DAOs")).then(async (data) => {
+            
+              if (data.exists()) {
+
+                const dao = data.val().map((a: any) => a.contract);
+
+                const sdao = [];
+
+                for (let i = 0; i < dao.length; i++) {
+
+                   const token = new ethers.Contract(dao[i], balanceABI, provider);
+
+                   const balance = await token.balanceOf(address);
+
+                   if (balance > 0) {
+                        sdao.push({...data.val()[i], id: i});
+                   }
+
+                }   
+                
+                if (sdao.length) {
+
+                    res.status(200).json({
+                        message: "Successful",
+                        error: false,
+                        daos: sdao
+                    });
+
+                }else{
+                   res.status(404).json({
+                     message: "No registered DAOs found",
+                     error: true,
+                   }); 
+                }
+              }else{
+                res.status(404).json({
+                  message: "No registered DAOs found",
+                  error: true,
+                });
+              }
+
+            }).catch(err => {
+                const error = err as Error;
+
+                console.log(error)
+
+                res.status(400).json({
+                    'message': "Something went wrong, please try again",
+                    'error' : true
+                });
+
+            });            
+
+        }else{
+          res.status(400).json({
+            message: "Invalid address",
+            error: true,
+          });   
+        }
+
+    }else{
+         res.status(422).json({
+           message: "Method not supported",
+           error: true,
+         });
+    }
+
+
+}
