@@ -6,15 +6,12 @@ import styles from '../styles/Home.module.css';
 import bgLogo from '../public/images/logolg.png';
 import { BiX } from "react-icons/bi";
 import axios from 'axios';
-import { useMoralis } from 'react-moralis'
 import { useState, useEffect, useContext } from 'react'
 import { Alert, Button, Modal, Box, FormControl, TextField } from "@mui/material";
 import Loader from '../app/components/loader';
 import web3 from "web3";
 import contract from "../artifacts/contracts/share.sol/simpleNFT.json";
 import { makeNFTClient } from '../app/components/extras/storage/utoken';
-import { LogContext } from '../app/components/extras/contexts/logContext';
-import { initData } from '../app/components/extras/storage';
 import Router from 'next/router';
 import { supported } from '../app/components/extras/connectors';
 import { useAccount, useConnect, useNetwork, useSignMessage, useSigner } from 'wagmi';
@@ -30,12 +27,7 @@ const abi:any = contract.abi;
 
 const Home: NextPage = () => {
 
-  const {
-    isAuthenticated,
-    authenticate,
-    logout,
-    Moralis
-  } = useMoralis();
+ 
 
   const { chain: chainId, chains } = useNetwork();
 
@@ -53,26 +45,13 @@ const Home: NextPage = () => {
   const [isLoading, setLoading] = useState<boolean>(false);
   const handleClose = () => setOpen(false);
   const [failMessage, setFailMessage] = useState<string>('');
-  const loginData = useContext(LogContext);
+  
   const [userAddress, setUserAddress] = useState<string>('');
   
 
-  useEffect(() => {
-
-      if (isNotSupported) {
-        logout();
-      }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isNotSupported]);
 
 
-
-  const logOut = async () => {
-    if (isAuthenticated) {
-      logout()
-    }
-  };
+ 
 
   const [name, setName] = useState<string>('');
   const [des, setDes] = useState<string>('');
@@ -89,9 +68,7 @@ const Home: NextPage = () => {
 
   const generateNftData = async (name: string, owner: string, desc?: string) => {
 
-    const nfx = makeNFTClient(
-      await Moralis.Cloud.run("getNFTStorageKey")
-      ); 
+    const nfx = makeNFTClient(process.env.NFT_KEY || ""); 
 
     const date = new Date();
     
@@ -168,11 +145,7 @@ const Home: NextPage = () => {
     table?:string 
   }>({});
 
-  useEffect(() => {
-    if (loginData.update) {
-    loginData.update({ ...updatex });
-    }
-  }, [updatex]);
+
 
 
   const sumitDeets = async () => {
@@ -441,116 +414,6 @@ const Home: NextPage = () => {
 
             }
 
-            return;
-
-             const res = await axios.get(
-               `https://api.covalenthq.com/v1/80001/address/${userAddress}/balances_v2/?quote-currency=USD&format=JSON&nft=true&no-nft-fetch=false&key=ckey_d8fd93851d6a4d57bdcf14a337d`
-             );
-
-              console.log(res.data)
-
-             const main = res.data.data.items;
-
-             if(!res.data.error){
-
-                for (let i = 0; i < main.length; i++) {
-                  const v:any = main[i];
-
-                  const DAO = Moralis.Object.extend("DAOs");
-
-                  const mQ = new Moralis.Query(DAO);
-                  mQ.equalTo("contract", v.contract_address);
-                  console.log('contracted')
-
-                  if (
-                    contractAddress == (v.contract_address).toLowerCase().trim()
-                  ) {
-
-                    console.log('personal contract')
-
-                    for(let ii = 0; ii < v.nft_data.length; ii++){
-
-                      const vv = v.nft_data[ii].external_data;
-                      
-                      mQ.equalTo("name", vv.name);
-
-                      if (vv.attributes[0].main !== undefined) {
-                        mQ.equalTo("userContract", vv.attributes[0].main);
-                        console.log('verified')
-                        const ld = await mQ.find();
-                      
-
-                        if (ld.length) {
-
-                          exec.push({
-                            name: vv.name,
-                            description: vv.description,
-                            contract: contractAddress,
-                            image: vv.image,
-                            main: vv.attributes[0].main,
-                            table:
-                              ld[0].attributes.tablename !== undefined
-                                ? ld[0].attributes.tablename
-                                : undefined,
-                          });
-                          
-                        }
-                      }
-                    }
-
-                    setExec([...exec]);
-            
-                  } else {
-                    const ld = await mQ.find();
-                    console.log('unk 1')
-                    if (ld.length) {
-                      console.log('unk 2')
-                      ld.forEach((vv: any) => {
-                        exec.push({
-                          name: vv.attributes.name,
-                          contract: v.contract_address,
-                          description:
-                            vv.attributes.desc !== undefined
-                              ? vv.attributes.desc
-                              : `Access to ${vv.attributes.name} ${
-                                  vv.attributes.name.toLowerCase().indexOf("dao") == -1
-                                    ? "DAO"
-                                    : ""
-                                }`,
-                          image: v.logo_url,
-                          main: vv.attributes.userContract,
-                          table:
-                            vv.attributes.tablename !== undefined
-                              ? vv.attributes.tablename
-                              : undefined,
-                        });
-                      });
-                    }
-
-                    setExec([...exec]);
-
-                  }
-                }
-
-                if (exec.length) {
-                  
-                } else {
-                  setBigLoader(false);
-                  setSupport(false);
-                  setLoginError("No registered DAOs found");
-                }    
-
-
-             }else{
-
-                setBigLoader(false);
-                setSupport(false);
-                setLoginError("No registered DAOs found");
-
-             }
-
-
-          
 
         }catch (err) {
 
@@ -610,13 +473,12 @@ const Home: NextPage = () => {
                             
                             localStorage.setItem('cloverlog',
                               JSON.stringify({
+                                id: vv.id,
                                 name,
                                 contract,
                                 data,
                               })
                             );
-
-                          
 
                           Router.push("/dashboard");
                           

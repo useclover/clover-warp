@@ -11,14 +11,9 @@ import {
   beginStorageProvider,
   retrieveFiles,
   lq,
-} from "../app/components/extras/storage/moralis_init";
+} from "../app/components/extras/storage/init";
 import { useEffect, useRef, useContext, useState } from 'react';
 import Loader from '../app/components/loader';
-import { useMoralis } from 'react-moralis';
-import {
-  LogContext,
-  LoginD,
-} from "../app/components/extras/contexts/logContext";
 
 const Custom404 = () => {
 
@@ -27,20 +22,20 @@ const [filex, setFilex] = useState<store>();
 const [pageData, setPageData] = useState<any>('');
 const [error, setError] = useState(false);
 const [e404, set404] = useState(false);
-const { isInitialized } = useMoralis();
 
-const data: any = useContext(LogContext);
 
 let executed = useRef(false);
 
  useEffect(() => {
     const linkString = window.location.pathname;
 
-    async function init({ name, contract, data }: LoginD) {
+    async function init({ name, contract, data }) {
+
       if (!executed.current) {
        
         if (lq === undefined) {
-          await beginStorageProvider(name, contract, data.main);
+
+          await beginStorageProvider({contract, randId: data});
         }
 
         const dir: any = await retrieveFiles(["main"]); //change later
@@ -125,14 +120,14 @@ let executed = useRef(false);
       }
     };
     
+    const data = JSON.parse(localStorage.getItem('cloverlog') || '{"name":""}');
+
     if (data.name == '') {
       set404(true)
     } else {
-      if(isInitialized){
        init(data)
-      }
     } 
-  }, [filex, isInitialized, data])
+  }, [filex])
 
 
 

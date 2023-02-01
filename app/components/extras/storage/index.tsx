@@ -1,6 +1,4 @@
 import axios from 'axios';
-import Moralis from 'moralis'
-import { connect, Connection, SUPPORTED_CHAINS } from "@tableland/sdk";
 
 
 export type store = {
@@ -106,7 +104,7 @@ export const initData:fstructure = {
 
 export const deleteFile = async (cid: string) => {
 
-    const token = await Moralis.Cloud.run("getWeb3StorageKey");
+    const token = process.env.STORAGE_KEY;
 
     const config = {
       data: {

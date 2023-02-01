@@ -18,7 +18,6 @@ import {
   FormControl,
   Box,
 } from "@mui/material";
-import { useMoralis } from 'react-moralis';
 import Picker from "emoji-picker-react";
 import { logout } from '../extras/logout';
 import empty from "../../../public/images/empty.png";
@@ -32,27 +31,34 @@ import {
   saveMessages,
   retrieveFiles,
   storeFiles,
-} from "../extras/storage/moralis_init";
+} from "../extras/storage/init";
 import { FaCloud } from 'react-icons/fa';
 import { CContext } from '../extras/contexts/CContext';
 import Text from './texts';
 import Chatlist from './sidebar/chatlist';
 import Loader from '../loader';
+import { useAccount } from 'wagmi';
+
 
 
 const Chats = () => {
 
-    const loginData: {
-      name: string;
-      contract: string;
-      data: {
-        main: string;
-        table?: string;
-      };
-    } = useContext(LogContext);
+     const [loginData, setLoginData] = useState<any>({});
+
+     const { address, isConnected } = useAccount();
+
+     useEffect(() => {
+       if (localStorage.getItem("cloverlog") === null) {
+         Router.push("/");
+       } else {
+         const data = JSON.parse(localStorage.getItem("cloverlog") || "{}");
+
+         setLoginData(data);
+
+       }
+     }, []);
     
-    const { name, contract } = loginData;
-    const { main, table } = loginData.data;
+    const { name, contract, data: main } = loginData;
 
     document.querySelectorAll("textArea, .emoji-scroll-wrapper").forEach((e) => {
       e.classList.add("cusscroller");
@@ -63,7 +69,6 @@ const Chats = () => {
 
     const [messageText, setMessageText] = useState('');
 
-    const { user, Moralis, isInitialized } = useMoralis();
 
     const [group, setGroup] = useState(name);
     const [currentDir, setCurrentDir] = useState<string[]>(["main"]);
@@ -92,9 +97,9 @@ const Chats = () => {
 
     useEffect(() => {
       async function init() {
-        await beginStorageProvider(name, contract, main);
 
-        // const xc: any = JSON.parse(lq.get("files"));
+        await beginStorageProvider({contract, randId: main});
+
         
         const mess = await retrieveMessages();
 
@@ -115,12 +120,8 @@ const Chats = () => {
     }, [
       main,
       currentDir,
-      user,
-      isInitialized,
       uploadData,
       update,
-      Moralis.Object,
-      Moralis.Query,
       contract,
       name,
     ]);
@@ -138,13 +139,13 @@ const Chats = () => {
             messData[group] = []; 
         }
 
-        const newMess:any = {
+        const newMess: any = {
           content: [[messageText]],
           isSending: true,
           sent: false,
           server: false,
           enlargen,
-          sender: user?.get("ethAddress"),
+          sender: address,
           date: new Date().getTime(),
         };
 
@@ -199,12 +200,9 @@ const Chats = () => {
 
         {!isLoading && (
           <div className="app">
-           
             <Modal open={addNew} onClose={() => setAddNew(false)}>
               <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
                 <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
-                  
-
                   <div className="rounded-lg bg-white shadow-lg shadow-[#cccccc]">
                     <div className="border-b flex justify-between py-[14px] px-[17px] text-xl font-bold">
                       Add New
@@ -300,7 +298,7 @@ const Chats = () => {
                                 >
                               ) => {
                                 setNname(e.target.value);
-                                setFailMessage('');
+                                setFailMessage("");
                               }}
                             />
                           </div>
@@ -312,33 +310,32 @@ const Chats = () => {
                               fontFamily: "inherit",
                             }}
                             onClick={async () => {
-                                if (nname.length) {
-                                  setLoader(true);
+                              if (nname.length) {
+                                setLoader(true);
 
-                                    try{
-                                      const nMessData = { ...messData }
-                                      nMessData[nname] = [];
-                                      
-                                      await saveMessages(
-                                        JSON.stringify(nMessData)
-                                      );
-                                      
-                                      updateMessData(nMessData);
-                                      
-                                      setGroup(nname);
-                                      
-                                      setAddNew(false);
+                                try {
+                                  const nMessData = { ...messData };
+                                  nMessData[nname] = [];
 
-                                      setLoader(false)
-                                    }catch(err:any){
+                                  await saveMessages(JSON.stringify(nMessData));
 
-                                      setLoader(false);
+                                  updateMessData(nMessData);
 
-                                      setFailMessage("Something went wrong, please try again later");
-                                    }
-                                } else {
-                                  setFailMessage('Name of channel is required')
-                                }   
+                                  setGroup(nname);
+
+                                  setAddNew(false);
+
+                                  setLoader(false);
+                                } catch (err: any) {
+                                  setLoader(false);
+
+                                  setFailMessage(
+                                    "Something went wrong, please try again later"
+                                  );
+                                }
+                              } else {
+                                setFailMessage("Name of channel is required");
+                              }
                             }}
                             fullWidth
                           >
@@ -542,7 +539,7 @@ const Chats = () => {
                           <div className="py-[10px] opacity-[.7] flex flex-col">
                             <span className="font-bold text-[10px]">
                               {`Replying to ${
-                                rContext?.sender == user?.get("ethAddress")
+                                rContext?.sender == address
                                   ? "self"
                                   : rContext?.sender
                               }`}

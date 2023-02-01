@@ -17,7 +17,6 @@ import { TbSearch } from 'react-icons/tb';
 import Dash from "../../app/components/dash";
 import FolderDes from "../../app/components/designs/folder";
 import FileDes from '../../app/components/designs/file';
-import { useMoralis } from "react-moralis";
 import { useContext, useState, useEffect } from "react";
 import { GenContext } from "../../app/components/extras/contexts/genContext";
 import { LogContext } from '../../app/components/extras/contexts/logContext';
@@ -32,12 +31,11 @@ import {
   beginStorageProvider,
   retrieveFiles,
   storeFiles,
-} from "../../app/components/extras/storage/moralis_init";
+} from "../../app/components/extras/storage/init";
 import { logout } from '../../app/components/extras/logout';
 
 
 const Dashboard = () => {
-  const { Moralis, user, isAuthenticated, isInitialized } = useMoralis();
 
   const [currentDir, setCurrentDir] = useState<string[]>(["main"]);
 
@@ -45,18 +43,15 @@ const Dashboard = () => {
 
   const uploadData = useContext(GenContext);
 
-  const loginData:{
-      name: string,
-      contract: string,
-      data: {
-        main: string,
-        table?: string
-      }
-  } = useContext(LogContext);
+  const [loginData, setLoginData] = useState<any>({});
 
   useEffect(() => {
     if (localStorage.getItem("cloverlog") === null) {
       Router.push('../');
+    }else{
+        const data = JSON.parse(localStorage.getItem("cloverlog") || '{}');
+
+        setLoginData(data);
     }
   }, []);
 
@@ -76,21 +71,21 @@ const Dashboard = () => {
   const [notInit, setNotInit] = useState<boolean>(false)
   const [isLoading, setLoader] = useState(true);
 
-   const { name, contract } = loginData
-   const { main, table } = loginData.data;
+   const { name, contract, data: main } = loginData
 
   useEffect(() => {
 
     async function init() {
 
-     await beginStorageProvider(name, contract, main);
-      
-      const xc: any = JSON.parse(lq.get("files"));
+     await beginStorageProvider({contract, randId: main});
+    
 
       const dir: any = await retrieveFiles(currentDir);
 
        setLoader(false);
-       setFileData(xc);
+
+       setFileData(dir);
+
         if (uploadData.updateFile !== undefined) {
               uploadData.updateFile(dir);
 
@@ -102,7 +97,7 @@ const Dashboard = () => {
       init();
     }
 
-  }, [main,currentDir,user, isInitialized, uploadData, update, Moralis.Object, Moralis.Query, contract, name])
+  }, [main, currentDir, uploadData, update, contract, name])
 
 
   const uploadFiles = (files: FileList) => {
@@ -158,6 +153,7 @@ const Dashboard = () => {
       console.log(cid, index);
       const name = files[index].name
       const extension = name.split('.').pop();
+
       addFiles.push({
         name,
         date: files[index].lastModified,
@@ -166,13 +162,14 @@ const Dashboard = () => {
         extension,
         cid: [cid],
         file: true,
-        tag: 'default',
-        deleted: false
-      })
+        tag: "default",
+        deleted: false,
+      });
 
       if (index == files.length - 1) {
 
         const newFileData = await storeFiles(addFiles, currentDir);
+
         const dir = await retrieveFiles(currentDir);
         setFileData(newFileData)
 
@@ -204,7 +201,7 @@ const Dashboard = () => {
     };
 
     const client = makeStorageClient(
-      await Moralis.Cloud.run("getWeb3StorageKey")
+      process.env.STORAGEKEY
     );
 
     files.forEach((file, i) => {

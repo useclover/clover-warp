@@ -11,6 +11,8 @@ const nextConfig = {
     MATIC_PRIVATE_KEY: process.env.MATIC_PRIVATE_KEY,
     MATIC_LINK: process.env.MATIC_LINK,
     PUBLIC_KEY: process.env.PUBLIC_KEY,
+    STORAGE_KEY: process.env.STORAGE_KEY,
+    NFT_KEY: process.env.NFT_KEY,
     FIREBASE_APIKEY: process.env.FIREBASE_APIKEY,
     FIREBASE_AUTHDOMAIN: process.env.FIREBASE_AUTHDOMAIN,
     FIREBASE_DATABASEURL: process.env.FIREBASE_DATABASEURL,

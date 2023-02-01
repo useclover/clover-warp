@@ -13,9 +13,9 @@ const Xx = () => {
 
             once.current = false;
 
-            set(query("DAOs/0/joined"), ["0x256a54068a49635aa9ab565bf689ffc0d27a8", "le"]).catch((err) => {
-              console.log(err);
-            });
+            // set(query("DAOs"), ["0x256a54068a49635aa9ab565bf689ffc0d27a8","ww"]).catch((err) => {
+            //   console.log(err);
+            // });
 
             // update(ref(db, "DAOs/0"), {
             //     joined: 1,

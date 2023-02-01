@@ -26,10 +26,8 @@ import { TbSearch } from "react-icons/tb";
 
 import FolderDes from "../../components/designs/folder";
 import FileDes from "../../components/designs/file";
-import { useMoralis } from "react-moralis";
 import { useContext, useState, useEffect } from "react";
 import { GenContext } from "../../components/extras/contexts/genContext";
-import { LogContext } from "../../components/extras/contexts/logContext";
 import { makeStorageClient } from "../../components/extras/storage/utoken";
 import { store } from "../../components/extras/storage";
 import Loader from "../../components/loader";
@@ -38,12 +36,11 @@ import {
   beginStorageProvider,
   retrieveFiles,
   storeFiles,
-} from "../../components/extras/storage/moralis_init";
+} from "../extras/storage/init";
 import { logout } from "../../components/extras/logout";
 import Dash from "../dash";
 
 const Storage = () => {
-  const { Moralis, user, isAuthenticated, isInitialized } = useMoralis();
 
   const [currentDir, setCurrentDir] = useState<string[]>(["main"]);
 
@@ -92,12 +89,12 @@ const Storage = () => {
     async function init() {
       await beginStorageProvider({ contract, randId: main});
 
-      const xc: any = JSON.parse(lq.get("files"));
-
+ 
       const dir: any = await retrieveFiles(currentDir);
 
       setLoader(false);
-      setFileData(xc);
+      setFileData(dir);
+
       if (uploadData.updateFile !== undefined) {
         uploadData.updateFile(dir);
 
@@ -111,12 +108,8 @@ const Storage = () => {
   }, [
     main,
     currentDir,
-    user,
-    isInitialized,
     uploadData,
     update,
-    Moralis.Object,
-    Moralis.Query,
     contract,
     name,
   ]);
@@ -214,9 +207,7 @@ const Storage = () => {
       setUpdate(!update);
     };
 
-    const client = makeStorageClient(
-      await Moralis.Cloud.run("getWeb3StorageKey")
-    );
+    const client = makeStorageClient(process.env.STORAGE_KEY || '');
 
     files.forEach((file, i) => {
       return client.put([file], { onRootCidReady, onStoredChunk });
@@ -251,7 +242,7 @@ const Storage = () => {
             }}
             className="w-full flex items-start justify-between filedrop min-h-screen"
           >
-            {user?.get("ethAddress") == main && (
+            
               <Button
                 onClick={() => {
                   const elem = document?.querySelector(
@@ -264,7 +255,6 @@ const Storage = () => {
               >
                 <BsPlusLg size={25} />
               </Button>
-            )}
 
             <input
               type="file"

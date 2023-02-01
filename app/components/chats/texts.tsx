@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import userx from "../../../public/images/user.svg";
-import { useMoralis } from "react-moralis";
 import { CContext } from "../extras/contexts/CContext";
+import { useAccount } from "wagmi";
 
 
 interface Textm {
@@ -15,8 +15,9 @@ interface Textm {
 }
 
 const Text = ({ content, sender, date, key, reply, sent, enlargen }: Textm) => {
-  const { user } = useMoralis();
-  
+
+  const { address, isConnected } = useAccount();
+
   const mCon = useContext(CContext);
 
   const cdat = new Date();
@@ -42,16 +43,19 @@ const Text = ({ content, sender, date, key, reply, sent, enlargen }: Textm) => {
   return (
     <div
       style={{
-        opacity: sent ? 1 : .3
+        opacity: sent ? 1 : 0.3,
       }}
       key={key}
-      className={`chat-msg transition-all delay-[400] ${user?.get("ethAddress") == sender ? "owner" : ""}`}
+      className={`chat-msg transition-all delay-[400] ${
+        address == sender ? "owner" : ""
+      }`}
     >
       <div className="chat-msg-profile">
         <img className="chat-msg-img" src={userx.src} alt={sender} />
 
         <div className="chat-msg-date">
-          {`${sender.substring(0, 6)}...${sender.substring(38, 42)}`} <span>{ddate}</span>
+          {`${sender.substring(0, 6)}...${sender.substring(38, 42)}`}{" "}
+          <span>{ddate}</span>
         </div>
       </div>
       <div className="chat-msg-content">
@@ -60,11 +64,9 @@ const Text = ({ content, sender, date, key, reply, sent, enlargen }: Textm) => {
             {Boolean(txt[1]) && (
               <div className="chat-msg-text reply">
                 <span>{`Replied to ${
-                  reply == user?.get("ethAddress") ? (
-                    "self"
-                  ) : (
-                    `${sender.substring(0, 6)}....${sender.substring(38, 42)}`
-                  )
+                  reply == address
+                    ? "self"
+                    : `${sender.substring(0, 6)}....${sender.substring(38, 42)}`
                 }`}</span>
                 <span>{txt[1]}</span>
               </div>
@@ -83,9 +85,9 @@ const Text = ({ content, sender, date, key, reply, sent, enlargen }: Textm) => {
                 }
               }}
               style={{
-                fontSize: enlargen ? '50px' : undefined,
-                padding: enlargen ? '5px' : undefined
-              }}              
+                fontSize: enlargen ? "50px" : undefined,
+                padding: enlargen ? "5px" : undefined,
+              }}
               className="chat-msg-text"
             >
               {txt[0]}

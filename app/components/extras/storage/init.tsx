@@ -1,4 +1,3 @@
-import Moralis from 'moralis';
 import { store, dir, getFileList, updateSearch } from '.';
 
 import { db } from "../../../firebase";
@@ -65,7 +64,7 @@ export const saveMessages = async (updateNew: any) => {
 
 export const retrieveFiles = async (folder?: string[]) => {
 
-    const query = child(ref(db), `chats/${lq[0]}${(folder || []).join('/')}`);
+    const query = child(ref(db), `files/${lq[0]}${(folder || []).join('/')}`);
 
   const results = await get(query);
 
@@ -88,15 +87,25 @@ export const retrieveFiles = async (folder?: string[]) => {
 
 export const storeFiles = async (file: store[], dirfolder: string[]) => {
   
-  const fileData = JSON.parse(lq.get("files"));
+    const query = child(ref(db), `files/${lq[0]}`);
+
+    const results = await get(query);
+
+    if(results.exists()){
+
+      const fileData = results.val();
+
+      updateSearch(fileData.files, file, dirfolder, false);
+
+      await update(ref(db, `files/${lq[0]}`), fileData);
+
+      return fileData;
+
+    }
+
+     await update(ref(db, `files/${lq[0]}`), file);
+
   
+  return file;
 
-  updateSearch(fileData.files, file, dirfolder, false);
-
-  lq.set('files', JSON.stringify(fileData));
-
-
-  await lq.save();
-
-  return fileData;
 };
