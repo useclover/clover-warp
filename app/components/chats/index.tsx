@@ -28,6 +28,7 @@ import {
   lq,
   retrieveMessages,
   saveMessages,
+  notifications,
   retrieveFiles,
   storeFiles,
 } from "../extras/storage/init";
@@ -57,7 +58,7 @@ const Chats = () => {
        }
      }, []);
     
-    const { name, contract, data: main } = loginData;
+    const { name, contract, data: main, participants} = loginData;
 
     document.querySelectorAll("textArea, .emoji-scroll-wrapper").forEach((e) => {
       e.classList.add("cusscroller");
@@ -100,11 +101,9 @@ const Chats = () => {
 
       async function init() {
 
-        await beginStorageProvider({contract, randId: main});
-
+        await beginStorageProvider({user: address || '', contract, randId: main, participants});
         
-        const mess = await retrieveMessages();
-        
+        const mess = await retrieveMessages();        
 
         if(mess[name] === undefined){
             mess[name] = [];
@@ -176,8 +175,16 @@ const Chats = () => {
 
         serverData[group][index]['server'] = true;
 
+        notifications({
+          title: `Message from ${address}`,
+          message: messageText,
+          receivers: lq[2],
+          exclude: address || "",
+        });
+
          await saveMessages(serverData);
-        
+      
+
          messData[group][index].sent = true;
 
          updateMessData(messData);
@@ -318,6 +325,13 @@ const Chats = () => {
                                 try {
                                   const nMessData = { ...messData };
                                   nMessData[nname] = [];
+
+                                  notifications({
+                                    title: `Message from ${address}`,
+                                    message: messageText,
+                                    receivers: lq[2],
+                                    exclude: address || "",
+                                  });
 
                                   await saveMessages(JSON.stringify(nMessData));
 

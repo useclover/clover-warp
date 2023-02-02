@@ -266,6 +266,7 @@ const Home: NextPage = () => {
                   name,
                   contract: contractAddress,
                   data: rand,
+                  participants
                 })
               );
             
@@ -283,6 +284,7 @@ const Home: NextPage = () => {
                   name,
                   contract: contractAd,
                   data: rand,
+                  participants: [address]         
                 })
               );  
           }
@@ -378,6 +380,7 @@ const Home: NextPage = () => {
                   name,
                   contract,
                   data,
+                  participants: vv.joined
                 })
               );
               
@@ -459,6 +462,7 @@ const Home: NextPage = () => {
                                 name,
                                 contract,
                                 data,
+                                participants: vv.joined
                               })
                             );
 

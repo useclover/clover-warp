@@ -3,7 +3,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import logo from '../public/images/logo.png'
 import {
-  userTable,
   toDataUrl,
   store
 } from "../app/components/extras/storage";  
@@ -14,8 +13,11 @@ import {
 } from "../app/components/extras/storage/init";
 import { useEffect, useRef, useContext, useState } from 'react';
 import Loader from '../app/components/loader';
+import { useAccount } from 'wagmi';
 
 const Custom404 = () => {
+
+  const { address, isConnected } = useAccount();
 
 const [ isLoading, setLoading ] = useState(true);
 const [filex, setFilex] = useState<store>();
@@ -29,13 +31,18 @@ let executed = useRef(false);
  useEffect(() => {
     const linkString = window.location.pathname;
 
-    async function init({ name, contract, data }) {
-
+    async function init({
+      contract,
+      data,
+      participants,
+    }: {
+      contract: string;
+      data: string;
+      participants: any;
+    }) {
       if (!executed.current) {
-       
         if (lq === undefined) {
-
-          await beginStorageProvider({contract, randId: data});
+          await beginStorageProvider({user: address || '', contract, randId: data, participants });
         }
 
         const dir: any = await retrieveFiles(["main"]); //change later

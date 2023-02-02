@@ -39,10 +39,13 @@ import {
 } from "../extras/storage/init";
 import { logout } from "../../components/extras/logout";
 import Dash from "../dash";
+import { useAccount } from "wagmi";
 
 const Storage = () => {
 
   const [currentDir, setCurrentDir] = useState<string[]>(["main"]);
+
+  const { address, isConnected } = useAccount();
 
   /* upload */
   const uploadData = useContext(GenContext);
@@ -52,6 +55,7 @@ const Storage = () => {
     name: string;
     contract: string;
     data: string;
+    participants: any
   }>();
 
   useEffect(() => {
@@ -82,12 +86,12 @@ const Storage = () => {
   const [notInit, setNotInit] = useState<boolean>(false);
   const [isLoading, setLoader] = useState(true);
 
-  const { name, contract, data } = loginData || { name: '', contract: '', main: '' };
+  const { name, contract, data, participants } = loginData || { name: '', contract: '', main: '', participants: {} };
 
   useEffect(() => {
 
     async function init() {
-      await beginStorageProvider({ contract, randId: data || ''});
+      await beginStorageProvider({user: address || '', contract, randId: data || '', participants});
 
  
       const dir: any = await retrieveFiles(currentDir);

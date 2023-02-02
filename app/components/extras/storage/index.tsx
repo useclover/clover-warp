@@ -50,8 +50,11 @@ export const updateSearch = (files: (store | dir)[], newFiles: store[], fileFold
   }else{
       newFiles.forEach(xx => {
           if(!update){
+            
             console.log(files)
-          files.push(xx)
+
+            files.push(xx)
+
           }else{
             files.forEach((e:(dir | store), ix:number) => {
                 if(e.name == xx.name){
@@ -72,26 +75,6 @@ export const toDataUrl = (blob: Blob) => {
       })
   
 }
-
-export let userTable;
-export let tableName:any = '';
-
-let tables: any[] = [];
-
-
-export const verifyHash = async (hash: string) => {
-   
-        const receiptRes = await userTable.receipt(
-              hash
-        );
-            if(receiptRes === undefined){
-                setTimeout(() => {
-                     verifyHash(hash);
-                }, 500)
-            }else{
-                return true
-            }
-  }
 
 
 export const initData:fstructure = {

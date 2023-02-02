@@ -1,7 +1,8 @@
 import { store, dir, getFileList, updateSearch } from '.';
-
+import * as PushAPI from "@pushprotocol/restapi";
 import { db } from "../../../firebase";
 import { ref, update, get, set, child } from "firebase/database";
+import { ethers } from 'ethers';
 
 export let lq:any;
 
@@ -15,12 +16,67 @@ export interface mess {
   }[];
 }
 
-export const beginStorageProvider = async ({ contract, randId }: {
-  contract: string, randId:string 
+export const notifications = async ({ title, message, receivers, exclude }: { title: string, message: string, receivers: string[], exclude: string }) => {
+
+   const pk = process.env.MATIC_PRIVATE_KEY;
+
+   const pkey = `0x${pk}`;
+
+   const signer = new ethers.Wallet(pkey);
+
+   const channel = `eip155:5:${process.env.PUBLIC_KEY}`;
+
+   try {
+    
+    receivers.forEach(async (val: string) => {
+
+      if (val.toLowerCase() == exclude.toLowerCase()) {
+
+        return;
+      }
+
+      const receiver = `eip155:5:${val}`;
+
+      await PushAPI.payloads.sendNotification({
+        signer,
+        type: 3,
+        identityType: 2,
+        notification: {
+          title,
+          body: message,
+        },
+        payload: {
+          title,
+          body: message,
+          cta: "",
+          img: "",
+        },
+        recipients: receiver,
+        channel,
+        env: "staging",
+      });
+
+    })
+
+      return true;
+
+    }catch (err) {
+        console.log(err)
+    }
+}
+
+export const beginStorageProvider = async ({
+  user,
+  contract,
+  randId,
+  participants,
+}: {
+  user: string;
+  contract: string;
+  randId: string;
+  participants: any;
 }) => {
-
-    lq = [randId, contract];
-
+  lq = [randId, contract, participants, user];
 };
 
 export const retrieveMessages = async () => {
@@ -64,13 +120,16 @@ export const saveMessages = async (updateNew: any) => {
 
 export const retrieveFiles = async (folder?: string[]) => {
 
-    const query = child(ref(db), `files/${lq[0]}${(folder || []).join('/')}`);
+    const query = child(
+      ref(db),
+      `files/${lq[0]}${folder ? "/" : ""}${(folder || []).join("/")}`
+    );
 
   const results = await get(query);
 
   if (results.exists()) {
 
-    const fileData = results.val().files;
+    const fileData = results.val();
 
     return fileData;
 
@@ -87,7 +146,7 @@ export const retrieveFiles = async (folder?: string[]) => {
 
 export const storeFiles = async (file: store[], dirfolder: string[]) => {
   
-    const query = child(ref(db), `files/${lq[0]}`);
+    const query = child(ref(db), `files/${lq[0]}${dirfolder ? "/" : ""}${(dirfolder || []).join("/")}`);
 
     const results = await get(query);
 
@@ -95,19 +154,28 @@ export const storeFiles = async (file: store[], dirfolder: string[]) => {
 
       const fileData = results.val();
 
-      updateSearch(fileData.files, file, dirfolder, false);
 
-   
-      await update(ref(db, `files/${lq[0]}`), fileData);
+      await set(
+        ref(
+          db,
+          `files/${lq[0]}${dirfolder ? "/" : ""}${(dirfolder || []).join("/")}`
+        ),
+        [...fileData, ...file]
+      );
 
-      return fileData;
+      return [...fileData, ...file];
 
     }
 
 
-     await set(ref(db, `files/${lq[0]}`), file);
+     await set(
+       ref(db, `files/${lq[0]}${dirfolder ? "/" : ""}${(dirfolder || []).join("/")}`),
+       file
+     );
+
 
   
-  return file;
+    return file;
 
 };
+

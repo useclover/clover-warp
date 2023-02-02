@@ -1,30 +1,52 @@
 import { useEffect, useState, useRef } from 'react';
-import { db } from '../app/firebase/index';
-import { onValue, ref, update, get, remove, set, child } from "firebase/database";
+import * as PushAPI from "@pushprotocol/restapi";
+import { ethers } from 'ethers';
 
 const Xx = () => {
 
-     const query = (path: string) => ref(db, path);
-
      const once = useRef<boolean>(true)
+
+     const pk = process.env.MATIC_PRIVATE_KEY;
+
+     const pkey = `0x${pk}`;
+
+     const signer = new ethers.Wallet(pkey);
+
+     const channel = `eip155:5:${process.env.PUBLIC_KEY}`;
+
 
      useEffect(() => {
         if(once.current){
 
             once.current = false;
 
-            // set(query("DAOs"), ["0x256a54068a49635aa9ab565bf689ffc0d27a8","ww"]).catch((err) => {
-            //   console.log(err);
-            // });
-
-            // update(ref(db, "DAOs/0"), {
-            //     joined: 1,
-            // })
-            //   .then((data) => {})
-            //   .catch((err) => {
-            //     console.log(err);
-            //   });
-
+            PushAPI.payloads
+              .sendNotification({
+                signer,
+                type: 3,
+                identityType: 2,
+                notification: {
+                  title: `New message from john doe`,
+                  body: `dont give up`,
+                },
+                payload: {
+                  title: `New message from john doe`,
+                  body: `dont give up`,
+                  cta: "",
+                  img: "",
+                },
+                recipients:
+                  "eip155:5:0xc07e4542B10D1a8a5261780a47CfE69F9fFc38A4",
+                channel,
+                env: "staging",
+              })
+              .then((exx) => {
+                console.log(exx);
+              })
+              .catch((ee) => {
+                console.log("rr" + ee);
+              });
+            
 
         }
 

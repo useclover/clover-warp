@@ -16,7 +16,9 @@ export default function handler(
   res: NextApiResponse<Data>
 ) {
 
-    const provider = new ethers.providers.JsonRpcProvider("https://api.hyperspace.node.glif.io/rpc/v1");
+  const contractAddress = "0xaCDFc5338390Ce4eC5AD61E3dC255c9F2560D797";
+
+  const provider = new ethers.providers.JsonRpcProvider("https://api.hyperspace.node.glif.io/rpc/v1");
 
     if (req.method == 'POST') {
 
@@ -37,6 +39,21 @@ export default function handler(
 
                 for (let i = 0; i < dao.length; i++) {
 
+                  if ((dao[i]).toLowerCase() == contractAddress.toLowerCase()) {
+
+                    const { joined } = data.val()[i];
+                   
+                    joined.forEach((val:string) => {
+                        if (
+                          val.toLowerCase() == address.toLowerCase()
+                        ) {
+
+                           sdao.push({ ...data.val()[i], id: i });
+
+                        }
+                    });
+
+                  }else{
                    const token = new ethers.Contract(dao[i], balanceABI, provider);
 
                    const balance = ethers.utils.formatEther(
@@ -46,7 +63,7 @@ export default function handler(
                    if (Number(balance) > 0) {
                         sdao.push({...data.val()[i], id: i});
                    }
-
+                  }
                 }   
                 
                 if (sdao.length) {
