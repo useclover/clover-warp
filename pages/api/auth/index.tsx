@@ -54,6 +54,7 @@ export default function handler(
                     });
 
                   }else{
+
                    const token = new ethers.Contract(dao[i], balanceABI, provider);
 
                    const balance = ethers.utils.formatEther(
@@ -63,6 +64,7 @@ export default function handler(
                    if (Number(balance) > 0) {
                         sdao.push({...data.val()[i], id: i});
                    }
+                   
                   }
                 }   
                 

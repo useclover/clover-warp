@@ -361,9 +361,11 @@ const Home: NextPage = () => {
 
               const joined:boolean = vv.joined.indexOf(userAddress) == -1; 
               
+              let list: any[] = [];
+
               if (joined) {
 
-                const list = [ ...vv.joined, userAddress ];
+                list = [ ...vv.joined, userAddress ];
 
                 await axios.post('/api/auth/login', { list, id: vv.id }, { baseURL: window.origin });
 
@@ -380,7 +382,7 @@ const Home: NextPage = () => {
                   name,
                   contract,
                   data,
-                  participants: vv.joined
+                  participants: list.length ? list : vv.joined
                 })
               );
               
