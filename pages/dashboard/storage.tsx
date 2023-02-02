@@ -19,7 +19,6 @@ import FolderDes from "../../app/components/designs/folder";
 import FileDes from '../../app/components/designs/file';
 import { useContext, useState, useEffect } from "react";
 import { GenContext } from "../../app/components/extras/contexts/genContext";
-import { LogContext } from '../../app/components/extras/contexts/logContext';
 import { makeStorageClient } from "../../app/components/extras/storage/utoken"
 import {
   store,

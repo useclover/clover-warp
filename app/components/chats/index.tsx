@@ -22,7 +22,6 @@ import Picker from "emoji-picker-react";
 import { logout } from '../extras/logout';
 import empty from "../../../public/images/empty.png";
 import cicon from  "../../../public/images/icon.png";
-import { LogContext } from '../extras/contexts/logContext';
 import { GenContext } from '../extras/contexts/genContext';
 import {
   beginStorageProvider,
@@ -71,6 +70,8 @@ const Chats = () => {
 
 
     const [group, setGroup] = useState(name);
+
+
     const [currentDir, setCurrentDir] = useState<string[]>(["main"]);
   
     /* upload */
@@ -96,14 +97,15 @@ const Chats = () => {
     const chatlst = Object.keys(messData);
 
     useEffect(() => {
+
       async function init() {
 
         await beginStorageProvider({contract, randId: main});
 
         
         const mess = await retrieveMessages();
-
         
+
         if(mess[name] === undefined){
             mess[name] = [];
         }
@@ -399,7 +401,7 @@ const Chats = () => {
                 </div>
 
                 <div
-                  className={`msg ${group.length ? "" : "active"}`}
+                  className={`msg ${Boolean(group) ? "" : "active"}`}
                   onClick={() => {
                     setGroup("");
                   }}
@@ -459,9 +461,9 @@ const Chats = () => {
                 <div className="overlay"></div>
               </div>
 
-              {!Boolean(group.length) && <Storage />}
+              {!Boolean(group) && <Storage />}
 
-              {Boolean(group.length) && (
+              {Boolean(group) && (
                 <>
                   <div className="chat-area cusscroller">
                     <div className="chat-area-header">

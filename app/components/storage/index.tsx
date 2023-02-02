@@ -47,18 +47,18 @@ const Storage = () => {
   /* upload */
   const uploadData = useContext(GenContext);
 
-  const loginData: {
+
+  const [loginData, setLoginData] = useState<{
     name: string;
     contract: string;
-    data: {
-      main: string;
-      table?: string;
-    };
-  } = useContext(LogContext);
+    data: string;
+  }>();
 
   useEffect(() => {
     if (localStorage.getItem("cloverlog") === null) {
       Router.push("../");
+    }else{
+        setLoginData(JSON.parse(localStorage.getItem("cloverlog") || '{}'));
     }
   }, []);
 
@@ -82,12 +82,12 @@ const Storage = () => {
   const [notInit, setNotInit] = useState<boolean>(false);
   const [isLoading, setLoader] = useState(true);
 
-  const { name, contract } = loginData;
-  const { main, table } = loginData.data;
+  const { name, contract, data } = loginData || { name: '', contract: '', main: '' };
 
   useEffect(() => {
+
     async function init() {
-      await beginStorageProvider({ contract, randId: main});
+      await beginStorageProvider({ contract, randId: data || ''});
 
  
       const dir: any = await retrieveFiles(currentDir);
@@ -106,7 +106,7 @@ const Storage = () => {
       init();
     }
   }, [
-    main,
+    data,
     currentDir,
     uploadData,
     update,

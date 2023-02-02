@@ -97,13 +97,15 @@ export const storeFiles = async (file: store[], dirfolder: string[]) => {
 
       updateSearch(fileData.files, file, dirfolder, false);
 
+   
       await update(ref(db, `files/${lq[0]}`), fileData);
 
       return fileData;
 
     }
 
-     await update(ref(db, `files/${lq[0]}`), file);
+
+     await set(ref(db, `files/${lq[0]}`), file);
 
   
   return file;

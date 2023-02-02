@@ -4,6 +4,7 @@ import Image from 'next/image';
 import logo from '../public/images/logo.png';
 import styles from '../styles/Home.module.css';
 import bgLogo from '../public/images/logolg.png';
+import { createAlchemyWeb3 } from '@alch/alchemy-web3';
 import { BiX } from "react-icons/bi";
 import axios from 'axios';
 import { useState, useEffect, useContext } from 'react'
@@ -18,8 +19,10 @@ import { useAccount, useConnect, useNetwork, useSignMessage, useSigner } from 'w
 
 import { db } from "../app/firebase";
 import { ref, update, get, set, child } from "firebase/database";
+import { ethers } from 'ethers';
+import { balanceABI } from '../app/components/extras/abi';
 
-
+// 0x74367351f1a6809ced9cc70654c6bf8c2d1913c9;
 const contractAddress: string = "0xaCDFc5338390Ce4eC5AD61E3dC255c9F2560D797";
 const abi:any = contract.abi;
 
@@ -96,40 +99,30 @@ const Home: NextPage = () => {
     return nft.url;
   };
 
-
   const mintNFT = async (tokenURI: string, receiver: string) => {
 
-    const web3js = new web3("https://api.hyperspace.node.glif.io/rpc/v1");
-    
-    const nftContract = new web3js.eth.Contract(abi, contractAddress);
+
+     const provider = new ethers.providers.JsonRpcProvider(
+       "https://api.hyperspace.node.glif.io/rpc/v1"
+     );
 
     console.log(receiver);
 
     try{
+      
+      const signer = new ethers.Wallet(process.env.MATIC_PRIVATE_KEY || '', provider);
 
-    const nonce = await web3js.eth.getTransactionCount(
-      process.env.PUBLIC_KEY || "",
-      "latest"
-    ); //get latest nonce
-    //the transaction
-    const tx = {
-      from: process.env.PUBLIC_KEY,
-      to: contractAddress,
-      nonce,
-      gas: 500000,
-      data: nftContract.methods.mintTokens(receiver, tokenURI).encodeABI(),
-    };
+      const token = new ethers.Contract(contractAddress, abi, signer);
 
-    const signPromise = await web3js.eth.accounts.signTransaction(
-      tx,
-      process.env.MATIC_PRIVATE_KEY || ""
-    );
 
-    const receipt = await web3js.eth.sendSignedTransaction(signPromise.rawTransaction || "")
+      const receipt = await token.mintTokens(
+        receiver,
+        tokenURI
+      );
 
-    console.log(receipt)
+      console.log(receipt);
 
-    return 'continue';
+      return "continue";
 
     }catch(err){
 
@@ -137,6 +130,8 @@ const Home: NextPage = () => {
 
     }
   };
+
+  
 
   const [updatex, setUpdatex] = useState<{
     name?: string,
@@ -180,64 +175,51 @@ const Home: NextPage = () => {
         return;
       }
 
-      if(!contractAd.length){
-          setFailMessage("A contract address is required if you dont have one leave as default");
-          setLoading(false);
-          return;
-
-      }else if(((contractAd).toLowerCase()).trim() == 'default'){
-
-      if (participants.length) {
-        
+      if (!contractAd.length) {
+        setFailMessage(
+          "A contract address is required if you dont have one leave as default"
+        );
+        setLoading(false);
+        return;
+      } else if (contractAd.toLowerCase().trim() == "default") {
+        if (participants.length) {
           participants.forEach(async (v) => {
-
-            const res = await axios.get(
-              `https://api.covalenthq.com/v1/80001/address/${v}/balances_v2/?quote-currency=USD&format=JSON&nft=true&no-nft-fetch=false&key=ckey_d8fd93851d6a4d57bdcf14a337d`
-            );
-
-           const main = res.data;
-
-           if(main.error){
-            setLoading(false);
-               setFailMessage(
-                 `Error Retrieving data from ${v}, check the address and try again`
-               );
+            if (!ethers.utils.isAddress(v)) {
+              setLoading(false);
+              setFailMessage(
+                `Error Retrieving data from ${v}, check the address and try again`
+              );
               return;
-           }else{
-              console.log('works')
-           }
-         })
-      }
-      
+            } else {
+              console.log("works");
+            }
+          });
+        }
+
         send = true;
-        console.log('default herex')
+        console.log("default herex");
 
         // send nft to dao
+      } else {
 
-      }else{
+        const provider = new ethers.providers.JsonRpcProvider(
+          "https://api.hyperspace.node.glif.io/rpc/v1"
+        );
 
-           const res = await axios.get(
-             `https://api.covalenthq.com/v1/80001/address/${userAddress}/balances_v2/?quote-currency=USD&format=JSON&nft=true&no-nft-fetch=false&key=ckey_d8fd93851d6a4d57bdcf14a337d`
-           );
+        const token = new ethers.Contract(contractAd, balanceABI, provider);
 
-           const main = res.data;   
-           let active = false;
-            main.data.items.forEach((v:any) => {
-                if (v["contract_address"] !== undefined) {
-                    if(v['contract_address'] == contractAd){
-                        active = true;
-                    }
-                }
-            })
+        const balance = await token.getBalance(address);
 
-            if(!active){
-                setLoading(false);
-                setFailMessage("Your contract address does not exist in your wallet");
-                return;
-            }
+        const active = balance > 0;
 
-            send = true;
-          }
+        if (!active) {
+          setLoading(false);
+          setFailMessage("Your contract address does not exist in your wallet");
+          return;
+        }
+
+        send = true;
+      }
 
         const nftown: string[] = participants;
 

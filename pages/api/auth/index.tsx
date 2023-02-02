@@ -39,9 +39,11 @@ export default function handler(
 
                    const token = new ethers.Contract(dao[i], balanceABI, provider);
 
-                   const balance = await token.balanceOf(address);
+                   const balance = ethers.utils.formatEther(
+                     await token.balanceOf(address)
+                   );
 
-                   if (balance > 0) {
+                   if (Number(balance) > 0) {
                         sdao.push({...data.val()[i], id: i});
                    }
 
