@@ -6,7 +6,7 @@ import logo from "../../../public/images/logo.png";
 import { BsFolder, BsPlusLg } from 'react-icons/bs';
 import { FiImage, FiSettings, FiMoon, FiPaperclip, FiPlusCircle, FiVideo, FiLogOut, FiX } from "react-icons/fi";
 import Storage from '../storage';
-import { MdOutlineEmojiEmotions } from 'react-icons/md';
+import { MdMeetingRoom, MdOutlineEmojiEmotions } from 'react-icons/md';
 import {
   LinearProgress,
   TextField,
@@ -38,6 +38,7 @@ import Text from './texts';
 import Chatlist from './sidebar/chatlist';
 import Loader from '../loader';
 import { useAccount } from 'wagmi';
+import Rooms from '../../../app/components/video';
 
 
 
@@ -214,7 +215,7 @@ const Chats = () => {
                 <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
                   <div className="rounded-lg bg-white shadow-lg shadow-[#cccccc]">
                     <div className="border-b flex justify-between py-[14px] px-[17px] text-xl font-bold">
-                      Add New
+                      Create New
                       <FiX
                         size={20}
                         className="cursor-pointer"
@@ -326,12 +327,6 @@ const Chats = () => {
                                   const nMessData = { ...messData };
                                   nMessData[nname] = [];
 
-                                  notifications({
-                                    title: `Message from ${address}`,
-                                    message: messageText,
-                                    receivers: lq[2],
-                                    exclude: address || "",
-                                  });
 
                                   await saveMessages(JSON.stringify(nMessData));
 
@@ -355,7 +350,7 @@ const Chats = () => {
                             }}
                             fullWidth
                           >
-                            Add
+                            Create
                           </Button>
                         </FormControl>
                       </Box>
@@ -409,6 +404,24 @@ const Chats = () => {
                     <div className="msg-content">
                       <span className="msg-message">
                         Add More Discussions, voting, airdrop
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  className={`msg ${group === true ? 'active' : ''}`}
+                  title="Meeting rooms"
+                  onClick={() => setGroup(true)}
+                >
+                  <div className="w-[44px] min-w-[44px] flex items-center justify-center mr-[15px] rounded-[50%] bg-[#1890FF] h-[44px]">
+                    <MdMeetingRoom size={19} color="#fff" />
+                  </div>
+                  <div className="msg-detail w-full">
+                    <div className="msg-username">Meeting Rooms</div>
+                    <div className="msg-content">
+                      <span className="msg-message">
+                        Rooms for conferences, meetings
                       </span>
                     </div>
                   </div>
@@ -475,9 +488,11 @@ const Chats = () => {
                 <div className="overlay"></div>
               </div>
 
-              {!Boolean(group) && <Storage />}
+              {group == "" && <Storage />}
 
-              {Boolean(group) && (
+              {group === true && <Rooms />}
+
+              {Boolean(group != "" && typeof group == "string") && (
                 <>
                   <div className="chat-area cusscroller">
                     <div className="chat-area-header">

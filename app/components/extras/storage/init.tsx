@@ -139,6 +139,63 @@ export const retrieveFiles = async (folder?: string[]) => {
 
 }
 
+export const getRooms = async () => {
+  const query = child(ref(db), `rooms/${lq[0]}`);
+
+  const results = await get(query);
+
+  let data = [];
+
+  if (results.exists()) {
+
+    data = results.val();
+
+  }
+  
+  return data;
+  
+}
+
+export const roomData = async (id: number) => {
+
+    const query = child(ref(db), `rooms/${lq[0]}/${id}`);
+
+    const results = await get(query);
+
+    if (results.exists()) {
+
+       return results.val();
+
+    }
+
+    return false;
+}
+
+export const createRoom = async (name: string) => {
+
+      const query = child(ref(db), `rooms/${lq[0]}`);
+
+      const results = await get(query);
+
+      let data = 0;
+
+    if (results.exists()) {
+
+        data = results.val().length;
+
+    }
+    
+    await set(ref(db, `rooms/${lq[0]}/${data}`), {
+      name,
+      creator: lq[3],
+      meetId: `${Math.floor(Math.random() * 9999)}-${Math.floor(
+        Math.random() * 9999
+      )}`,
+    });
+
+    return data;
+
+}
 
 /**
  * @param dirfolder: array - showing file directory till destination

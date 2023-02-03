@@ -16,7 +16,7 @@ export default function handler(
   res: NextApiResponse<Data>
 ) {
 
-  const contractAddress = "0xaCDFc5338390Ce4eC5AD61E3dC255c9F2560D797";
+  const contractAddress = ("0xaCDFc5338390Ce4eC5AD61E3dC255c9F2560D797").toLowerCase();
 
   const provider = new ethers.providers.JsonRpcProvider("https://api.hyperspace.node.glif.io/rpc/v1");
 
@@ -29,26 +29,29 @@ export default function handler(
 
         if ((validateAddress).toLowerCase() == address.toLowerCase()) {
 
+
             get(child(ref(db), "DAOs")).then(async (data) => {
             
               if (data.exists()) {
 
-                const dao = data.val().map((a: any) => a.contract);
+                const dao = data.val().filter((a: any) => a.contract);
 
                 const sdao = [];
 
+                if (dao.length) {
                 for (let i = 0; i < dao.length; i++) {
 
-                  if ((dao[i]).toLowerCase() == contractAddress.toLowerCase()) {
 
-                    const { joined } = data.val()[i];
+                  if ((dao[i].contract).toLowerCase() == contractAddress) {
+
+                    const { joined } = dao[i];
                    
                     joined.forEach((val:string) => {
                         if (
                           val.toLowerCase() == address.toLowerCase()
                         ) {
 
-                           sdao.push({ ...data.val()[i], id: i });
+                           sdao.push({ ...dao[i], id: i });
 
                         }
                     });
@@ -62,11 +65,12 @@ export default function handler(
                    );
 
                    if (Number(balance) > 0) {
-                        sdao.push({...data.val()[i], id: i});
+                        sdao.push({...dao[i], id: i});
                    }
-                   
+
                   }
-                }   
+                }
+              }   
                 
                 if (sdao.length) {
 
@@ -102,6 +106,7 @@ export default function handler(
             });            
 
         }else{
+          console.log('eee')
           res.status(400).json({
             message: "Invalid address",
             error: true,

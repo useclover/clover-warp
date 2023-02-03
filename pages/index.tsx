@@ -14,7 +14,6 @@ import web3 from "web3";
 import contract from "../artifacts/contracts/share.sol/simpleNFT.json";
 import { makeNFTClient } from '../app/components/extras/storage/utoken';
 import Router from 'next/router';
-import { supported } from '../app/components/extras/connectors';
 import { useAccount, useConnect, useNetwork, useSignMessage, useSigner } from 'wagmi';
 
 import { db } from "../app/firebase";
@@ -320,9 +319,11 @@ const Home: NextPage = () => {
   
       try {
 
+        let add;
+
         if(!isConnected){
 
-          await connectAsync({ connector: connectors[0] });
+           add = await connectAsync({ connector: connectors[0] });
 
         }
       
@@ -333,11 +334,11 @@ const Home: NextPage = () => {
 
             const userAddress:string = address as `0x${string}`;
             
-            console.log(userAddress, signedHash);
+            console.log(add, userAddress, signedHash);
 
             try {
  
-            const { data: results } = await axios.post('/api/auth', { hash: signedHash, address: userAddress }, {
+            const { data: results } = await axios.post('/api/auth', { hash: signedHash, address: add?.account || userAddress }, {
               baseURL: window.origin
             });            
             
@@ -427,10 +428,12 @@ const Home: NextPage = () => {
           </Head>
 
           {showModal ? (
-            <div className="justify-center bg-[rgba(255,255,255,.4)] items-center flex overflow-x-hidden overflow-y-auto backdrop-blur fixed inset-0 z-50 outline-none focus:outline-none">
-              <div className="relative max-w-[1200px] mmd:w-[70%] 4sm:w-[60%] w-[340px] min-w-[340px]">
+            <div className={`justify-center bg-[rgba(255,255,255,.4)] mt-[74px] flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none`}>
+              
+              <div className="relative max-w-[1500px] w-[80%] 4sm:w-[60%] min-w-[340px]">
                 {/*content*/}
-                <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+                <div className="border-0 rounded-[12px] shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+
                   <div className="flex items-center justify-center pb-2 pt-3 border-solid rounded-t">
                     <h2
                       style={{ fontFamily: "inherit" }}
@@ -446,30 +449,33 @@ const Home: NextPage = () => {
                     </div>
                   )} */}
 
-                  <div className="relative p-6 flex flex-col justify-center 4sm:flex-row">
+                  <div
+                    style={{
+                      gridTemplateColumns:
+                        "repeat(auto-fill, minmax(320px, 1fr))",
+                    }}
+                    className="relative p-6 grid gap-2 grid-flow-dense"
+                  >
                     {exec.map((vv: any, i: number) => (
                       <button
                         key={i}
                         onClick={async () => {
-                          
                           const name: string = vv.name;
                           const contract: string = vv.contract;
                           const data: string = vv.randId;
 
-                          
-                            
-                            localStorage.setItem('cloverlog',
-                              JSON.stringify({
-                                id: vv.id,
-                                name,
-                                contract,
-                                data,
-                                participants: vv.joined
-                              })
-                            );
+                          localStorage.setItem(
+                            "cloverlog",
+                            JSON.stringify({
+                              id: vv.id,
+                              name,
+                              contract,
+                              data,
+                              participants: vv.joined,
+                            })
+                          );
 
                           Router.push("/dashboard");
-                          
                         }}
                         style={{ fontFamily: "inherit" }}
                         className="transition-all rounded-md delay-500 hover:border-[#1891fe] hover:text-[#1891fe] items-start text-[16px] flex justify-between border-[1px] 4sm:mr-2 text-[#575757] mb-2 w-full py-4 px-4"
@@ -616,12 +622,12 @@ const Home: NextPage = () => {
                               variant="outlined"
                               value={part}
                               placeholder="click enter to add address"
-                              onChange={(e:any) => {
-                                  setPart(e.target.value)
+                              onChange={(e: any) => {
+                                setPart(e.target.value);
                               }}
                               onKeyUp={(e: any) => {
                                 setPart(e.target.value);
-                                
+
                                 if (e.keyCode == 13 || e.which === 13) {
                                   if (part.length) {
                                     const partx: string[] = participants;
