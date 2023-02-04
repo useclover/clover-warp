@@ -193,7 +193,6 @@ const Rooms = () => {
 
                             Router.push(`/dashboard/room/${create}`);
 
-                            setLoader(false);
                           } catch (err: any) {
                             setLoader(false);
 
@@ -202,6 +201,7 @@ const Rooms = () => {
                             );
                           }
                         } else {
+                            setLoader(false);
                           setFailMessage("Name of channel is required");
                         }
                       }}
