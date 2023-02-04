@@ -332,7 +332,7 @@ const Rooms = () => {
                     <div
                       style={{
                         gridTemplateColumns:
-                          "repeat(auto-fill, minmax(230px, 1fr))",
+                          "repeat(auto-fill, minmax(260px, 1fr))",
                       }}
                       className="flist pt-7 grid gap-2 grid-flow-dense"
                     >
@@ -352,7 +352,7 @@ const Rooms = () => {
                                       margin: "auto",
                                       backgroundColor: "#1890FF",
                                     }}
-                                    className="text-[50px] font-bold"
+                                    className="text-[100px] font-bold"
                                     variant="rounded"
                                   >
                                     {(
@@ -372,7 +372,7 @@ const Rooms = () => {
                                         {name}
                                       </h3>
                                       <span className="block text-[14px] leading-[1.2] truncate w-full text-[#575757]">
-                                        created by
+                                        created by 
                                         {owner.substring(0, 6)}...
                                         {owner.substring(38, 42)}
                                       </span>

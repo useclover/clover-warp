@@ -70,7 +70,6 @@ const Chats = () => {
 
     const [messageText, setMessageText] = useState('');
 
-
     const [group, setGroup] = useState(name);
 
 
@@ -110,13 +109,15 @@ const Chats = () => {
             mess[name] = [];
         }
 
+        setGroup(name)
+
         updateMessData(mess);
 
         setLoader(false);
 
       }
 
-      if (name != "") {
+      if (name != undefined) {
         init();
       }
     }, [
@@ -469,6 +470,7 @@ const Chats = () => {
                       key={i}
                       onClick={() => {
                         setGroup(gps);
+
                         if (rContext.update !== undefined) {
                           rContext.update({
                             content: undefined,
@@ -480,7 +482,7 @@ const Chats = () => {
                       img={cicon.src}
                       selected={gps == group}
                       lastMsg={clst !== undefined ? clst["content"] : ""}
-                      name={gps}
+                      name={`${gps} ${!i ? '(Main)' : ''}`}
                     />
                   );
                 })}
