@@ -113,9 +113,6 @@ const Room = () => {
 
     if(elem !== null){
 
-        elem.addEventListener('load', () => {
-                console.log('leo');           
-        });
 
         (elem).style.minHeight = '100vh';
   
@@ -150,7 +147,7 @@ const Room = () => {
           <div className="w-full bg-[rgb(18,18,20)] flex items-start justify-between filedrop min-h-screen">
             <div className="mt-[20px] absolute st:flex st:justify-between st:items-center mb-[1.24rem]">
               <div className="bg-[rgb(18,18,20)] mdd:bg-[#202020] flex items-center pl-6">
-                <div className="text-[#1890FF] cursor-pointer">
+                <div onClick={() => router.push('/dashboard')} className="text-[#1890FF] cursor-pointer">
                   <MdArrowBack size={25} />
                 </div>
                 <Link href="/">

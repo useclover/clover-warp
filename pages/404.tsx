@@ -190,10 +190,10 @@ let executed = useRef(false);
               </div>
 
               <div className="text-black font-bold text-4xl mx-auto mt-24">
-                We think you&#39;re lost
+                Page not found
               </div>
               <div className="text-[#1890FF] font-semibold text-lg mx-auto mt-12">
-                Click this button, and let&#39;s get you found
+                Click this button, and go home
               </div>
               <div className="mx-auto mt-8">
                 <Link href="/">

@@ -46,7 +46,7 @@ import {
 import { logout } from "../../components/extras/logout";
 import Dash from "../dash";
 import { useAccount } from "wagmi";
-import { MdLink } from "react-icons/md";
+import { MdLink, MdMeetingRoom } from "react-icons/md";
 
 const Rooms = () => {
 
@@ -332,13 +332,13 @@ const Rooms = () => {
                     <div
                       style={{
                         gridTemplateColumns:
-                          "repeat(auto-fill, minmax(186px, 1fr))",
+                          "repeat(auto-fill, minmax(230px, 1fr))",
                       }}
                       className="flist pt-7 grid gap-2 grid-flow-dense"
                     >
                       {roomContent.map((attributes: any, i: number) => {
                         
-                        const { name, owner } = attributes;
+                        const { name, creator: owner } = attributes;
 
                         return (
                           <Link href={`/dashboard/rooms/${i}`} key={i}>
@@ -365,20 +365,20 @@ const Rooms = () => {
                                 <div className="flex items-center mb-[10px] justify-between">
                                   <div className="flex items-center w-[calc(100%-44px)]">
                                     <div className="text-white w-[40px] h-[40px] min-w-[40px] min-h-[40px] rounded-md mr-[.75rem] flex items-center justify-center bg-[#1890FF]">
-                                      <MdLink size={21} />
+                                      <MdMeetingRoom size={21} />
                                     </div>
                                     <div className="truncate">
                                       <h3 className="truncate flex items-center text-[17px] leading-[20px] font-[500] text-[#121212]">
                                         {name}
                                       </h3>
                                       <span className="block text-[14px] leading-[1.2] truncate w-full text-[#575757]">
-                                        created by 
+                                        created by
                                         {owner.substring(0, 6)}...
                                         {owner.substring(38, 42)}
                                       </span>
                                     </div>
                                   </div>
-                                  <div
+                                  {/* <div
                                     onClick={(e: any) => {
                                       e.preventDefault();
                                     }}
@@ -392,7 +392,7 @@ const Rooms = () => {
                                     >
                                       <FiTrash2 size={20} />
                                     </IconButton>
-                                  </div>
+                                  </div> */}
                                 </div>
                               </div>
                             </a>
