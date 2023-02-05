@@ -618,7 +618,7 @@ const Home: NextPage = () => {
                             <TextField
                               fullWidth
                               id="outlined-basic"
-                              helperText="if left empty only you would have access to your , Polygon testnet addresses only"
+                              helperText="if left empty, only you would have access to the DAO"
                               variant="outlined"
                               value={part}
                               placeholder="click enter to add address"
