@@ -103,10 +103,11 @@ const Storage = () => {
         uploadData.updateFile(dir);
 
         setUpdate(!update);
+
       }
     }
 
-    if (name != "") {
+    if (name !== undefined) {
       init();
     }
   }, [
@@ -188,6 +189,10 @@ const Storage = () => {
         const dir = await retrieveFiles(currentDir);
         setFileData(newFileData);
 
+        updateLoading(false);
+
+        console.log('jeee')
+
         if (uploadData?.updateFile !== undefined) {
           uploadData.updateFile(dir);
 
@@ -206,7 +211,7 @@ const Storage = () => {
 
       console.log(`Uploading... ${pct.toFixed(2)}% complete`);
 
-      updateLoading(pct);
+      updateLoading(true);
 
       setUpdate(!update);
     };
@@ -216,6 +221,8 @@ const Storage = () => {
     files.forEach((file, i) => {
       return client.put([file], { onRootCidReady, onStoredChunk });
     });
+
+
   };
 
   /*end of upload*/
@@ -272,10 +279,10 @@ const Storage = () => {
             />
 
             <div className="w-full st:!pl-0 pb-[65px] transition-all delay-500 h-full flex flex-col">
-              {Boolean(loading) && loading < 100 && (
+              {loading && (
                 <Box>
                   <LinearProgress
-                    variant="determinate"
+                    variant="indeterminate"
                     sx={{
                       backgroundColor: "#ececec",
                       color: "#ececec",
@@ -287,7 +294,6 @@ const Storage = () => {
                         borderTopRightRadius: "16px",
                       },
                     }}
-                    value={loading}
                   />
                 </Box>
               )}

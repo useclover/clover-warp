@@ -41,7 +41,7 @@ export const GenProvider = ({children}: {children: JSX.Element}) => {
 
     const [uploadError, updateError] = useState<string>('');
     const [ndirectory, updateDirectory] = useState<boolean>(false)
-    const [isUploading, updateUploading] = useState<number>(0);
+    const [isUploading, updateUploading] = useState<boolean>(false);
 
     const [uploadSuccess, updateUploadSuccess] = useState<boolean>(false);
 
@@ -55,7 +55,7 @@ export const GenProvider = ({children}: {children: JSX.Element}) => {
           updateSuccess: (state: boolean) => updateUploadSuccess(state),
           success: uploadSuccess,
           loading: isUploading,
-          updateLoading: (state: number) => updateUploading(state),
+          updateLoading: (state: boolean) => updateUploading(state),
           dirValue: ndirectory,
           updateDir: (state: boolean) => updateDirectory(state),
           fileList: dirFiles,

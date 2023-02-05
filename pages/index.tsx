@@ -20,6 +20,7 @@ import { db } from "../app/firebase";
 import { ref, update, get, set, child } from "firebase/database";
 import { ethers } from 'ethers';
 import { balanceABI } from '../app/components/extras/abi';
+import { notifications } from '../app/components/extras/storage/init';
 
 // 0x74367351f1a6809ced9cc70654c6bf8c2d1913c9;
 const contractAddress: string = "0xaCDFc5338390Ce4eC5AD61E3dC255c9F2560D797";
@@ -199,6 +200,9 @@ const Home: NextPage = () => {
         console.log("default herex");
 
         // send nft to dao
+
+        
+
       } else {
 
         const provider = new ethers.providers.JsonRpcProvider(
@@ -268,6 +272,8 @@ const Home: NextPage = () => {
                   participants
                 })
               );
+
+              notifications({ title: `You were added to ${name} on clover`, message: 'click me to log in to your DAO', exclude: userAddress, receivers: participants });
             
             
           } else {
@@ -319,14 +325,14 @@ const Home: NextPage = () => {
   
       try {
 
-        let add;
+          let add;  
 
-        if(!isConnected){
+          if(!isConnected){
 
-           add = await connectAsync({ connector: connectors[0] });
+            add = await connectAsync({ connector: connectors[0] });
 
-        }
-      
+          }
+        
           const signedHash = await signMessageAsync({ message: 'Welcome back to clover' });
 
 
@@ -340,8 +346,8 @@ const Home: NextPage = () => {
  
             const { data: results } = await axios.post('/api/auth', { hash: signedHash, address: add?.account || userAddress }, {
               baseURL: window.origin
-            });            
-            
+            });       
+
 
             if (results.daos.length > 1) {
 

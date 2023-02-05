@@ -70,7 +70,7 @@ const Chats = () => {
 
     const [messageText, setMessageText] = useState('');
 
-    const [group, setGroup] = useState(name);
+    const [group, setGroup] = useState<any>();
 
 
     const [currentDir, setCurrentDir] = useState<string[]>(["main"]);
@@ -109,7 +109,11 @@ const Chats = () => {
             mess[name] = [];
         }
 
-        setGroup(name)
+        if (group === undefined) {
+
+           setGroup(name)
+
+        }
 
         updateMessData(mess);
 
@@ -138,8 +142,8 @@ const Chats = () => {
 
       if(messageText.length){
 
-        if(messData[group] === undefined){
-            messData[group] = []; 
+        if(messData[group || ''] === undefined){
+            messData[group || ''] = []; 
         }
 
         const newMess: any = {
@@ -160,9 +164,9 @@ const Chats = () => {
         
         let index:number;
 
-        messData[group].push(newMess);
+        messData[group || ''].push(newMess);
 
-        index = messData[group].length - 1;
+        index = messData[group || ''].length - 1;
 
         updateMessData(messData)
 
@@ -175,7 +179,7 @@ const Chats = () => {
       try{
         const serverData = { ...messData }
 
-        serverData[group][index]['server'] = true;
+        serverData[group || ''][index]['server'] = true;
 
         notifications({
           title: `Message from ${address}`,
@@ -187,7 +191,7 @@ const Chats = () => {
          await saveMessages(serverData);
       
 
-         messData[group][index].sent = true;
+         messData[group || ''][index].sent = true;
 
          updateMessData(messData);
 
