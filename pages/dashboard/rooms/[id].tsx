@@ -56,7 +56,7 @@ const Room = () => {
   const { name, contract, data, participants } = loginData || {
     name: "",
     contract: "",
-    main: "",
+    data: "",
     participants: {},
   };
 
@@ -88,8 +88,8 @@ const Room = () => {
 
       }else{
 
-        console.log(id,main)
-          // router.push('/404');
+        // console.log(id,main)
+          router.push('/404');
 
       }
 

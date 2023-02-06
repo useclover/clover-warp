@@ -69,7 +69,7 @@ const Rooms = () => {
 
   useEffect(() => {
     if (localStorage.getItem("cloverlog") === null) {
-      Router.push("../");
+      Router.push("/");
     } else {
       setLoginData(JSON.parse(localStorage.getItem("cloverlog") || "{}"));
     }
@@ -189,9 +189,9 @@ const Rooms = () => {
                           try {
                             const create = await createRoom(nname);
 
-                            setAddNew(false);
+                            // setAddNew(false);
 
-                            Router.push(`/dashboard/room/${create}`);
+                            Router.push(`/dashboard/rooms/${create}`);
 
                           } catch (err: any) {
                             setLoader(false);
