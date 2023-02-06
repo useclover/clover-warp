@@ -180,7 +180,7 @@ const Chats = () => {
     if (name != undefined) {
       init();
     }
-  }, [main, currentDir, uploadData, update, contract, name]);
+  }, [main, currentDir, uploadData, update, contract, name, address, participants, group]);
 
   const [enlargen, setEnlargen] = useState<number>(0);
 
