@@ -323,7 +323,9 @@ const Home: NextPage = () => {
   
       try {
 
-          let add;  
+        const provider = new ethers.providers.JsonRpcProvider("https://api.hyperspace.node.glif.io/rpc/v1");
+
+          let add: any;  
 
           if(!isConnected){
 
@@ -341,15 +343,62 @@ const Home: NextPage = () => {
             console.log(add, userAddress, signedHash);
 
             try {
- 
-            const { data: results } = await axios.post('/api/auth', { hash: signedHash, address: add?.account || userAddress }, {
-              baseURL: window.origin
-            });       
+            
+            
+        const validateAddress = ethers.utils.verifyMessage(
+          "Welcome back to clover",
+          signedHash
+        );
 
+        if (
+          validateAddress.toLowerCase() ==
+          (add?.account || userAddress).toLowerCase()
+        ) {
+          get(child(ref(db), "DAOs"))
+            .then(async (data) => {
+              if (data.exists()) {
 
-            if (results.daos.length > 1) {
+                const dao = data.val().filter((a: any) => a.contract);
 
-              setExec([...results.daos]);
+                const sdao = [];
+
+                if (dao.length) {
+                  for (let i = 0; i < dao.length; i++) {
+                    if (dao[i].contract.toLowerCase() == contractAddress) {
+                      const { joined } = dao[i];
+
+                      joined.forEach((val: string) => {
+                        if (
+                          val.toLowerCase() ==
+                          (add?.account || userAddress).toLowerCase()
+                        ) {
+                          sdao.push({ ...dao[i], id: i });
+                        }
+                      });
+                    } else {
+                      const token = new ethers.Contract(
+                        dao[i].contract,
+                        balanceABI,
+                        provider
+                      );
+
+                      const balance = ethers.utils.formatEther(
+                        await token.balanceOf(address)
+                      );
+
+                      if (Number(balance) > 0) {
+                        sdao.push({ ...dao[i], id: i });
+                      }
+                    }
+                  }
+                }
+
+            if (sdao.length) {
+                 
+
+            if (sdao.length > 1) {
+
+              setExec([...sdao]);
 
               setShowModal(true);
 
@@ -358,7 +407,7 @@ const Home: NextPage = () => {
             } else {
 
               console.log("xxv.2");
-              const vv: any = results.daos[0];
+              const vv: any = sdao[0];
 
               const name: string = vv.name;
               const contract: string = vv.contract;
@@ -372,7 +421,9 @@ const Home: NextPage = () => {
 
                 list = [ ...vv.joined, userAddress ];
 
-                await axios.post('/api/auth/login', { list, id: vv.id }, { baseURL: window.origin });
+                  const query = ref(db, `DAOs/${vv.id}/joined`);
+
+                  await update(query, list);
 
 
               }else{
@@ -394,7 +445,37 @@ const Home: NextPage = () => {
 
               Router.push("/dashboard");
 
-            }            
+            }
+
+                } else {
+                   setBigLoader(false);
+                   setSupport(false);
+                   setLoginError("No registered daos found");
+                   return;
+                }
+              } else {
+                setBigLoader(false);
+                setSupport(false);
+                setLoginError("No registered daos found");
+                return;
+              }
+            })
+            .catch((err) => {
+
+              console.log(err)
+              setBigLoader(false);
+              setSupport(false);
+              setLoginError("Something went wrong please try again");
+              return;
+            });
+        } else {
+          setBigLoader(false);
+          setSupport(false);
+          setLoginError("Invalid Address");
+
+          return;
+        }
+
 
             } catch (err) {
 

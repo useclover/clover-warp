@@ -34,6 +34,8 @@ export default function handler(
             
               if (data.exists()) {
 
+                
+
                 const dao = data.val().filter((a: any) => a.contract);
 
                 const sdao = [];
