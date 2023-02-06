@@ -190,7 +190,7 @@ const Chats = () => {
     enlargen: boolean,
     type: "mess" | "vote" = "mess"
   ) => {
-    
+
     console.log(messageText);
 
     if (messageText.length) {
@@ -509,7 +509,7 @@ const Chats = () => {
                             <Select
                               isClearable={false}
                               value={discussions}
-                              onChange={(e: any) => setDiscussion(e)}
+                              onChange={(e: any) => setDiscussion(e.value)}
                               name="Channels"
                               placeholder={"Channels..."}
                               options={Object.keys(messData).map(
