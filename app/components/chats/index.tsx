@@ -509,12 +509,10 @@ const Chats = () => {
                             <Select
                               isClearable={false}
                               value={discussions}
-                              onChange={(e: any) => setDiscussion(e.value)}
+                              onChange={(e: any) => setDiscussion(e)}
                               name="Channels"
                               placeholder={"Channels..."}
-                              options={Object.keys(messData).map(
-                                (v: string) => ({ value: v, label: v })
-                              )}
+                              options={Object.keys(messData)}
                               styles={{
                                 option: (provided: any, state: any) => {
                                   return {
