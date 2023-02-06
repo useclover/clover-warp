@@ -3,10 +3,10 @@ const nextConfig = {
   reactStrictMode: true,
   webpack: (config, { isServer }) => {
     if (!isServer) {
-      config.resolve.fallback.fs = false
+      config.resolve.fallback.fs = false;
     }
-    return config
-  }, 
+    return config;
+  },
   env: {
     MATIC_PRIVATE_KEY: process.env.MATIC_PRIVATE_KEY,
     MATIC_LINK: process.env.MATIC_LINK,
@@ -21,8 +21,13 @@ const nextConfig = {
     FIREBASE_MESSAGINGSENDERID: process.env.FIREBASE_MESSAGINGSENDERID,
     FIREBASE_APPID: process.env.FIREBASE_APPID,
     FIREBASE_MEASUREMENTID: process.env.FIREBASE_MEASUREMENTID,
-    HUDDLE: process.env.HUDDLE
+    HUDDLE: process.env.HUDDLE,
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = {
+  images: {
+    unoptimized: true,
+  },
+  nextConfig,
+};
