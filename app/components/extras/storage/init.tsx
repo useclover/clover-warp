@@ -16,6 +16,7 @@ export interface mess {
   }[];
 }
 
+
 export const notifications = async ({ title, message, receivers, exclude }: { title: string, message: string, receivers: string[], exclude: string }) => {
 
    const pk = process.env.NEXT_PUBLIC_MATIC_PRIVATE_KEY;
@@ -104,7 +105,7 @@ export const saveMessages = async (updateNew: any) => {
 
   try{
 
-    await update(ref(db, `chats/${lq[0]}`), updateNew);
+    await set(ref(db, `chats/${lq[0]}`), updateNew);
 
 
     return true;
