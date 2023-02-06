@@ -11,7 +11,7 @@ import { useState, useEffect, useContext } from 'react'
 import { Alert, Button, Modal, Box, FormControl, TextField } from "@mui/material";
 import Loader from '../app/components/loader';
 import web3 from "web3";
-import contract from "../artifacts/contracts/share.sol/simpleNFT.json";
+import contract from "../SimpleNFT.json";
 import { makeNFTClient } from '../app/components/extras/storage/utoken';
 import Router from 'next/router';
 import { useAccount, useConnect, useNetwork, useSignMessage, useSigner } from 'wagmi';
@@ -53,8 +53,6 @@ const Home: NextPage = () => {
   
 
 
-
- 
 
   const [name, setName] = useState<string>('');
   const [des, setDes] = useState<string>('');
