@@ -48,7 +48,7 @@ const Room = () => {
 
     }
 
-  }, [address]);
+  }, [address, router]);
 
 
   const [isLoading, setLoader] = useState(true);
@@ -98,7 +98,7 @@ const Room = () => {
     if (name != "" && id !== undefined) {
       init();
     }
-  }, [data, address, id, contract, name]);
+  }, [data, address, id, contract, name, participants]);
 
 
 

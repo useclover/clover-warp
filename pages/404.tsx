@@ -134,7 +134,7 @@ let executed = useRef(false);
     } else {
        init(data)
     } 
-  }, [filex])
+  }, [address, filex])
 
 
 

@@ -99,7 +99,7 @@ const Dashboard = () => {
       init();
     }
 
-  }, [main, currentDir, uploadData, update, contract, name])
+  }, [main, currentDir, uploadData, update, contract, name, address, participants])
 
 
   const uploadFiles = (files: FileList) => {
