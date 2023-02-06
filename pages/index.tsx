@@ -488,12 +488,7 @@ const Home: NextPage = () => {
                           <span className="font-bold">{vv.name}</span>
                           <span className="text-left">{vv.desc}</span>
                         </div>
-                        <img
-                          src={bgLogo.src}
-                          alt={vv.name}
-                          width={40}
-                          height={40}
-                        />
+                        
                       </button>
                     ))}
                   </div>
