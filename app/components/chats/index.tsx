@@ -3,6 +3,7 @@ import { useEffect, useState, useContext } from "react";
 import Link from "next/link";
 import Router from "next/router";
 import logo from "../../../public/images/logo.png";
+import Select from "react-select";
 import { BsFolder, BsPlusLg } from "react-icons/bs";
 import {
   FiImage,
@@ -26,6 +27,7 @@ import {
   ToggleButton,
   FormControl,
   Box,
+  Tab,
 } from "@mui/material";
 import Picker from "emoji-picker-react";
 import { logout } from "../extras/logout";
@@ -48,6 +50,41 @@ import Chatlist from "./sidebar/chatlist";
 import Loader from "../loader";
 import { useAccount } from "wagmi";
 import Rooms from "../../../app/components/video";
+
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+  className?: string;
+  padding?: number;
+}
+
+const TabPanel = (props: TabPanelProps) => {
+  const { children, padding, value, index, className = "", ...other } = props;
+
+  const pc = {
+    p: padding,
+    py: padding !== undefined ? undefined : 2,
+  };
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box className={className} sx={pc}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+};
+
 
 const Chats = () => {
   const [loginData, setLoginData] = useState<any>({});
@@ -87,7 +124,13 @@ const Chats = () => {
 
   const [nname, setNname] = useState<string>("");
 
-  const [disparts, setDisparts] = useState<string[]>([]);
+  const [disparts, setDisparts] = useState<(string | undefined)[]>([]);
+
+  const [toggle, setToggle] = useState<string | number>('0');
+
+  const [discussions, setDiscussion] = useState<string>('');
+
+  const [voteDesc, setVoteDesc] = useState<string>('');
 
   const [failMessage, setFailMessage] = useState<string>("");
 
@@ -104,8 +147,8 @@ const Chats = () => {
           date: new Date().getTime(),
         },
       ],
-      participants: []
-    }
+      participants: [],
+    },
   });
 
   const chatlst = Object.keys(messData);
@@ -147,6 +190,7 @@ const Chats = () => {
     enlargen: boolean,
     type: "mess" | "vote" = "mess"
   ) => {
+    
     console.log(messageText);
 
     if (messageText.length) {
@@ -249,7 +293,7 @@ const Chats = () => {
                       >
                         <div>
                           <ToggleButtonGroup
-                            value={"discussion"}
+                            value={toggle}
                             className="cusscroller"
                             sx={{
                               width: "100%",
@@ -271,13 +315,18 @@ const Chats = () => {
                               },
                             }}
                             exclusive
+                            onChange={(e: any) => {
+                              if (e.target.value != "2") {
+                                setToggle(e.target.value);
+                              }
+                            }}
                           >
                             <ToggleButton
                               sx={{
                                 textTransform: "capitalize",
                                 fontWeight: "500",
                               }}
-                              value="discussion"
+                              value={"0"}
                             >
                               Discussion Channel
                             </ToggleButton>
@@ -286,7 +335,7 @@ const Chats = () => {
                                 textTransform: "capitalize",
                                 fontWeight: "500",
                               }}
-                              value="vote"
+                              value={"1"}
                             >
                               A new voting campaign
                             </ToggleButton>
@@ -297,7 +346,7 @@ const Chats = () => {
                                   textTransform: "capitalize",
                                   fontWeight: "500",
                                 }}
-                                value="user"
+                                value={"2"}
                               >
                                 A New Participant
                               </ToggleButton>
@@ -305,84 +354,288 @@ const Chats = () => {
                           </ToggleButtonGroup>
                         </div>
 
-                        <div>
-                          <TextField
-                            fullWidth
-                            id="outlined-basic"
-                            label="Name of discussion channel"
-                            variant="outlined"
-                            value={nname}
-                            onChange={(
-                              e: React.ChangeEvent<
-                                HTMLInputElement | HTMLTextAreaElement
-                              >
-                            ) => {
-                              setNname(e.target.value);
-                              setFailMessage("");
-                            }}
-                          />
-                        </div>
-
-                        <div className="mt-4">
-                          <label className="text-[#808080] mb-2 block">
-                            Add members, click on registered members to add
-                          </label>
-
-                          <div className="flex items-center cusscroller flex-nowrap overflow-y-hidden overflow-x-scroll">
-                            {participants.map((v: string, i: number) => (
-                              <div
-                                  
-                                className="truncate cursor-pointer rounded-[4rem] max-w-[200px] hover:max-w-[419px] py-1 px-[10px] font-[500] text-[#444444] delay-500 transition-all border border-solid border-[rgba(0,0,0,0.12)] mx-[3px]"
-                                key={i}
-                              >
-                                {v}
-                              </div>
-                            ))}
+                        <TabPanel padding={0} value={Number(toggle)} index={0}>
+                          <div>
+                            <TextField
+                              fullWidth
+                              id="outlined-basic"
+                              label="Name of discussion channel"
+                              variant="outlined"
+                              value={nname}
+                              onChange={(
+                                e: React.ChangeEvent<
+                                  HTMLInputElement | HTMLTextAreaElement
+                                >
+                              ) => {
+                                setNname(e.target.value);
+                                setFailMessage("");
+                              }}
+                            />
                           </div>
-                          <span className="text-[14px] block mt-1 text-[#b6b6b6]">
-                            Not selecting anyone, selects every one
-                          </span>
-                        </div>
 
-                        <Button
-                          variant="contained"
-                          className="!bg-[#1891fe] !mt-4 !py-[13px] !font-medium !capitalize"
-                          style={{
-                            fontFamily: "inherit",
-                          }}
-                          onClick={async () => {
-                            if (nname.length) {
-                              setLoader(true);
+                          <div className="mt-4">
+                            <label className="text-[#808080] mb-2 block">
+                              Add members, click on registered members to add
+                            </label>
 
-                              try {
-                                const nMessData = { ...messData };
+                            <div className="flex w-full items-center cusscroller flex-nowrap overflow-y-hidden overflow-x-scroll">
+                              {participants.map(
+                                (v: string, i: number) =>
+                                  v.toLowerCase() != address?.toLowerCase() && (
+                                    <div
+                                      onClick={() => {
+                                        const selected = [...disparts];
 
-                                nMessData[nname]["messages"] = [];
+                                        if (selected[i] !== undefined) {
+                                          selected[i] = undefined;
 
-                                await saveMessages(JSON.stringify(nMessData));
+                                          setDisparts(selected);
+                                        } else {
+                                          selected[i] = v;
 
-                                updateMessData(nMessData);
+                                          setDisparts(selected);
+                                        }
+                                      }}
+                                      style={
+                                        disparts[i] !== undefined
+                                          ? {
+                                              color: "#fff",
+                                              backgroundColor: "#1890FF",
+                                            }
+                                          : {}
+                                      }
+                                      className="truncate cursor-pointer rounded-[4rem] max-w-[200px] hover:max-w-[450px] py-1 px-[10px] font-[500] text-[#444444] delay-500 transition-all border border-solid border-[rgba(0,0,0,0.12)] mx-[3px]"
+                                      key={i}
+                                    >
+                                      {v}
+                                    </div>
+                                  )
+                              )}
+                            </div>
+                            <span className="text-[14px] block mt-1 text-[#b6b6b6]">
+                              Not selecting any item, selects every item
+                            </span>
+                          </div>
 
-                                setGroup(nname);
+                          <Button
+                            variant="contained"
+                            className="!bg-[#1891fe] !mt-4 !py-[13px] !font-medium !capitalize"
+                            style={{
+                              fontFamily: "inherit",
+                            }}
+                            onClick={async () => {
+                              if (nname.length) {
+                                setLoader(true);
 
-                                setAddNew(false);
+                                try {
+                                  const nMessData = { ...messData };
 
-                                setLoader(false);
-                              } catch (err: any) {
-                                setLoader(false);
+                                  nMessData[nname]["participants"] =
+                                    disparts.filter((v) => v !== undefined);
 
-                                setFailMessage(
-                                  "Something went wrong, please try again later"
-                                );
+                                  nMessData[nname]["messages"] = [];
+
+                                  await saveMessages(JSON.stringify(nMessData));
+
+                                  updateMessData(nMessData);
+
+                                  setGroup(nname);
+
+                                  setDisparts([]);
+
+                                  setAddNew(false);
+
+                                  setLoader(false);
+                                } catch (err: any) {
+                                  setLoader(false);
+
+                                  setFailMessage(
+                                    "Something went wrong, please try again later"
+                                  );
+                                }
+                              } else {
+                                setFailMessage("Name of channel is required");
                               }
-                            } else {
-                              setFailMessage("Name of channel is required");
-                            }
-                          }}
-                          fullWidth
-                        >
-                          Create
-                        </Button>
+                            }}
+                            fullWidth
+                          >
+                            Create
+                          </Button>
+                        </TabPanel>
+
+                        <TabPanel padding={0} value={Number(toggle)} index={1}>
+                          <div className="mb-4">
+                            <TextField
+                              fullWidth
+                              id="outlined-basic"
+                              label="Name"
+                              variant="outlined"
+                              value={nname}
+                              onChange={(
+                                e: React.ChangeEvent<
+                                  HTMLInputElement | HTMLTextAreaElement
+                                >
+                              ) => {
+                                setNname(e.target.value);
+                                setFailMessage("");
+                              }}
+                            />
+                          </div>
+
+                          <div className="mb-4">
+                            <TextField
+                              fullWidth
+                              id="outlined-basic"
+                              label="Description"
+                              multiline
+                              variant="outlined"
+                              value={voteDesc}
+                              onChange={(
+                                e: React.ChangeEvent<
+                                  HTMLInputElement | HTMLTextAreaElement
+                                >
+                              ) => {
+                                setVoteDesc(e.target.value);
+                                setFailMessage("");
+                              }}
+                            />
+                          </div>
+
+                          <div className="mb-5">
+                            <label className="text-[#808080] mb-2 block">
+                              Select Discussion Channel participants can vote on
+                            </label>
+
+                            <Select
+                              isClearable={false}
+                              value={discussions}
+                              onChange={(e: any) => setDiscussion(e)}
+                              name="Channels"
+                              placeholder={"Channels..."}
+                              options={Object.keys(messData).map(
+                                (v: string) => ({ value: v, label: v })
+                              )}
+                              styles={{
+                                option: (provided: any, state: any) => {
+                                  return {
+                                    ...provided,
+                                    backgroundColor: state.isSelected
+                                      ? "#dfdfdf"
+                                      : "transparent",
+                                    cursor: "pointer",
+                                    "&:active": {
+                                      backgroundColor: "#dfdfdf",
+
+                                      color: "#121212 !important",
+                                    },
+                                    "&:hover": {
+                                      backgroundColor: state.isSelected
+                                        ? undefined
+                                        : `#dfdfdff2`,
+                                    },
+                                  };
+                                },
+                                container: (provided: any, state: any) => ({
+                                  ...provided,
+                                  "& .select__control": {
+                                    borderWidth: "0px",
+                                    borderRadius: "0px",
+                                    backgroundColor: "transparent",
+                                    borderBottomWidth: "1px",
+                                  },
+                                  "& .select__value-container": {
+                                    paddingLeft: "0px",
+                                  },
+                                  "& .select__control:hover": {
+                                    borderBottomWidth: "2px",
+                                    borderBottomColor: "#121212",
+                                  },
+                                  "& .select__control--is-focused": {
+                                    borderWidth: "0px",
+                                    borderBottomWidth: "2px",
+                                    borderBottomColor: `#1891fe !important`,
+                                    boxShadow: "none",
+                                  },
+                                }),
+                              }}
+                              classNamePrefix="select"
+                            />
+                          </div>
+
+                          <Button
+                            variant="contained"
+                            className="!bg-[#1891fe] !mt-4 !py-[13px] !font-medium !capitalize"
+                            style={{
+                              fontFamily: "inherit",
+                            }}
+                            onClick={async () => {
+                              if (nname.length && voteDesc.length && discussions.length) {
+                                setLoader(true);
+
+                                try {
+                                  const nMessData = { ...messData };
+
+                                  if (nMessData[discussions] !== undefined) {
+                                    
+                                      const newMess: any = {
+
+                                        content: { name: nname, desc: voteDesc },
+                                        sent: true,
+                                        type: "vote",
+                                        creator: address,
+                                        expiry: new Date().getTime(),
+                                      };                                    
+
+                                      nMessData[discussions]["messages"].push(newMess);
+
+                                      await saveMessages(
+                                        JSON.stringify(nMessData)
+                                      );
+
+                                      notifications({
+                                        title: `Vote campaign created by ${String(
+                                          address
+                                        ).substring(0, 6)}...
+                      ${String(address).substring(38, 42)}`,
+                                        message: voteDesc,
+                                        receivers: nMessData[discussions]['participants'].length ? nMessData[discussions]['participants'] : lq[2],
+                                        exclude: address || "",
+                                      });
+
+                                      updateMessData(nMessData);
+
+                                      setGroup(discussions);
+
+                                      setDisparts([]);
+
+                                      setAddNew(false);
+
+                                      setLoader(false);
+
+                                  }else{
+                                    setLoader(false);
+
+                                    setFailMessage(
+                                      "Discussion channel not found"
+                                    );
+                                  }
+                                  
+                                } catch (err: any) {
+                                  setLoader(false);
+
+                                  setFailMessage(
+                                    "Something went wrong, please try again later"
+                                  );
+                                }
+                              } else {
+                                setFailMessage("Please all inputs are required");
+                              }
+                            }}
+                            fullWidth
+                          >
+                            Create
+                          </Button>
+                        </TabPanel>
                       </FormControl>
                     </Box>
                   </div>
@@ -499,6 +752,7 @@ const Chats = () => {
                   ];
 
                 return (
+                  
                   <Chatlist
                     key={i}
                     onClick={() => {
@@ -518,7 +772,9 @@ const Chats = () => {
                     name={`${gps} ${!i ? "(Main)" : ""}`}
                   />
                 );
-              })}
+              })
+              
+            }
 
               <div className="overlay"></div>
             </div>
@@ -546,13 +802,14 @@ const Chats = () => {
                               date,
                               content,
                               reply,
+                              type,
                               server,
                               sent,
                               enlargen,
                             },
                             i
                           ) => (
-                            <Text
+                            type == 'mess' ? <Text
                               sender={sender}
                               date={date}
                               key={i}
@@ -560,7 +817,7 @@ const Chats = () => {
                               sent={server || sent}
                               reply={reply}
                               enlargen={Boolean(enlargen)}
-                            />
+                            /> : <></>
                           )
                         )}
                       </>
