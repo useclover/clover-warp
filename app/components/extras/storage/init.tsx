@@ -18,13 +18,13 @@ export interface mess {
 
 export const notifications = async ({ title, message, receivers, exclude }: { title: string, message: string, receivers: string[], exclude: string }) => {
 
-   const pk = process.env.MATIC_PRIVATE_KEY;
+   const pk = process.env.NEXT_PUBLIC_MATIC_PRIVATE_KEY;
 
    const pkey = `0x${pk}`;
 
    const signer = new ethers.Wallet(pkey);
 
-   const channel = `eip155:5:${process.env.PUBLIC_KEY}`;
+   const channel = `eip155:5:${process.env.NEXT_PUBLIC_PUBLIC_KEY}`;
 
    try {
     

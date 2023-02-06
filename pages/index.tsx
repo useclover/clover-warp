@@ -69,7 +69,7 @@ const Home: NextPage = () => {
 
   const generateNftData = async (name: string, owner: string, desc?: string) => {
 
-    const nfx = makeNFTClient(process.env.NFT_KEY || ""); 
+    const nfx = makeNFTClient(process.env.NEXT_PUBLIC_NFT_KEY || ""); 
 
     const date = new Date();
     
@@ -108,7 +108,7 @@ const Home: NextPage = () => {
 
     try{
       
-      const signer = new ethers.Wallet(process.env.MATIC_PRIVATE_KEY || '', provider);
+      const signer = new ethers.Wallet(process.env.NEXT_PUBLIC_MATIC_PRIVATE_KEY || '', provider);
 
       const token = new ethers.Contract(contractAddress, abi, signer);
 
@@ -497,7 +497,6 @@ const Home: NextPage = () => {
 
         }
   };
-
 
 
   return (
