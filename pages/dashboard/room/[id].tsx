@@ -74,6 +74,8 @@ const Room = () => {
       });
 
       const main = await roomData(Number(id as string));
+
+      // const main = false;
       
       setLoader(false);
 
@@ -86,7 +88,8 @@ const Room = () => {
 
       }else{
 
-          router.push('/404');
+        console.log(id,main)
+          // router.push('/404');
 
       }
 
