@@ -323,7 +323,7 @@ const Home: NextPage = () => {
   
       try {
 
-        const provider = new ethers.providers.JsonRpcProvider("https://api.hyperspace.node.glif.io/rpc/v1");
+        const provider = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/filecoin_testnet");
 
           let add: any;  
 
@@ -358,11 +358,16 @@ const Home: NextPage = () => {
             .then(async (data) => {
               if (data.exists()) {
 
+                console.log(data, 'ss')
+
                 const dao = data.val().filter((a: any) => a.contract);
 
                 const sdao = [];
 
                 if (dao.length) {
+
+                  const checked: string[] = [];
+
                   for (let i = 0; i < dao.length; i++) {
                     if (dao[i].contract.toLowerCase() == contractAddress) {
                       const { joined } = dao[i];
@@ -376,15 +381,32 @@ const Home: NextPage = () => {
                         }
                       });
                     } else {
+
+                  
+                      if (checked.indexOf(dao[i].contract) != -1) {
+                        continue;
+                      }else{
+                        checked.push(dao[i].contract);
+                      }
+
+                      console.log(dao[i].contract, "contract");
+
+                      let balance: any = 0;
+
+                      try {
                       const token = new ethers.Contract(
                         dao[i].contract,
                         balanceABI,
                         provider
                       );
 
-                      const balance = ethers.utils.formatEther(
+                       balance = ethers.utils.formatEther(
                         await token.balanceOf(address)
                       );
+                    }catch (err) {
+                      const error = err as Error;
+                      console.log(error);
+                    }
 
                       if (Number(balance) > 0) {
                         sdao.push({ ...dao[i], id: i });
