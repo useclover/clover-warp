@@ -21,6 +21,7 @@ import { ref, update, get, set, child } from "firebase/database";
 import { ethers } from 'ethers';
 import { balanceABI } from '../app/components/extras/abi';
 import { notifications } from '../app/components/extras/storage/init';
+import Link from 'next/link';
 
 // 0x74367351f1a6809ced9cc70654c6bf8c2d1913c9;
 const contractAddress: string = "0xaCDFc5338390Ce4eC5AD61E3dC255c9F2560D797";
@@ -520,299 +521,351 @@ const Home: NextPage = () => {
         }
   };
 
-
   return (
     <>
       {bigLoader && <Loader />}
 
       {!bigLoader && (
-        <div className={styles.container}>
-          <Head>
-            <title>Clover</title>
-            <meta name="description" content="Chat as a DAO" />
-            <link rel="icon" href="/favicon.ico" />
-          </Head>
-
-          {showModal ? (
-            <div className={`justify-center bg-[rgba(255,255,255,.4)] mt-[74px] flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none`}>
-              
-              <div className="relative max-w-[1500px] w-[80%] 4sm:w-[60%] min-w-[340px]">
-                {/*content*/}
-                <div className="border-0 rounded-[12px] shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
-
-                  <div className="flex items-center justify-center pb-2 pt-3 border-solid rounded-t">
-                    <h2
-                      style={{ fontFamily: "inherit" }}
-                      className="text-[18px] font-bold"
-                    >
-                      Choose DAO
-                    </h2>
-                  </div>
-                  {/*body*/}
-                  {/* {Boolean(authError?.length) && (
-                    <div className="transition-all rounded-md delay-500 border-[#1891fe] text-[#1891fe] items-center font-bold text-[16px] border-[1px] mx-6 my-2 w-[calc(100%-48px)] p-3">
-                      {authError}
-                    </div>
-                  )} */}
-
-                  <div
-                    style={{
-                      gridTemplateColumns:
-                        "repeat(auto-fill, minmax(320px, 1fr))",
-                    }}
-                    className="relative p-6 grid gap-2 grid-flow-dense"
-                  >
-                    {exec.map((vv: any, i: number) => (
-                      <button
-                        key={i}
-                        onClick={async () => {
-                          const name: string = vv.name;
-                          const contract: string = vv.contract;
-                          const data: string = vv.randId;
-
-                          localStorage.setItem(
-                            "cloverlog",
-                            JSON.stringify({
-                              id: vv.id,
-                              name,
-                              contract,
-                              data,
-                              participants: vv.joined,
-                            })
-                          );
-
-                          Router.push("/dashboard");
-                        }}
-                        style={{ fontFamily: "inherit" }}
-                        className="transition-all rounded-md delay-500 hover:border-[#1891fe] hover:text-[#1891fe] items-start text-[16px] flex justify-between border-[1px] 4sm:mr-2 text-[#575757] mb-2 w-full py-4 px-4"
-                      >
-                        <div className="flex flex-col items-start">
-                          <span className="font-bold">{vv.name}</span>
-                          <span className="text-left">{vv.desc}</span>
-                        </div>
-                        
-                      </button>
-                    ))}
-                  </div>
-                  {/*footer*/}
-                  <div className="flex items-center justify-end p-2 border-t border-solid border-slate-200 rounded-b">
-                    <button
-                      className="text-blue-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                      type="button"
-                      onClick={useClose}
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
+        <div className="min-w-screen min-h-screen bg-white p-4">
+          <div className="bg-[#1890FF] rounded-t-[1rem] rounded-bl-[1rem] min-w-full py-5 px-[40px]">
+            <div className="flex items-center justify-between px-[30px] bg-white rounded-[1rem] py-2 mb-12">
+              <div className="h-[30px]">
+                <Image src={logo} alt="Clover" width={91.83} height={30} />
               </div>
-            </div>
-          ) : null}
 
-          <Modal open={open} onClose={handleClose}>
-            <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
-              <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
-                {isLoading && (
-                  <Loader
-                    sx={{
-                      backgroundColor: "rgba(255,255,255,.6)",
-                      backdropFilter: "blur(5px)",
-                    }}
-                    fixed={false}
-                    incLogo={false}
-                  />
-                )}
+              <div className="flex items-center w-[150px] justify-between">
+                <Link href="#">
+                  <span className="text-[#1890FF] text-[14px]">Product</span>
+                </Link>
 
-                <div className="rounded-lg bg-white shadow-lg shadow-[#cccccc]">
-                  <div className="border-b flex justify-between py-[14px] px-[17px] text-xl font-bold">
-                    Register DAO
-                    <BiX
-                      size={20}
-                      className="cursor-pointer"
-                      onClick={handleClose}
-                    />
-                  </div>
-                  <div className="form relative pt-4">
-                    <Box sx={{ width: "100%" }}>
-                      {Boolean(failMessage.length) && (
-                        <div className="rounded-md w-[95%] font-bold mt-2 mx-auto p-3 bg-[#ff8f33] text-white">
-                          {failMessage}
-                        </div>
-                      )}
-
-                      <FormControl
-                        fullWidth
-                        sx={{
-                          px: 5,
-                          py: 3,
-                        }}
-                      >
-                        <div>
-                          <TextField
-                            fullWidth
-                            id="outlined-basic"
-                            label="Name of DAO"
-                            variant="outlined"
-                            value={name}
-                            onChange={(
-                              e: React.ChangeEvent<
-                                HTMLInputElement | HTMLTextAreaElement
-                              >
-                            ) => {
-                              setName(e.target.value);
-                            }}
-                          />
-                        </div>
-                        <div className="mt-3">
-                          <TextField
-                            fullWidth
-                            id="outlined-basic"
-                            label="Description of DAO"
-                            variant="outlined"
-                            helperText="Short Description Of DAO, Can be left empty - max 300 characters"
-                            value={des}
-                            onChange={(
-                              e: React.ChangeEvent<
-                                HTMLInputElement | HTMLTextAreaElement
-                              >
-                            ) => {
-                              const val = e.target.value;
-
-                              setDes(val.substring(0, 300));
-                            }}
-                          />
-                        </div>
-                        <div className="my-3">
-                          <TextField
-                            fullWidth
-                            id="outlined-basic"
-                            label="Contract Address"
-                            variant="outlined"
-                            helperText="Contract address of the token that would allow users into the DAO - use `default` if you want one generated by us"
-                            value={contractAd}
-                            onChange={(
-                              e: React.ChangeEvent<
-                                HTMLInputElement | HTMLTextAreaElement
-                              >
-                            ) => {
-                              setContractAd(e.target.value);
-                            }}
-                          />
-                        </div>
-
-                        {contractAd.toLowerCase().trim() == "default" && (
-                          <>
-                            <div className="py-3 font-bold">Participants</div>
-                            <div className="flex w-full my-2 cusscroller overflow-hidden overflow-x-scroll items-center">
-                              {participants.map((e, i: number) => (
-                                <div
-                                  className="border text-[#777] border-solid ml-[2px] rounded p-2"
-                                  key={i}
-                                >
-                                  {e.substring(0, 5) +
-                                    "...." +
-                                    e.substring(e.length - 5, e.length)}
-                                </div>
-                              ))}
-                            </div>
-
-                            <TextField
-                              fullWidth
-                              id="outlined-basic"
-                              helperText="if left empty, only you would have access to the DAO"
-                              variant="outlined"
-                              value={part}
-                              placeholder="click enter to add address"
-                              onChange={(e: any) => {
-                                setPart(e.target.value);
-                              }}
-                              onKeyUp={(e: any) => {
-                                setPart(e.target.value);
-
-                                if (e.keyCode == 13 || e.which === 13) {
-                                  if (part.length) {
-                                    const partx: string[] = participants;
-                                    partx.push(part);
-
-                                    setParticipants(partx);
-
-                                    setPart("");
-                                  }
-                                }
-                              }}
-                              onBlur={(e: any) => {
-                                setPart(e.target.value);
-                                if (part.length) {
-                                  const partx: string[] = participants;
-                                  partx.push(part);
-                                  setParticipants(partx);
-                                  setPart("");
-                                }
-                              }}
-                            />
-                          </>
-                        )}
-
-                        <Button
-                          variant="contained"
-                          className="!bg-[#1891fe] !mt-4 !py-[13px] !font-medium !capitalize"
-                          style={{
-                            fontFamily: "inherit",
-                          }}
-                          onClick={() => {
-                            setFailMessage("");
-                            sumitDeets();
-                          }}
-                          fullWidth
-                        >
-                          Create
-                        </Button>
-                      </FormControl>
-                    </Box>
-                  </div>
-                </div>
+                <Link href="#">
+                  <span className="text-[#1890FF] text-[14px]">Solutions</span>
+                </Link>
               </div>
-            </div>
-          </Modal>
 
-          <div className="h-screen flex flex-col justify-center">
-            {Boolean(loginError.length) && (
-              <Alert className="my-2" severity="error">
-                {loginError}
-              </Alert>
-            )}
-            <div className="flex justify-around">
-              <div className="items-center mt-4 top-0 absolute flex justify-center">
-                <Image src={logo} alt="Clover" width={150} height={49.995} />
-              </div>
-              <div className="self-center">
-                <Button
-                  onClick={login}
-                  style={{
-                    fontFamily: "Poppins",
-                  }}
-                  className="!py-4 !px-8 rounded-lg !capitalize !font-semibold !text-xl !text-white !bg-[#1891fe]"
-                >
-                  Authenticate
+              <div>
+                <Button className="!bg-[#1891fe] !rounded-[.5rem] !text-white !mt-0 !py-2 !px-4 !font-medium">
+                  Get started
                 </Button>
               </div>
-              <div className="self-center">
-                <Button
-                  onClick={() => setOpen(true)}
-                  style={{
-                    fontFamily: "Poppins",
-                  }}
-                  className="!py-4 !px-8 rounded-lg !capitalize !font-semibold !text-xl !text-white !bg-[#1891fe]"
-                >
-                  Register DAO
-                </Button>
-              </div>
+            </div>
+
+            <div className="">
+              <h1 className="font-bold mb-3 text-[60px] cursor-default text-white">
+                {" "}
+                <span className="text-[#ECB22F]">A digital Suite, </span>{" "}
+                perfect for <br></br> your DAO.
+              </h1>
+
+              <span className="text-white mb-6 font-light block">
+                With all your DAO members, tools and communication in <br/> one place,
+                your DAO can now be more productive than ever.
+              </span>
+
+              <Button className="!bg-[#387CF7] !border-solid !border-white !border-[2px] !mb-5 !rounded-[.5rem] !text-white !mt-0 !py-3 !px-4 !font-medium !capitalize">
+                Get started
+              </Button>
+
+
             </div>
           </div>
         </div>
       )}
     </>
   );
+
+  // return (
+  //   <>
+  //     {bigLoader && <Loader />}
+
+  //     {!bigLoader && (
+  //       <div className={styles.container}>
+  //         <Head>
+  //           <title>Clover</title>
+  //           <meta name="description" content="Chat as a DAO" />
+  //           <link rel="icon" href="/favicon.ico" />
+  //         </Head>
+
+  //         {showModal ? (
+  //           <div className={`justify-center bg-[rgba(255,255,255,.4)] mt-[74px] flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none`}>
+              
+  //             <div className="relative max-w-[1500px] w-[80%] 4sm:w-[60%] min-w-[340px]">
+  //               {/*content*/}
+  //               <div className="border-0 rounded-[12px] shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+
+  //                 <div className="flex items-center justify-center pb-2 pt-3 border-solid rounded-t">
+  //                   <h2
+  //                     style={{ fontFamily: "inherit" }}
+  //                     className="text-[18px] font-bold"
+  //                   >
+  //                     Choose DAO
+  //                   </h2>
+  //                 </div>
+  //                 {/*body*/}
+  //                 {/* {Boolean(authError?.length) && (
+  //                   <div className="transition-all rounded-md delay-500 border-[#1891fe] text-[#1891fe] items-center font-bold text-[16px] border-[1px] mx-6 my-2 w-[calc(100%-48px)] p-3">
+  //                     {authError}
+  //                   </div>
+  //                 )} */}
+
+  //                 <div
+  //                   style={{
+  //                     gridTemplateColumns:
+  //                       "repeat(auto-fill, minmax(320px, 1fr))",
+  //                   }}
+  //                   className="relative p-6 grid gap-2 grid-flow-dense"
+  //                 >
+  //                   {exec.map((vv: any, i: number) => (
+  //                     <button
+  //                       key={i}
+  //                       onClick={async () => {
+  //                         const name: string = vv.name;
+  //                         const contract: string = vv.contract;
+  //                         const data: string = vv.randId;
+
+  //                         localStorage.setItem(
+  //                           "cloverlog",
+  //                           JSON.stringify({
+  //                             id: vv.id,
+  //                             name,
+  //                             contract,
+  //                             data,
+  //                             participants: vv.joined,
+  //                           })
+  //                         );
+
+  //                         Router.push("/dashboard");
+  //                       }}
+  //                       style={{ fontFamily: "inherit" }}
+  //                       className="transition-all rounded-md delay-500 hover:border-[#1891fe] hover:text-[#1891fe] items-start text-[16px] flex justify-between border-[1px] 4sm:mr-2 text-[#575757] mb-2 w-full py-4 px-4"
+  //                     >
+  //                       <div className="flex flex-col items-start">
+  //                         <span className="font-bold">{vv.name}</span>
+  //                         <span className="text-left">{vv.desc}</span>
+  //                       </div>
+                        
+  //                     </button>
+  //                   ))}
+  //                 </div>
+  //                 {/*footer*/}
+  //                 <div className="flex items-center justify-end p-2 border-t border-solid border-slate-200 rounded-b">
+  //                   <button
+  //                     className="text-blue-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+  //                     type="button"
+  //                     onClick={useClose}
+  //                   >
+  //                     Close
+  //                   </button>
+  //                 </div>
+  //               </div>
+  //             </div>
+  //           </div>
+  //         ) : null}
+
+  //         <Modal open={open} onClose={handleClose}>
+  //           <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
+  //             <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
+  //               {isLoading && (
+  //                 <Loader
+  //                   sx={{
+  //                     backgroundColor: "rgba(255,255,255,.6)",
+  //                     backdropFilter: "blur(5px)",
+  //                   }}
+  //                   fixed={false}
+  //                   incLogo={false}
+  //                 />
+  //               )}
+
+  //               <div className="rounded-lg bg-white shadow-lg shadow-[#cccccc]">
+  //                 <div className="border-b flex justify-between py-[14px] px-[17px] text-xl font-bold">
+  //                   Register DAO
+  //                   <BiX
+  //                     size={20}
+  //                     className="cursor-pointer"
+  //                     onClick={handleClose}
+  //                   />
+  //                 </div>
+  //                 <div className="form relative pt-4">
+  //                   <Box sx={{ width: "100%" }}>
+  //                     {Boolean(failMessage.length) && (
+  //                       <div className="rounded-md w-[95%] font-bold mt-2 mx-auto p-3 bg-[#ff8f33] text-white">
+  //                         {failMessage}
+  //                       </div>
+  //                     )}
+
+  //                     <FormControl
+  //                       fullWidth
+  //                       sx={{
+  //                         px: 5,
+  //                         py: 3,
+  //                       }}
+  //                     >
+  //                       <div>
+  //                         <TextField
+  //                           fullWidth
+  //                           id="outlined-basic"
+  //                           label="Name of DAO"
+  //                           variant="outlined"
+  //                           value={name}
+  //                           onChange={(
+  //                             e: React.ChangeEvent<
+  //                               HTMLInputElement | HTMLTextAreaElement
+  //                             >
+  //                           ) => {
+  //                             setName(e.target.value);
+  //                           }}
+  //                         />
+  //                       </div>
+  //                       <div className="mt-3">
+  //                         <TextField
+  //                           fullWidth
+  //                           id="outlined-basic"
+  //                           label="Description of DAO"
+  //                           variant="outlined"
+  //                           helperText="Short Description Of DAO, Can be left empty - max 300 characters"
+  //                           value={des}
+  //                           onChange={(
+  //                             e: React.ChangeEvent<
+  //                               HTMLInputElement | HTMLTextAreaElement
+  //                             >
+  //                           ) => {
+  //                             const val = e.target.value;
+
+  //                             setDes(val.substring(0, 300));
+  //                           }}
+  //                         />
+  //                       </div>
+  //                       <div className="my-3">
+  //                         <TextField
+  //                           fullWidth
+  //                           id="outlined-basic"
+  //                           label="Contract Address"
+  //                           variant="outlined"
+  //                           helperText="Contract address of the token that would allow users into the DAO - use `default` if you want one generated by us"
+  //                           value={contractAd}
+  //                           onChange={(
+  //                             e: React.ChangeEvent<
+  //                               HTMLInputElement | HTMLTextAreaElement
+  //                             >
+  //                           ) => {
+  //                             setContractAd(e.target.value);
+  //                           }}
+  //                         />
+  //                       </div>
+
+  //                       {contractAd.toLowerCase().trim() == "default" && (
+  //                         <>
+  //                           <div className="py-3 font-bold">Participants</div>
+  //                           <div className="flex w-full my-2 cusscroller overflow-hidden overflow-x-scroll items-center">
+  //                             {participants.map((e, i: number) => (
+  //                               <div
+  //                                 className="border text-[#777] border-solid ml-[2px] rounded p-2"
+  //                                 key={i}
+  //                               >
+  //                                 {e.substring(0, 5) +
+  //                                   "...." +
+  //                                   e.substring(e.length - 5, e.length)}
+  //                               </div>
+  //                             ))}
+  //                           </div>
+
+  //                           <TextField
+  //                             fullWidth
+  //                             id="outlined-basic"
+  //                             helperText="if left empty, only you would have access to the DAO"
+  //                             variant="outlined"
+  //                             value={part}
+  //                             placeholder="click enter to add address"
+  //                             onChange={(e: any) => {
+  //                               setPart(e.target.value);
+  //                             }}
+  //                             onKeyUp={(e: any) => {
+  //                               setPart(e.target.value);
+
+  //                               if (e.keyCode == 13 || e.which === 13) {
+  //                                 if (part.length) {
+  //                                   const partx: string[] = participants;
+  //                                   partx.push(part);
+
+  //                                   setParticipants(partx);
+
+  //                                   setPart("");
+  //                                 }
+  //                               }
+  //                             }}
+  //                             onBlur={(e: any) => {
+  //                               setPart(e.target.value);
+  //                               if (part.length) {
+  //                                 const partx: string[] = participants;
+  //                                 partx.push(part);
+  //                                 setParticipants(partx);
+  //                                 setPart("");
+  //                               }
+  //                             }}
+  //                           />
+  //                         </>
+  //                       )}
+
+  //                       <Button
+  //                         variant="contained"
+  //                         className="!bg-[#1891fe] !mt-4 !py-[13px] !font-medium !capitalize"
+  //                         style={{
+  //                           fontFamily: "inherit",
+  //                         }}
+  //                         onClick={() => {
+  //                           setFailMessage("");
+  //                           sumitDeets();
+  //                         }}
+  //                         fullWidth
+  //                       >
+  //                         Create
+  //                       </Button>
+  //                     </FormControl>
+  //                   </Box>
+  //                 </div>
+  //               </div>
+  //             </div>
+  //           </div>
+  //         </Modal>
+
+  //         <div className="h-screen flex flex-col justify-center">
+  //           {Boolean(loginError.length) && (
+  //             <Alert className="my-2" severity="error">
+  //               {loginError}
+  //             </Alert>
+  //           )}
+  //           <div className="flex justify-around">
+  //             <div className="items-center mt-4 top-0 absolute flex justify-center">
+  //               <Image src={logo} alt="Clover" width={150} height={49.995} />
+  //             </div>
+  //             <div className="self-center">
+  //               <Button
+  //                 onClick={login}
+  //                 style={{
+  //                   fontFamily: "Poppins",
+  //                 }}
+  //                 className="!py-4 !px-8 rounded-lg !capitalize !font-semibold !text-xl !text-white !bg-[#1891fe]"
+  //               >
+  //                 Authenticate
+  //               </Button>
+  //             </div>
+  //             <div className="self-center">
+  //               <Button
+  //                 onClick={() => setOpen(true)}
+  //                 style={{
+  //                   fontFamily: "Poppins",
+  //                 }}
+  //                 className="!py-4 !px-8 rounded-lg !capitalize !font-semibold !text-xl !text-white !bg-[#1891fe]"
+  //               >
+  //                 Register DAO
+  //               </Button>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     )}
+  //   </>
+  // );
 }
 
 export default Home
