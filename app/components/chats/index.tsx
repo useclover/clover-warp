@@ -164,8 +164,13 @@ const Chats = () => {
 
       const mess = await retrieveMessages();
 
-      if (mess[name]["messages"] === undefined) {
-        mess[name]["messages"] = [];
+      if (mess[name]?.["messages"] === undefined) {
+
+        if(mess[name] === undefined) mess[name] = {}; 
+
+
+         mess[name]["messages"] = [];
+
       }
 
       if (group === undefined) {
@@ -219,6 +224,8 @@ const Chats = () => {
       messData[group || ""]["messages"].push(newMess);
 
       index = messData[group || ""]["messages"].length - 1;
+
+      console.log(messData, 's')
 
       updateMessData(messData);
 
@@ -807,7 +814,7 @@ const Chats = () => {
                             },
                             i
                           ) => (
-                            type == 'mess' ? <Text
+                            <Text
                               sender={sender}
                               date={date}
                               key={i}
@@ -815,7 +822,7 @@ const Chats = () => {
                               sent={server || sent}
                               reply={reply}
                               enlargen={Boolean(enlargen)}
-                            /> : <></>
+                            />
                           )
                         )}
                       </>
