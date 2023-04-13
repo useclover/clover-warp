@@ -875,6 +875,7 @@ const Home: NextPage = () => {
                 </Button>
               </div>
             </div>
+            
             <div className="">
               <img
                 className="absolute z-10 right-0 -bottom-[12.9pc]"
