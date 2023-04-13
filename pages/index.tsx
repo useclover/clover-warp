@@ -9,7 +9,7 @@ import { BiX } from "react-icons/bi";
 import axios from 'axios';
 import hero from '../public/images/phone.svg';
 import { useState, useEffect, useContext } from 'react'
-import { Alert, Button, Modal, Box, FormControl, TextField } from "@mui/material";
+import { Alert, Button, Modal, Box, FormControl, TextField, IconButton } from "@mui/material";
 import Loader from '../app/components/loader';
 import web3 from "web3";
 import contract from "../SimpleNFT.json";
@@ -24,6 +24,7 @@ import { balanceABI } from '../app/components/extras/abi';
 import { notifications } from '../app/components/extras/storage/init';
 import Link from 'next/link';
 import trusted from "../public/images/trust.svg";
+import { BsList } from 'react-icons/bs';
 
 // 0x74367351f1a6809ced9cc70654c6bf8c2d1913c9;
 const contractAddress: string = "0xaCDFc5338390Ce4eC5AD61E3dC255c9F2560D797";
@@ -45,6 +46,8 @@ const Home: NextPage = () => {
 
   const { data: signer } = useSigner();
 
+  const [sidebar, setSidebar] = useState(false);
+
   const [isNotSupported, setSupport] = useState<boolean>(false);
   const [loginError, setLoginError] = useState<string>('');
   const [open, setOpen] = useState<boolean>(false);
@@ -62,7 +65,7 @@ const Home: NextPage = () => {
   const [bigLoader, setBigLoader] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
 
-  const [start, setStart] = useState<boolean>(true);
+  const [start, setStart] = useState<boolean>(false);
 
   const useClose = () => setShowModal(false)
 
@@ -533,6 +536,46 @@ const Home: NextPage = () => {
 
       {bigLoader && <Loader />}
 
+      <Modal open={sidebar} onClose={() => setSidebar(false)}>
+        <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
+          <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
+            <div className="min-h-screen fixed w-[60%] top-0 left-0 justify-center bg-white flex flex-col shadow-lg shadow-[#cccccc]">
+              <div className="flex top-0 pt-5 pb-2 items-center justify-between px-4 absolute w-full">
+                <div className="h-[30px]">
+                  <Image src={logo} alt="Clover" width={91.83} height={30} />
+                </div>
+
+                <IconButton onClick={() => setSidebar(false)}>
+                  <BiX className="text-[#1891fe]" size={30} />
+                </IconButton>
+              </div>
+
+              <Link href="#">
+                <h1 className="flex text-[#1891fe] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold">
+                  Product
+                </h1>
+              </Link>
+
+              <Link href="#">
+                <h1 className="flex text-[#1891fe] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold">
+                  Solutions
+                </h1>
+              </Link>
+
+              <h1
+                onClick={() => {
+                  setSidebar(false);
+                  setStart(true);
+                }}
+                className="flex text-[#1891fe] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold"
+              >
+                Get Started
+              </h1>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
       <Modal open={start} onClose={closeStart}>
         <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
           <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
@@ -825,15 +868,15 @@ const Home: NextPage = () => {
       </Modal>
 
       {!bigLoader && (
-        <div className="min-w-screen min-h-screen bg-white p-4">
-          <div className="bg-[#1890FF] rounded-t-[1rem] rounded-bl-[1rem] min-w-full py-5 px-[40px] flex justify-center relative">
+        <div className="min-w-screen max-h-screen overflow-y-scroll overflow-x-hidden cusscroller  bg-white p-4">
+          <div className="bg-[#1890FF] rounded-t-[1rem] usm:rounded-[1rem] rounded-bl-[1rem] min-w-full py-5 px-[40px] flex justify-center relative">
             <div className="w-full">
               <div className="flex items-center justify-between px-[30px] bg-white rounded-[1rem] py-2 mb-12">
                 <div className="h-[30px]">
                   <Image src={logo} alt="Clover" width={91.83} height={30} />
                 </div>
 
-                <div className="flex items-center w-[150px] justify-between">
+                <div className="flex items-center w-[150px] mmd:hidden  justify-between">
                   <Link href="#">
                     <span className="text-[#1890FF] text-[14px]">Product</span>
                   </Link>
@@ -845,7 +888,14 @@ const Home: NextPage = () => {
                   </Link>
                 </div>
 
-                <div>
+                <IconButton
+                  className="hidden mmd:block"
+                  onClick={() => setSidebar(true)}
+                >
+                  <BsList className="text-[#1890FF] cursor-pointer text-[30px]" />
+                </IconButton>
+
+                <div className="mmd:hidden">
                   <Button
                     onClick={() => setStart(true)}
                     className="!bg-[#1891fe] !rounded-[.5rem] !text-white !mt-0 !py-2 !px-4 !font-medium"
@@ -855,11 +905,11 @@ const Home: NextPage = () => {
                 </div>
               </div>
 
-              <div className="">
-                <h1 className="font-bold mb-3 text-[60px] cursor-default text-white">
+              <div className="usm:text-center">
+                <h1 className="font-bold mb-3 mst:text-[40px] text-[60px] cursor-default text-white">
                   {" "}
                   <span className="text-[#ECB22F]">A digital Suite, </span>{" "}
-                  perfect for <br></br> your DAO.
+                  perfect for <br className="st:hidden"></br> your DAO.
                 </h1>
 
                 <span className="text-white mb-6 font-light block">
@@ -875,10 +925,10 @@ const Home: NextPage = () => {
                 </Button>
               </div>
             </div>
-            
-            <div className="">
+
+            <div className="usm:hidden">
               <img
-                className="absolute z-10 right-0 -bottom-[12.9pc]"
+                className="absolute z-10 mst:!w-[330px] right-0 -bottom-[12.9pc]"
                 width={370}
                 height={500}
                 src={hero.src}
@@ -888,12 +938,12 @@ const Home: NextPage = () => {
           </div>
 
           <div className="flex items-center relative px-10 justify-between">
-            <div className="pt-9 rounded-tr-[2rem] pb-[45px] min-w-[60%] z-[1] bg-white">
+            <div className="pt-9 usm:pt-12 rounded-tr-[2rem] pb-[47px] min-w-[60%] z-[1] bg-white">
               <h2 className="text-[#121212] mb-1 font-bold text-[19px]">
                 TRUSTED BY DAOs ALL OVER THE WORLD
               </h2>
 
-              <div className="relative w-[472px] h-[70px] mt-4">
+              <div className="relative mmd:w-full mmd:overflow-y-hidden mmd:overflow-x-hidden cusscroller w-[472px] h-[70px] mt-4">
                 <Image
                   src={trusted}
                   layout="fill"
@@ -904,7 +954,7 @@ const Home: NextPage = () => {
               </div>
             </div>
 
-            <div className="bg-[#1891fe] right-0 top-0 w-[45%] h-[196px] absolute rounded-br-[1rem]">
+            <div className="bg-[#1891fe] right-0 top-0 w-[45%] h-[196px] absolute rounded-br-[1rem] usm:hidden">
               <div className="w-[90.4%] rounded-b-[1rem] bg-[#1891fe] right-0 h-[30px] absolute bottom-[-10px]"></div>
             </div>
           </div>
