@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { FiTrash2, FiX } from 'react-icons/fi';
-
+import { useHuddle01 } from "@huddle01/react";
 import {
   LinearProgress,
   Button,
@@ -65,7 +65,7 @@ const Rooms = () => {
     participants: any;
   }>();
 
-
+  const { initialize, isInitialized } = useHuddle01(); 
 
   useEffect(() => {
     if (localStorage.getItem("cloverlog") === null) {
@@ -73,7 +73,14 @@ const Rooms = () => {
     } else {
       setLoginData(JSON.parse(localStorage.getItem("cloverlog") || "{}"));
     }
+
   }, []);
+
+  useEffect(() => {
+
+        if (!isInitialized) initialize(process.env.HUDDLE_PROJECTID || "");    
+
+  }, [isInitialized, initialize]);
 
   const dirContent =
     uploadData.fileList !== undefined ? uploadData.fileList : [];
@@ -187,11 +194,17 @@ const Rooms = () => {
                           setLoader(true);
 
                           try {
+
                             const create = await createRoom(nname);
 
-                            // setAddNew(false);
+                            window?.refresh()
 
-                            Router.push(`/dashboard/rooms/${create}`);
+                            setAddNew(false);
+
+                            window?.open(create, "_blank")?.focus();
+                
+
+                            // Router.push(`/dashboard/rooms/${create}`);
 
                           } catch (err: any) {
                             setLoader(false);
@@ -338,10 +351,13 @@ const Rooms = () => {
                     >
                       {roomContent.map((attributes: any, i: number) => {
                         
-                        const { name, creator: owner } = attributes;
+                        const { name, creator: owner, meetId } = attributes;
 
                         return (
-                          <Link href={`/dashboard/rooms/${i}`} key={i}>
+                          <Link
+                            href={`https://app.huddle01.com/${meetId}`}
+                            key={i}
+                          >
                             <a>
                               <div className="w-full border border-[rgb(218,220,224)] rounded-md border-solid p-2 hover:bg-[rgb(248,248,248)] transition-all delay-300 cursor-pointer">
                                 <div className="mb-4">
@@ -372,7 +388,7 @@ const Rooms = () => {
                                         {name}
                                       </h3>
                                       <span className="block text-[14px] leading-[1.2] truncate w-full text-[#575757]">
-                                        created by 
+                                        created by
                                         {owner.substring(0, 6)}...
                                         {owner.substring(38, 42)}
                                       </span>

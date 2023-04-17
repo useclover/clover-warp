@@ -3,7 +3,7 @@ import * as PushAPI from "@pushprotocol/restapi";
 import { db } from "../../../firebase";
 import { ref, update, get, set, child } from "firebase/database";
 import { ethers } from 'ethers';
-
+import axios from 'axios';
 export let lq:any;
 
 export interface mess {
@@ -185,16 +185,28 @@ export const createRoom = async (name: string) => {
         data = results.val().length;
 
     }
-    
+
+    const { data: response } = await axios.post(
+      "https://iriko.testing.huddle01.com/api/v1/create-room",
+      {
+        title: name,
+        hostWallets: [lq[3]],
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.NEXT_PUBLIC_HUDDLE_APPKEY,
+        },
+      }
+    );
+
     await set(ref(db, `rooms/${lq[0]}/${data}`), {
       name,
       creator: lq[3],
-      meetId: `${Math.floor(Math.random() * 9999)}-${Math.floor(
-        Math.random() * 9999
-      )}`,
+      meetId: response.data.roomId,
     });
 
-    return data;
+    return `https://app.huddle01.com/${response.data.roomId}`;
 
 }
 
