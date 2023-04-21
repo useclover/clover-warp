@@ -45,6 +45,7 @@ const contractAddress: string = "0xaCDFc5338390Ce4eC5AD61E3dC255c9F2560D797";
 const abi: any = contract.abi;
 
 const Home: NextPage = () => {
+
   const { chain: chainId, chains } = useNetwork();
 
   const { address, isConnected } = useAccount();
@@ -604,7 +605,7 @@ const Home: NextPage = () => {
 
       {showModal ? (
         <div
-          className={`justify-center bg-[rgba(255,255,255,.4)] mt-[74px] flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none`}
+          className={`justify-center bg-[rgba(255,255,255,.4)] flex overflow-x-hidden items-center cusscroller overflow-y-auto fixed inset-0 z-[99999999] outline-none focus:outline-none`}
         >
           <div className="relative max-w-[1500px] w-[80%] 4sm:w-[60%] min-w-[340px]">
             {/*content*/}
@@ -634,6 +635,9 @@ const Home: NextPage = () => {
                   <button
                     key={i}
                     onClick={async () => {
+                      
+                      setLoading(true);
+
                       const name: string = vv.name;
                       const contract: string = vv.contract;
                       const data: string = vv.randId;
@@ -650,6 +654,7 @@ const Home: NextPage = () => {
                       );
 
                       Router.push("/dashboard");
+                      
                     }}
                     style={{ fontFamily: "inherit" }}
                     className="transition-all rounded-md delay-500 hover:border-[#1891fe] hover:text-[#1891fe] items-start text-[16px] flex justify-between border-[1px] 4sm:mr-2 text-[#575757] mb-2 w-full py-4 px-4"

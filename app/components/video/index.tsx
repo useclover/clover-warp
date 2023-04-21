@@ -93,9 +93,9 @@ const Rooms = () => {
 
     const [addNew, setAddNew] = useState<boolean>(false);
 
-  const [update, setUpdate] = useState<boolean>(false);
+    const [update, setUpdate] = useState<boolean>(false);
 
-  const [isLoading, setLoader] = useState(true);
+    const [isLoading, setLoader] = useState(true);
 
   const { name, contract, data, participants } = loginData || {
     name: "",
@@ -134,8 +134,8 @@ const Rooms = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
 
-  return (
-    <>
+  return !isLoading ? (
+        <>
       <Dash />
 
       <Modal open={addNew} onClose={() => setAddNew(false)}>
@@ -191,6 +191,7 @@ const Rooms = () => {
                       }}
                       onClick={async () => {
                         if (nname.length) {
+
                           setLoader(true);
 
                           try {
@@ -229,8 +230,7 @@ const Rooms = () => {
         </div>
       </Modal>
 
-      {!isLoading && (
-        <>
+     
           <div className="w-full flex items-start justify-between filedrop min-h-screen">
             <Button
               onClick={() => setAddNew(true)}
@@ -421,9 +421,10 @@ const Rooms = () => {
             </div>
           </div>
         </>
-      )}
-    </>
-  );
+      ) : (
+        <Loader />
+      )
+
 };
 
 export default Rooms;
