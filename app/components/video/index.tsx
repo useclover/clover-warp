@@ -197,12 +197,11 @@ const Rooms = () => {
 
                             const create = await createRoom(nname);
 
-                            window?.refresh()
-
                             setAddNew(false);
 
                             window?.open(create, "_blank")?.focus();
                 
+                            location.reload();
 
                             // Router.push(`/dashboard/rooms/${create}`);
 
@@ -388,7 +387,7 @@ const Rooms = () => {
                                         {name}
                                       </h3>
                                       <span className="block text-[14px] leading-[1.2] truncate w-full text-[#575757]">
-                                        created by
+                                        hosted by 
                                         {owner.substring(0, 6)}...
                                         {owner.substring(38, 42)}
                                       </span>

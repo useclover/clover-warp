@@ -1,41 +1,50 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image';
-import logo from '../public/images/logo.png';
-import styles from '../styles/Home.module.css';
-import bgLogo from '../public/images/logolg.png';
-import { createAlchemyWeb3 } from '@alch/alchemy-web3';
+import type { NextPage } from "next";
+import Head from "next/head";
+import Image from "next/image";
+import logo from "../public/images/logo.png";
+import styles from "../styles/Home.module.css";
+import bgLogo from "../public/images/logolg.png";
+import { createAlchemyWeb3 } from "@alch/alchemy-web3";
 import { BiX } from "react-icons/bi";
-import axios from 'axios';
-import hero from '../public/images/phone.svg';
-import { useState, useEffect, useContext } from 'react'
-import { Alert, Button, Modal, Box, FormControl, TextField, IconButton } from "@mui/material";
-import Loader from '../app/components/loader';
+import axios from "axios";
+import hero from "../public/images/phone.svg";
+import { useState, useEffect, useContext } from "react";
+import {
+  Alert,
+  Button,
+  Modal,
+  Box,
+  FormControl,
+  TextField,
+  IconButton,
+} from "@mui/material";
+import Loader from "../app/components/loader";
 import web3 from "web3";
 import contract from "../SimpleNFT.json";
-import { makeNFTClient } from '../app/components/extras/storage/utoken';
-import Router from 'next/router';
-import { useAccount, useConnect, useNetwork, useSignMessage, useSigner } from 'wagmi';
+import { makeNFTClient } from "../app/components/extras/storage/utoken";
+import Router from "next/router";
+import {
+  useAccount,
+  useConnect,
+  useNetwork,
+  useSignMessage,
+  useSigner,
+} from "wagmi";
 
 import { db } from "../app/firebase";
 import { ref, update, get, set, child } from "firebase/database";
-import { ethers } from 'ethers';
-import { balanceABI } from '../app/components/extras/abi';
-import { notifications } from '../app/components/extras/storage/init';
-import Link from 'next/link';
+import { ethers } from "ethers";
+import { balanceABI } from "../app/components/extras/abi";
+import { notifications } from "../app/components/extras/storage/init";
+import Link from "next/link";
 import trusted from "../public/images/trust.svg";
-import { BsList } from 'react-icons/bs';
+import { BsList } from "react-icons/bs";
 
 // 0x74367351f1a6809ced9cc70654c6bf8c2d1913c9;
 const contractAddress: string = "0xaCDFc5338390Ce4eC5AD61E3dC255c9F2560D797";
-const abi:any = contract.abi;
-
-
+const abi: any = contract.abi;
 
 const Home: NextPage = () => {
-
- 
-
   const { chain: chainId, chains } = useNetwork();
 
   const { address, isConnected } = useAccount();
@@ -49,17 +58,17 @@ const Home: NextPage = () => {
   const [sidebar, setSidebar] = useState(false);
 
   const [isNotSupported, setSupport] = useState<boolean>(false);
-  const [loginError, setLoginError] = useState<string>('');
+  const [loginError, setLoginError] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
   const [isLoading, setLoading] = useState<boolean>(false);
   const handleClose = () => setOpen(false);
-  const [failMessage, setFailMessage] = useState<string>('');
-  
-  const [userAddress, setUserAddress] = useState<string>('');
+  const [failMessage, setFailMessage] = useState<string>("");
 
-  const [name, setName] = useState<string>('');
-  const [des, setDes] = useState<string>('');
-  const [contractAd, setContractAd] = useState<string>('');
+  const [userAddress, setUserAddress] = useState<string>("");
+
+  const [name, setName] = useState<string>("");
+  const [des, setDes] = useState<string>("");
+  const [contractAd, setContractAd] = useState<string>("");
   const [participants, setParticipants] = useState<string[]>([]);
   const [part, setPart] = useState<string>("");
   const [bigLoader, setBigLoader] = useState<boolean>(false);
@@ -67,18 +76,21 @@ const Home: NextPage = () => {
 
   const [start, setStart] = useState<boolean>(false);
 
-  const useClose = () => setShowModal(false)
+  const useClose = () => setShowModal(false);
 
   const closeStart = () => setStart(false);
 
-  let nft:any = "";
+  let nft: any = "";
 
-  const generateNftData = async (name: string, owner: string, desc?: string) => {
-
-    const nfx = makeNFTClient(process.env.NEXT_PUBLIC_NFT_KEY || ""); 
+  const generateNftData = async (
+    name: string,
+    owner: string,
+    desc?: string
+  ) => {
+    const nfx = makeNFTClient(process.env.NEXT_PUBLIC_NFT_KEY || "");
 
     const date = new Date();
-    
+
     await fetch(bgLogo.src).then(async (x) => {
       nft = await nfx.store({
         image: new File([await x.blob()], "clover.png", {
@@ -104,76 +116,60 @@ const Home: NextPage = () => {
   };
 
   const mintNFT = async (tokenURI: string, receiver: string) => {
+    const provider = new ethers.providers.JsonRpcProvider(
+      "https://api.hyperspace.node.glif.io/rpc/v1"
+    );
 
+    console.log(receiver, process.env.NEXT_PUBLIC_MATIC_PRIVATE_KEY);
 
-     const provider = new ethers.providers.JsonRpcProvider(
-       "https://api.hyperspace.node.glif.io/rpc/v1"
-     );
-
-    console.log(receiver);
-
-    try{
-      
-      const signer = new ethers.Wallet(process.env.NEXT_PUBLIC_MATIC_PRIVATE_KEY || '', provider);
+    try {
+      const signer = new ethers.Wallet(
+        process.env.NEXT_PUBLIC_MATIC_PRIVATE_KEY || "",
+        provider
+      );
 
       const token = new ethers.Contract(contractAddress, abi, signer);
 
-
-      const receipt = await token.mintTokens(
-        receiver,
-        tokenURI
-      );
+      const receipt = await token.mintTokens(receiver, tokenURI);
 
       console.log(receipt);
 
       return "continue";
-
-    }catch(err){
-
-      console.log(err)
-
+    } catch (err) {
+      console.log(err);
     }
   };
 
-  
-
   const [updatex, setUpdatex] = useState<{
-    name?: string,
-    contract?: string,
-    main?: string,
-    table?:string 
+    name?: string;
+    contract?: string;
+    main?: string;
+    table?: string;
   }>({});
 
-
-
-
   const sumitDeets = async () => {
-      setLoading(true)
-      
-      let send: boolean = false; 
-      
-      if (!isConnected) {
-        await connectAsync({ connector: connectors[0] });
-      }
+    setLoading(true);
 
+    let send: boolean = false;
 
-     try{      
+    if (!isConnected) {
+      await connectAsync({ connector: connectors[0] });
+    }
 
+    try {
       const signedHash = await signMessageAsync({
-              message: "Registering A DAO",
-          });
-
+        message: "Registering A DAO",
+      });
 
       const userAddress: string = address as `0x${string}`;
 
-
       if (!name.length) {
-        setFailMessage("Name is required"); 
-        setLoading(false);         
+        setFailMessage("Name is required");
+        setLoading(false);
         return;
       }
 
-      if(des.length > 300){
+      if (des.length > 300) {
         setFailMessage("Description requires a max of 300 characters");
         setLoading(false);
         return;
@@ -204,11 +200,7 @@ const Home: NextPage = () => {
         console.log("default herex");
 
         // send nft to dao
-
-        
-
       } else {
-
         const provider = new ethers.providers.JsonRpcProvider(
           "https://api.hyperspace.node.glif.io/rpc/v1"
         );
@@ -228,129 +220,124 @@ const Home: NextPage = () => {
         send = true;
       }
 
-        const nftown: string[] = participants;
+      const nftown: string[] = participants;
 
-        try {
-          const dbData = await get(child(ref(db), "DAOs"));
+      try {
+        const dbData = await get(child(ref(db), "DAOs"));
 
-          const idMain = dbData.exists()
-            ? (dbData.val().length || dbData.val().length - 1)
-            : 0;
+        const idMain = dbData.exists() ? dbData.val().length - 1 : 0;
 
+        const rand = `CF${Math.floor(Math.random() * 999)}-${Math.floor(
+          Math.random() * 999
+        )}-${Math.floor(Math.random() * 999)}`;
 
-          const rand = `CF${Math.floor(Math.random() * 999)}-${Math.floor(Math.random() * 999)}-${Math.floor(Math.random() * 999)}`;
+        const payload: any = {
+          contract:
+            contractAd.toLowerCase().trim() == "default"
+              ? contractAddress
+              : contractAd,
+          joined: participants,
+          desc: des || "",
+          name,
+          randId: rand,
+        };
 
-          const payload: any = {
-            contract : (contractAd.toLowerCase()).trim() == 'default' ? contractAddress : contractAd,
-            joined: participants,
-            desc: des || '',
-            name,
-            randId: rand
-          }
+        if (contractAd.toLowerCase().trim() == "default") {
           
+          nftown.push(userAddress);     
 
-          if (contractAd.toLowerCase().trim() == "default") {
-            nftown.push(userAddress);
-            const metadata = await generateNftData(
-              name,
-              userAddress,
-              des.length ? des : undefined
-            );
+          const metadata = await generateNftData(
+            name,
+            userAddress,
+            des.length ? des : undefined
+          );
 
-            for (let i = 0; i < nftown.length; i++) {
-              const trans = await mintNFT(metadata, nftown[i]);
-            }
-
-            payload['metadata'] = userAddress;
-
-            await set(ref(db, `DAOs/${idMain}`), payload);
-
-              
-              localStorage.setItem(
-                "cloverlog",
-                JSON.stringify({
-                  id: idMain,
-                  name,
-                  contract: contractAddress,
-                  data: rand,
-                  participants
-                })
-              );
-
-              notifications({ title: `You were added to ${name} on clover`, message: 'click me to log in to your DAO', exclude: userAddress, receivers: participants });
-            
-            
-          } else {
-
-            
-            await set(ref(db, `DAOs/${idMain}`), payload);
-              
-
-              localStorage.setItem(
-                "cloverlog",
-                JSON.stringify({
-                  id: idMain,
-                  name,
-                  contract: contractAd,
-                  data: rand,
-                  participants: [address]         
-                })
-              );  
+          for (let i = 0; i < nftown.length; i++) {
+            const trans = await mintNFT(metadata, nftown[i]);
           }
 
-          Router.push("/dashboard");
-        } catch (err) {
-          setLoading(false);
-          console.log(err);
-          setFailMessage("Something went wrong, please try again");
+          payload["metadata"] = userAddress;
+
+          await set(ref(db, `DAOs/${idMain}`), payload);
+
+          localStorage.setItem(
+            "cloverlog",
+            JSON.stringify({
+              id: idMain,
+              name,
+              contract: contractAddress,
+              data: rand,
+              participants,
+            })
+          );
+
+          notifications({
+            title: `You were added to ${name} on clover`,
+            message: "click me to log in to your DAO",
+            exclude: userAddress,
+            receivers: participants,
+          });
+        } else {
+          await set(ref(db, `DAOs/${idMain}`), payload);
+
+          localStorage.setItem(
+            "cloverlog",
+            JSON.stringify({
+              id: idMain,
+              name,
+              contract: contractAd,
+              data: rand,
+              participants: [address],
+            })
+          );
         }
 
-       } catch(err) {
-        const error = err as Error;
-
-        console.log(error)
+        Router.push("/dashboard");
+      } catch (err) {
         setLoading(false);
-          setFailMessage("Something went wrong, please try again")
-       }
+        console.log(err);
+        setFailMessage("Something went wrong, please try again");
+      }
+    } catch (err) {
+      const error = err as Error;
 
-  }
+      console.log(error);
+      setLoading(false);
+      setFailMessage("Something went wrong, please try again");
+    }
+  };
 
-  
   const [exec, setExec] = useState<object[]>([]);
 
   const login = async () => {
-
-    setLoginError('');
-    setBigLoader(true)
+    setLoginError("");
+    setBigLoader(true);
 
     setExec([]);
 
-      setSupport(false)
-  
+    setSupport(false);
+
+    try {
+      const provider = new ethers.providers.JsonRpcProvider(
+        "https://rpc.ankr.com/filecoin_testnet"
+      );
+
+      let add: any;
+
+      if (!isConnected) {
+        add = await connectAsync({ connector: connectors[0] });
+      }
+
+      const signedHash = await signMessageAsync({
+        message: "Welcome back to clover",
+      });
+
+      console.log("connected");
+
+      const userAddress: string = address as `0x${string}`;
+
+
       try {
-
-        const provider = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/filecoin_testnet");
-
-          let add: any;  
-
-          if(!isConnected){
-
-            add = await connectAsync({ connector: connectors[0] });
-
-          }
-        
-          const signedHash = await signMessageAsync({ message: 'Welcome back to clover' });
-
-
-            console.log('connected');
-
-            const userAddress:string = address as `0x${string}`;
-            
-            console.log(add, userAddress, signedHash);
-
-            try {
-            
-            
         const validateAddress = ethers.utils.verifyMessage(
           "Welcome back to clover",
           signedHash
@@ -364,9 +351,9 @@ const Home: NextPage = () => {
             .then(async (data) => {
               if (data.exists()) {
 
-                console.log(data, 'ss')
-
                 const dao = data.val().filter((a: any) => a.contract);
+
+                console.log(dao, "daos");
 
                 const sdao = [];
 
@@ -375,23 +362,25 @@ const Home: NextPage = () => {
                   const checked: string[] = [];
 
                   for (let i = 0; i < dao.length; i++) {
-                    if (dao[i].contract.toLowerCase() == contractAddress) {
+                    if (ethers.utils.getAddress(dao[i].contract) == contractAddress) {
                       const { joined } = dao[i];
 
                       joined.forEach((val: string) => {
+
+                        const address = ethers.utils.getAddress(val);
+
+                        const address2 = ethers.utils.getAddress(add?.account || userAddress);
+
                         if (
-                          val.toLowerCase() ==
-                          (add?.account || userAddress).toLowerCase()
+                          address == address2
                         ) {
                           sdao.push({ ...dao[i], id: i });
                         }
                       });
                     } else {
-
-                  
                       if (checked.indexOf(dao[i].contract) != -1) {
                         continue;
-                      }else{
+                      } else {
                         checked.push(dao[i].contract);
                       }
 
@@ -400,19 +389,19 @@ const Home: NextPage = () => {
                       let balance: any = 0;
 
                       try {
-                      const token = new ethers.Contract(
-                        dao[i].contract,
-                        balanceABI,
-                        provider
-                      );
+                        const token = new ethers.Contract(
+                          dao[i].contract,
+                          balanceABI,
+                          provider
+                        );
 
-                       balance = ethers.utils.formatEther(
-                        await token.balanceOf(address)
-                      );
-                    }catch (err) {
-                      const error = err as Error;
-                      console.log(error);
-                    }
+                        balance = ethers.utils.formatEther(
+                          await token.balanceOf(address)
+                        );
+                      } catch (err) {
+                        const error = err as Error;
+                        console.log(error);
+                      }
 
                       if (Number(balance) > 0) {
                         sdao.push({ ...dao[i], id: i });
@@ -421,65 +410,60 @@ const Home: NextPage = () => {
                   }
                 }
 
-            if (sdao.length) {
-                 
+                if (sdao.length) {
 
-            if (sdao.length > 1) {
+                
 
-              setExec([...sdao]);
+                  if (sdao.length > 1) {
+                    setExec([...sdao]);
 
-              setShowModal(true);
+                    setShowModal(true);
 
-              setBigLoader(false);
-
-            } else {
-
-              console.log("xxv.2");
-              const vv: any = sdao[0];
-
-              const name: string = vv.name;
-              const contract: string = vv.contract;
-              const data:string = vv.randId;
-
-              const joined:boolean = vv.joined.indexOf(userAddress) == -1; 
-              
-              let list: any[] = [];
-
-              if (joined) {
-
-                list = [ ...vv.joined, userAddress ];
-
-                  const query = ref(db, `DAOs/${vv.id}/joined`);
-
-                  await update(query, list);
+                    setBigLoader(false);
+                  } else {
+                    console.log("xxv.2");
+                    const vv: any = sdao[0];
 
 
-              }else{
-                console.log(userAddress, vv.joined)
-              }
+                    const name: string = vv.name;
+                    const contract: string = vv.contract;
+                    const data: string = vv.randId;
 
+                    const joined: boolean =
+                      vv.joined.indexOf(userAddress) == -1;
 
-              localStorage.setItem(
-                "cloverlog",
-                JSON.stringify({
-                  id: vv.id,
-                  name,
-                  contract,
-                  data,
-                  participants: list.length ? list : vv.joined
-                })
-              );
-              
+                    let list: any[] = [];
 
-              Router.push("/dashboard");
+                    if (joined) {
 
-            }
+                      list = [...vv.joined, userAddress];
 
+                      const query = ref(db, `DAOs/${vv.id}/joined`);
+
+                      await update(query, list);
+                      
+                    } else {
+                      console.log(userAddress, vv.joined);
+                    }
+
+                    localStorage.setItem(
+                      "cloverlog",
+                      JSON.stringify({
+                        id: vv.id,
+                        name,
+                        contract,
+                        data,
+                        participants: list.length ? list : vv.joined,
+                      })
+                    );
+
+                    Router.push("/dashboard");
+                  }
                 } else {
-                   setBigLoader(false);
-                   setSupport(false);
-                   setLoginError("No registered daos found");
-                   return;
+                  setBigLoader(false);
+                  setSupport(false);
+                  setLoginError("No registered daos found");
+                  return;
                 }
               } else {
                 setBigLoader(false);
@@ -489,8 +473,7 @@ const Home: NextPage = () => {
               }
             })
             .catch((err) => {
-
-              console.log(err)
+              console.log(err);
               setBigLoader(false);
               setSupport(false);
               setLoginError("Something went wrong please try again");
@@ -503,27 +486,19 @@ const Home: NextPage = () => {
 
           return;
         }
+      } catch (err) {
+        const error = err as any;
 
+        setBigLoader(false);
+        setSupport(false);
+        setLoginError(error.response.data.message || error.message);
+      }
+    } catch (err) {
+      const error = err as Error;
 
-            } catch (err) {
-
-              const error = err as any;
-
-              setBigLoader(false);
-              setSupport(false);
-              setLoginError(error.response.data.message || error.message);
-
-            }
-
-
-        }catch (err) {
-
-          const error = err as Error
-
-          setBigLoader(false);
-          setLoginError(error.message);
-
-        }
+      setBigLoader(false);
+      setLoginError(error.message);
+    }
   };
 
   return (
@@ -823,23 +798,52 @@ const Home: NextPage = () => {
 
                             if (e.keyCode == 13 || e.which === 13) {
                               if (part.length) {
-                                const partx: string[] = participants;
-                                partx.push(part);
+
+                                if (
+                                  !ethers.utils.isAddress(part) ||
+                                  (participants.includes(
+                                    ethers.utils.getAddress(part)
+                                  ) &&
+                                    ethers.utils.isAddress(part))
+                                ) {
+                                  setPart("");
+                                  return;
+                                }
+                                
+                               
+                                const partx: string[] = [...participants];
+                                partx.push(ethers.utils.getAddress(part));
 
                                 setParticipants(partx);
 
                                 setPart("");
+
                               }
                             }
                           }}
                           onBlur={(e: any) => {
                             setPart(e.target.value);
-                            if (part.length) {
-                              const partx: string[] = participants;
-                              partx.push(part);
-                              setParticipants(partx);
-                              setPart("");
-                            }
+
+                              if (part.length) {
+                                if (
+                                  !ethers.utils.isAddress(part) ||
+                                  (participants.includes(
+                                    ethers.utils.getAddress(part)
+                                  ) &&
+                                    ethers.utils.isAddress(part))
+                                ) {
+                                  setPart("");
+                                  return;
+                                }
+
+                                const partx: string[] = [...participants];
+                                partx.push(ethers.utils.getAddress(part));
+
+                                setParticipants(partx);
+
+                                setPart("");
+                              }
+                            
                           }}
                         />
                       </>
@@ -889,7 +893,7 @@ const Home: NextPage = () => {
                 </div>
 
                 <IconButton
-                  className="hidden mmd:block"
+                  className="!hidden mmd:!block"
                   onClick={() => setSidebar(true)}
                 >
                   <BsList className="text-[#1890FF] cursor-pointer text-[30px]" />
@@ -969,9 +973,7 @@ const Home: NextPage = () => {
 
   //     {!bigLoader && (
   //       <div className={styles.container}>
-         
 
-  
   //         <div className="h-screen flex flex-col justify-center">
   //           {Boolean(loginError.length) && (
   //             <Alert className="my-2" severity="error">
@@ -1010,6 +1012,6 @@ const Home: NextPage = () => {
   //     )}
   //   </>
   // );
-}
+};
 
-export default Home
+export default Home;
