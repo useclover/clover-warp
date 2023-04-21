@@ -15,6 +15,7 @@ const Discuss = () => {
     const Chats = dynamic(() => (import("../../app/components/chats"))
      , { ssr: false });
 
+     
     return (
       <>
         <Head>
