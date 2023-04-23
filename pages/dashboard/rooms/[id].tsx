@@ -13,17 +13,14 @@ import {
 } from "../../../app/components/extras/storage/init";
 import Dash from "../../../app/components/dash";
 import { useAccount } from "wagmi";
-import {
-  HuddleIframe,
-  IframeConfig,
-  huddleIframeApp,
-} from "@huddle01/huddle01-iframe";
-import style from '../../../styles/iframe.module.css';
+import { useLobby } from "@huddle01/react/hooks";
 import { MdArrowBack } from "react-icons/md";
 
 const Room = () => {
 
   const { address, isConnected } = useAccount();
+
+  const { joinLobby, leaveLobby } = useLobby();
 
   const router = useRouter();
 
@@ -77,10 +74,12 @@ const Room = () => {
 
       // const main = false;
       
+      joinLobby(main.meetId);
+
       setLoader(false);
 
       if (main !== false) {
- 
+
 
         setMeeting(main.meetId);
 
@@ -102,42 +101,13 @@ const Room = () => {
 
 
 
-  const iframeConfig: IframeConfig = {
-    roomUrl: `https://iframe.huddle01.com/${meeting}`,
-    height: "100%",
-    width: "100%",
-    noBorder: true, // false by default
-  };
+  // const iframeConfig: IframeConfig = {
+  //   roomUrl: `https://iframe.huddle01.com/${meeting}`,
+  //   height: "100%",
+  //   width: "100%",
+  //   noBorder: true, // false by default
+  // };
 
-
-  useEffect(() => {
-   
-    const elem = document.querySelector("#huddle01-iframe") as any;
-
-    if(elem !== null){
-
-
-        (elem).style.minHeight = '100vh';
-  
-        (
-          elem
-        ).setAttribute("allowFullScreen", true);
-
-        (elem).setAttribute(
-          "allow",
-          "camera; microphone; clipboard-read; clipboard-write; display-capture"
-        );
-
-        
-        elem.addEventListener('load', () => {
-            huddleIframeApp.methods.connectWallet(address);        
-        
-        });
-        
-
-        }
-
-  })
 // disableShare();
   return (
     <>
@@ -163,7 +133,10 @@ const Room = () => {
 
             <div className="w-full st:!pl-0 transition-all delay-500 h-full flex flex-col">
               <div className={`min-h-screen custom min-w-screen`}>
-                <HuddleIframe config={iframeConfig} />
+                {/* Fix here */}
+
+
+
               </div>
             </div>
           </div>

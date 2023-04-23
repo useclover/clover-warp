@@ -759,7 +759,10 @@ html {
 
 @media (max-width: 780px) {
   .conversation-area {
-    display: none;
+    position:fixed;
+    height:100%;
+    background-color: #fff;
+    z-index:100;
   }
 
   .search-bar {

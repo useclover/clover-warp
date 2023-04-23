@@ -4,7 +4,7 @@ import Link from "next/link";
 import Router from "next/router";
 import logo from "../../../public/images/logo.png";
 import Select from "react-select";
-import { BsFolder, BsPlusLg } from "react-icons/bs";
+import { BsFolder, BsList, BsPlusLg } from "react-icons/bs";
 import {
   FiImage,
   FiSettings,
@@ -50,6 +50,7 @@ import Chatlist from "./sidebar/chatlist";
 import Loader from "../loader";
 import { useAccount } from "wagmi";
 import Rooms from "../../../app/components/video";
+import { BiX } from "react-icons/bi";
 
 
 interface TabPanelProps {
@@ -131,6 +132,8 @@ const Chats = () => {
   const [discussions, setDiscussion] = useState<string>('');
 
   const [voteDesc, setVoteDesc] = useState<string>('');
+
+  const [sidebar, setSidebar] = useState<boolean>(false);
 
   const [failMessage, setFailMessage] = useState<string>("");
 
@@ -574,57 +577,63 @@ const Chats = () => {
                               fontFamily: "inherit",
                             }}
                             onClick={async () => {
-                              if (nname.length && voteDesc.length && discussions.length) {
+                              if (
+                                nname.length &&
+                                voteDesc.length &&
+                                discussions.length
+                              ) {
                                 setLoader(true);
 
                                 try {
                                   const nMessData = { ...messData };
 
                                   if (nMessData[discussions] !== undefined) {
-                                    
-                                      const newMess: any = {
+                                    const newMess: any = {
+                                      content: { name: nname, desc: voteDesc },
+                                      sent: true,
+                                      type: "vote",
+                                      creator: address,
+                                      expiry: new Date().getTime(),
+                                    };
 
-                                        content: { name: nname, desc: voteDesc },
-                                        sent: true,
-                                        type: "vote",
-                                        creator: address,
-                                        expiry: new Date().getTime(),
-                                      };                                    
+                                    nMessData[discussions]["messages"].push(
+                                      newMess
+                                    );
 
-                                      nMessData[discussions]["messages"].push(newMess);
+                                    await saveMessages(
+                                      JSON.stringify(nMessData)
+                                    );
 
-                                      await saveMessages(
-                                        JSON.stringify(nMessData)
-                                      );
-
-                                      notifications({
-                                        title: `Vote campaign created by ${String(
-                                          address
-                                        ).substring(0, 6)}...
+                                    notifications({
+                                      title: `Vote campaign created by ${String(
+                                        address
+                                      ).substring(0, 6)}...
                       ${String(address).substring(38, 42)}`,
-                                        message: voteDesc,
-                                        receivers: nMessData[discussions]['participants'].length ? nMessData[discussions]['participants'] : lq[2],
-                                        exclude: address || "",
-                                      });
+                                      message: voteDesc,
+                                      receivers: nMessData[discussions][
+                                        "participants"
+                                      ].length
+                                        ? nMessData[discussions]["participants"]
+                                        : lq[2],
+                                      exclude: address || "",
+                                    });
 
-                                      updateMessData(nMessData);
+                                    updateMessData(nMessData);
 
-                                      setGroup(discussions);
+                                    setGroup(discussions);
 
-                                      setDisparts([]);
+                                    setDisparts([]);
 
-                                      setAddNew(false);
+                                    setAddNew(false);
 
-                                      setLoader(false);
-
-                                  }else{
+                                    setLoader(false);
+                                  } else {
                                     setLoader(false);
 
                                     setFailMessage(
                                       "Discussion channel not found"
                                     );
                                   }
-                                  
                                 } catch (err: any) {
                                   setLoader(false);
 
@@ -633,7 +642,9 @@ const Chats = () => {
                                   );
                                 }
                               } else {
-                                setFailMessage("Please all inputs are required");
+                                setFailMessage(
+                                  "Please all inputs are required"
+                                );
                               }
                             }}
                             fullWidth
@@ -650,6 +661,17 @@ const Chats = () => {
           </Modal>
 
           <div className="header">
+            <IconButton
+              className="!hidden sst:!block"
+              onClick={() => setSidebar(!sidebar)}
+            >
+              {sidebar ? (
+                <BsList className="text-[#1890FF] cursor-pointer text-[30px]" />
+              ) : (
+                <BiX className="text-[#1890FF] cursor-pointer text-[30px]" />
+              )}
+            </IconButton>
+
             <div className="logo">
               <Link href="/">
                 <a className="text-[#1890FF] cursor-pointer flex pl-4 items-center font-bold text-[18px]">
@@ -677,7 +699,7 @@ const Chats = () => {
             </div>
           </div>
           <div className="wrapper">
-            <div className="conversation-area cusscroller">
+            <div className={`conversation-area cusscroller ${sidebar ? '!hidden' : '!block'}`}>
               <div
                 className={`msg`}
                 title="Add More Discussions, voting, airdrop"
@@ -757,7 +779,6 @@ const Chats = () => {
                   ];
 
                 return (
-                  
                   <Chatlist
                     key={i}
                     onClick={() => {
@@ -777,9 +798,7 @@ const Chats = () => {
                     name={`${gps} ${!i ? "(Main)" : ""}`}
                   />
                 );
-              })
-              
-            }
+              })}
 
               <div className="overlay"></div>
             </div>
