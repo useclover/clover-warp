@@ -10,25 +10,25 @@ import { getDatabase } from "firebase/database";
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey:
-    process.env.NEXT_PUBLIC_FIREBASE_APIKEY ||
+    process.env.FIREBASE_APIKEY ||
     "AIzaSyBzJLms6P1gAmiksq9d8gNf44F2arvWoeg",
   authDomain:
-    process.env.NEXT_PUBLIC_FIREBASE_AUTHDOMAIN ||
+    process.env.FIREBASE_AUTHDOMAIN ||
     "clover-6aac1.firebaseapp.com",
   databaseURL:
-    process.env.NEXT_PUBLIC_FIREBASE_DATABASEURL ||
+    process.env.FIREBASE_DATABASEURL ||
     "https://clover-6aac1-default-rtdb.firebaseio.com",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECTID || "clover-6aac1",
+  projectId: process.env.FIREBASE_PROJECTID || "clover-6aac1",
   storageBucket:
-    process.env.NEXT_PUBLIC_FIREBASE_STORAGEBUCKET ||
+    process.env.FIREBASE_STORAGEBUCKET ||
     "clover-6aac1.appspot.com",
   messagingSenderId:
-    process.env.NEXT_PUBLIC_FIREBASE_MESSAGINGSENDERID || "1036733483114",
+    process.env.FIREBASE_MESSAGINGSENDERID || "1036733483114",
   appId:
-    process.env.NEXT_PUBLIC_FIREBASE_APPID ||
+    process.env.FIREBASE_APPID ||
     "1:1036733483114:web:45b3b72229e5c58041e213",
   measurementId:
-    process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENTID || "G-PFZ9MWN052",
+    process.env.FIREBASE_MEASUREMENTID || "G-PFZ9MWN052",
 };
 
 // Initialize Firebase

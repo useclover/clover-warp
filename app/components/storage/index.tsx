@@ -216,7 +216,7 @@ const Storage = () => {
       setUpdate(!update);
     };
 
-    const client = makeStorageClient(process.env.NEXT_PUBLIC_STORAGE_KEY || '');
+    const client = makeStorageClient(process.env.STORAGE_KEY || '');
 
     files.forEach((file, i) => {
       return client.put([file], { onRootCidReady, onStoredChunk });

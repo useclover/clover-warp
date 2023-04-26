@@ -4,7 +4,7 @@ import Image from "next/image";
 import logo from "../public/images/logo.png";
 import styles from "../styles/Home.module.css";
 import bgLogo from "../public/images/logolg.png";
-import { createAlchemyWeb3 } from "@alch/alchemy-web3";
+// import { createAlchemyWeb3 } from "@alch/alchemy-web3";
 import { BiX } from "react-icons/bi";
 import axios from "axios";
 import hero from "../public/images/phone.svg";
@@ -67,6 +67,12 @@ const Home: NextPage = () => {
 
   const [userAddress, setUserAddress] = useState<string>("");
 
+  const [testName, setTestName] = useState<string>("");
+  const [testEmail, setTestEmail] = useState<string>("");
+  const [testAdd, setTestAdd] = useState<string>("");
+
+  const [improve, setImprove] = useState<boolean>(false);
+
   const [name, setName] = useState<string>("");
   const [des, setDes] = useState<string>("");
   const [contractAd, setContractAd] = useState<string>("");
@@ -74,6 +80,34 @@ const Home: NextPage = () => {
   const [part, setPart] = useState<string>("");
   const [bigLoader, setBigLoader] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
+
+  const helper = {
+    padding: "6px 3px",
+    color: "#fff",
+    fontSize: "12px",
+    fontWeight: "bold",
+    marginTop: "0px",
+  };
+
+  const testText = {
+    "& .Mui-focused.MuiFormLabel-root": {
+      color: "#121212",
+    },
+    "& .MuiInputLabel-root": {
+      fontWeight: "600",
+      color: "#121212",
+      backgroundColor: "#ffffff",
+    },
+    "& .MuiOutlinedInput-notchedOutline, .MuiInput-underline::after": {
+      border: "none !important",
+    },
+    "& .MuiOutlinedInput-root input": {
+      color: "#121212",
+      borderRadius: "1.2rem",
+      backgroundColor: "#ffffff",
+    },
+    "& .MuiFormHelperText-root": helper,
+  };
 
   const [start, setStart] = useState<boolean>(false);
 
@@ -88,7 +122,7 @@ const Home: NextPage = () => {
     owner: string,
     desc?: string
   ) => {
-    const nfx = makeNFTClient(process.env.NEXT_PUBLIC_NFT_KEY || "");
+    const nfx = makeNFTClient(process.env.NFT_KEY || "");
 
     const date = new Date();
 
@@ -121,11 +155,9 @@ const Home: NextPage = () => {
       "https://api.hyperspace.node.glif.io/rpc/v1"
     );
 
-    console.log(receiver, process.env.NEXT_PUBLIC_MATIC_PRIVATE_KEY);
-
     try {
       const signer = new ethers.Wallet(
-        process.env.NEXT_PUBLIC_MATIC_PRIVATE_KEY || "",
+        process.env.MATIC_PRIVATE_KEY || "",
         provider
       );
 
@@ -136,6 +168,7 @@ const Home: NextPage = () => {
       console.log(receipt);
 
       return "continue";
+      
     } catch (err) {
       console.log(err);
     }
@@ -266,6 +299,7 @@ const Home: NextPage = () => {
             JSON.stringify({
               id: idMain,
               name,
+              creator: userAddress,
               contract: contractAddress,
               data: rand,
               participants,
@@ -288,6 +322,7 @@ const Home: NextPage = () => {
               name,
               contract: contractAd,
               data: rand,
+              creator: address,
               participants: [address],
             })
           );
@@ -333,7 +368,6 @@ const Home: NextPage = () => {
         message: "Welcome back to clover",
       });
 
-      console.log("connected");
 
       const userAddress: string = address as `0x${string}`;
 
@@ -348,6 +382,7 @@ const Home: NextPage = () => {
           validateAddress.toLowerCase() ==
           (add?.account || userAddress).toLowerCase()
         ) {
+
           get(child(ref(db), "DAOs"))
             .then(async (data) => {
               if (data.exists()) {
@@ -364,6 +399,7 @@ const Home: NextPage = () => {
 
                   for (let i = 0; i < dao.length; i++) {
                     if (ethers.utils.getAddress(dao[i].contract) == contractAddress) {
+                     
                       const { joined } = dao[i];
 
                       joined.forEach((val: string) => {
@@ -399,6 +435,7 @@ const Home: NextPage = () => {
                         balance = ethers.utils.formatEther(
                           await token.balanceOf(address)
                         );
+
                       } catch (err) {
                         const error = err as Error;
                         console.log(error);
@@ -413,8 +450,6 @@ const Home: NextPage = () => {
 
                 if (sdao.length) {
 
-                
-
                   if (sdao.length > 1) {
                     setExec([...sdao]);
 
@@ -422,6 +457,7 @@ const Home: NextPage = () => {
 
                     setBigLoader(false);
                   } else {
+
                     console.log("xxv.2");
                     const vv: any = sdao[0];
 
@@ -452,6 +488,7 @@ const Home: NextPage = () => {
                       JSON.stringify({
                         id: vv.id,
                         name,
+                        creator: vv.metadata,
                         contract,
                         data,
                         participants: list.length ? list : vv.joined,
@@ -635,7 +672,6 @@ const Home: NextPage = () => {
                   <button
                     key={i}
                     onClick={async () => {
-                      
                       setLoading(true);
 
                       const name: string = vv.name;
@@ -646,6 +682,7 @@ const Home: NextPage = () => {
                         "cloverlog",
                         JSON.stringify({
                           id: vv.id,
+                          creator: vv.metadata,
                           name,
                           contract,
                           data,
@@ -654,7 +691,6 @@ const Home: NextPage = () => {
                       );
 
                       Router.push("/dashboard");
-                      
                     }}
                     style={{ fontFamily: "inherit" }}
                     className="transition-all rounded-md delay-500 hover:border-[#1891fe] hover:text-[#1891fe] items-start text-[16px] flex justify-between border-[1px] 4sm:mr-2 text-[#575757] mb-2 w-full py-4 px-4"
@@ -803,7 +839,6 @@ const Home: NextPage = () => {
 
                             if (e.keyCode == 13 || e.which === 13) {
                               if (part.length) {
-
                                 if (
                                   !ethers.utils.isAddress(part) ||
                                   (participants.includes(
@@ -814,41 +849,38 @@ const Home: NextPage = () => {
                                   setPart("");
                                   return;
                                 }
-                                
-                               
+
                                 const partx: string[] = [...participants];
                                 partx.push(ethers.utils.getAddress(part));
 
                                 setParticipants(partx);
 
                                 setPart("");
-
                               }
                             }
                           }}
                           onBlur={(e: any) => {
                             setPart(e.target.value);
 
-                              if (part.length) {
-                                if (
-                                  !ethers.utils.isAddress(part) ||
-                                  (participants.includes(
-                                    ethers.utils.getAddress(part)
-                                  ) &&
-                                    ethers.utils.isAddress(part))
-                                ) {
-                                  setPart("");
-                                  return;
-                                }
-
-                                const partx: string[] = [...participants];
-                                partx.push(ethers.utils.getAddress(part));
-
-                                setParticipants(partx);
-
+                            if (part.length) {
+                              if (
+                                !ethers.utils.isAddress(part) ||
+                                (participants.includes(
+                                  ethers.utils.getAddress(part)
+                                ) &&
+                                  ethers.utils.isAddress(part))
+                              ) {
                                 setPart("");
+                                return;
                               }
-                            
+
+                              const partx: string[] = [...participants];
+                              partx.push(ethers.utils.getAddress(part));
+
+                              setParticipants(partx);
+
+                              setPart("");
+                            }
                           }}
                         />
                       </>
@@ -876,147 +908,266 @@ const Home: NextPage = () => {
         </div>
       </Modal>
 
-      {!bigLoader && (
-        <div className="min-w-screen max-h-screen overflow-y-scroll overflow-x-hidden cusscroller  bg-white p-4">
-          <div className="bg-[#1890FF] rounded-t-[1rem] usm:rounded-[1rem] rounded-bl-[1rem] min-w-full py-5 px-[40px] flex justify-center relative">
-            <div className="w-full">
-              <div className="flex items-center justify-between px-[30px] bg-white rounded-[1rem] py-2 mb-12">
-                <div className="h-[30px]">
-                  <Image src={logo} alt="Clover" width={91.83} height={30} />
-                </div>
-
-                <div className="flex items-center w-[150px] mmd:hidden  justify-between">
-                  <Link href="#">
-                    <span className="text-[#1890FF] text-[14px]">Product</span>
-                  </Link>
-
-                  <Link href="#">
-                    <span className="text-[#1890FF] text-[14px]">
-                      Solutions
-                    </span>
-                  </Link>
-                </div>
-
-                <IconButton
-                  className="!hidden mmd:!block"
-                  onClick={() => setSidebar(true)}
-                >
-                  <BsList className="text-[#1890FF] cursor-pointer text-[30px]" />
-                </IconButton>
-
-                <div className="mmd:hidden">
-                  <Button
-                    onClick={() => setStart(true)}
-                    className="!bg-[#1891fe] !rounded-[.5rem] !text-white !mt-0 !py-2 !px-4 !font-medium"
-                  >
-                    Get started
-                  </Button>
-                </div>
-              </div>
-
-              <div className="usm:text-center">
-                <h1 className="font-bold mb-3 mst:text-[40px] text-[60px] cursor-default text-white">
-                  {" "}
-                  <span className="text-[#ECB22F]">A digital Suite, </span>{" "}
-                  perfect for <br className="st:hidden"></br> your DAO.
-                </h1>
-
-                <span className="text-white mb-6 font-light block">
-                  With all your DAO members, tools and communication in <br />{" "}
-                  one place, your DAO can now be more productive than ever.
-                </span>
-
-                <Button
-                  onClick={() => setStart(true)}
-                  className="!bg-[#387CF7] !border-solid !border-white !border-[2px] !mb-5 !rounded-[.5rem] !text-white !mt-0 !py-3 !px-4 !font-medium !capitalize"
-                >
-                  Get started
-                </Button>
-              </div>
-            </div>
-
-            <div className="usm:hidden">
-              <img
-                className="absolute z-10 mst:!w-[330px] right-0 -bottom-[12.9pc]"
-                width={370}
-                height={500}
-                src={hero.src}
-                alt="hero"
+      <Modal open={improve} onClose={() => setImprove(false)}>
+        <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
+          <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
+            {isLoading && (
+              <Loader
+                sx={{
+                  backgroundColor: "rgba(255,255,255,.6)",
+                  backdropFilter: "blur(5px)",
+                }}
+                fixed={false}
+                incLogo={false}
               />
-            </div>
-          </div>
+            )}
 
-          <div className="flex items-center relative px-10 justify-between">
-            <div className="pt-9 usm:pt-12 rounded-tr-[2rem] pb-[47px] min-w-[60%] z-[1] bg-white">
-              <h2 className="text-[#121212] mb-1 font-bold text-[19px]">
-                TRUSTED BY DAOs ALL OVER THE WORLD
-              </h2>
-
-              <div className="relative mmd:w-full mmd:overflow-y-hidden mmd:overflow-x-hidden cusscroller w-[472px] h-[70px] mt-4">
-                <Image
-                  src={trusted}
-                  layout="fill"
-                  alt="dao"
-                  width={700}
-                  height={70}
+            <div className="rounded-lg bg-white shadow-lg shadow-[#cccccc]">
+              <div className="border-b flex justify-between py-[14px] px-[17px] text-xl font-bold">
+                Help us improve?
+                <BiX
+                  size={20}
+                  className="cursor-pointer"
+                  onClick={() => setImprove(false)}
                 />
               </div>
+              <div className="form relative pt-4">
+                <Box sx={{ width: "100%" }}>
+                  {/* {Boolean(failMessage.length) && (
+                    <div className="rounded-md w-[95%] font-bold mt-2 mx-auto p-3 bg-[#ff8f33] text-white">
+                      {failMessage}
+                    </div>
+                  )} */}
+
+                  <FormControl
+                    fullWidth
+                    sx={{
+                      px: 5,
+                      py: 3,
+                    }}
+                  >
+                    <div>
+                      <TextField
+                        fullWidth
+                        id="outlined-basic"
+                        label="Name"
+                        variant="outlined"
+                        value={testName}
+                        onChange={(
+                          e: React.ChangeEvent<
+                            HTMLInputElement | HTMLTextAreaElement
+                          >
+                        ) => {
+                          setTestName(e.target.value);
+                        }}
+                      />
+                    </div>
+                    <div className="mt-3">
+                      <TextField
+                        fullWidth
+                        id="outlined-basic"
+                        label="Ethereum address"
+                        variant="outlined"
+                        value={testAdd}
+                        onChange={(
+                          e: React.ChangeEvent<
+                            HTMLInputElement | HTMLTextAreaElement
+                          >
+                        ) => {
+                          const val = e.target.value;
+
+                          setTestAdd(val);
+                        }}
+                      />
+                    </div>
+                    <div className="my-3">
+                      <TextField
+                        fullWidth
+                        id="outlined-basic"
+                        label="Email"
+                        variant="outlined"
+                        value={testEmail}
+                        onChange={(
+                          e: React.ChangeEvent<
+                            HTMLInputElement | HTMLTextAreaElement
+                          >
+                        ) => {
+                          setTestEmail(e.target.value);
+                        }}
+                      />
+                    </div>
+
+                    
+                    <Button
+                      variant="contained"
+                      className="!bg-[#1891fe] !mt-4 !py-[13px] !font-medium !capitalize"
+                      style={{
+                        fontFamily: "inherit",
+                      }}
+                      
+                      fullWidth
+                    >
+                      Submit
+                    </Button>
+                  </FormControl>
+                </Box>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      {!bigLoader && (
+        <div className="min-w-screen max-h-screen overflow-y-scroll overflow-x-hidden cusscroller relative bg-white p-4">
+          <div className="max-w-[1430px] mx-auto">
+            <div className="bg-[#1890FF] usm:flex-col rounded-t-[1rem] usm:rounded-[1rem] rounded-bl-[1rem] min-w-full py-5 px-[40px] flex justify-center relative">
+              <div className="w-full">
+                <div className="flex items-center justify-between px-[30px] bg-white rounded-[1rem] py-2 mb-12">
+                  <div className="h-[30px]">
+                    <Image src={logo} alt="Clover" width={91.83} height={30} />
+                  </div>
+
+                  <div className="flex items-center w-[150px] mmd:hidden  justify-between">
+                    <Link href="#">
+                      <span className="text-[#1890FF] text-[14px]">
+                        Product
+                      </span>
+                    </Link>
+
+                    <Link href="#">
+                      <span className="text-[#1890FF] text-[14px]">
+                        Solutions
+                      </span>
+                    </Link>
+                  </div>
+
+                  <IconButton
+                    className="!hidden mmd:!block"
+                    onClick={() => setSidebar(true)}
+                  >
+                    <BsList className="text-[#1890FF] cursor-pointer text-[30px]" />
+                  </IconButton>
+
+                  <div className="mmd:hidden">
+                    <Button
+                      onClick={() => setStart(true)}
+                      className="!bg-[#1891fe] !rounded-[.5rem] !text-white !mt-0 !py-2 !px-4 !font-medium"
+                    >
+                      Get started
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="usm:text-center">
+                  <h1 className="font-bold mb-3 mst:text-[40px] text-[50px] cursor-default text-white">
+                    {" "}
+                    <span className="text-[#ECB22F]">
+                      A digital Suite,{" "}
+                    </span>{" "}
+                    perfect for <br className="st:hidden"></br> your DAO.
+                  </h1>
+
+                  <span className="text-white mb-6 font-light block">
+                    With all your DAO members, tools and communication in <br />{" "}
+                    one place, your DAO can now be more productive than ever.
+                  </span>
+
+                  <div className="flex items-center usm:justify-center">
+                    <Button
+                      onClick={() => setStart(true)}
+                      className="!bg-[#387CF7] !border-solid !border-white !border-[2px] !mb-5 !rounded-[.5rem] !text-white !mt-0 !py-3 !px-4 !font-medium !capitalize"
+                    >
+                      Get started
+                    </Button>
+
+                    <Button
+                      onClick={() => setImprove(true)}
+                      className="!bg-[#387CF7] !border-solid !border-white !border-[2px] !mb-5 !rounded-[.5rem] !text-white !hidden !ml-5 usm:!block !mt-0 !py-3 !px-4 !font-medium !capitalize"
+                    >
+                      Help us improve?
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="w-[35%] usm:w-[350px] z-[200] usm:hidden usm:relative usm:top-0 usm:right-0 usm:mt-3 usm:m-auto right-[35px] top-[90px] rounded-[1rem] bg-white usm:bg-transparent absolute p-[18px]">
+                <h4 className="w-full text-center usm:text-white font-bold text-[19px] mb-3">
+                  Help us build better
+                </h4>
+
+                <div className="flex bg-[#1891fe] items-center rounded-[1rem] p-5 justify-between mb-3 flex-col">
+                  <div className="py-2 mb-[7px] w-full">
+                    <label className="text-white mb-3 block">Name</label>
+
+                    <TextField
+                      fullWidth
+                      sx={testText}
+                      value={testName}
+                      onChange={(e: any) => setTestName(e.target.value)}
+                    />
+
+                  </div>
+
+                  <div className="py-2 mb-[7px] w-full">
+                    <label className="text-white mb-3 block">
+                      Ethereum Address
+                    </label>
+
+                    <TextField
+                      fullWidth
+                      sx={testText}
+                      value={testAdd}
+                      onChange={(e: any) => setTestAdd(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="py-2 mb-[7px] w-full">
+                    <label className="text-white mb-3 block">Email</label>
+
+                    <TextField
+                      fullWidth
+                      sx={testText}
+                      value={testEmail}
+                      onChange={(e: any) => setTestEmail(e.target.value)}
+                    />
+                  
+                  </div>
+
+                  <div className="pt-2 mb-[5px] w-full">
+                    <Button className="!py-[13px] !font-normal !px-[14px] font-[poppins,sans-serif] !normal-case !text-[16px] !flex !items-center !text-[#121212] !w-full hover:!bg-[#fff] !bg-[#fff] !m-auto !rounded-[1.2rem]">
+                      Submit
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="bg-[#1891fe] right-0 top-0 w-[45%] h-[196px] absolute rounded-br-[1rem] usm:hidden">
-              <div className="w-[90.4%] rounded-b-[1rem] bg-[#1891fe] right-0 h-[30px] absolute bottom-[-10px]"></div>
+            <div className="flex items-center relative px-10 justify-between">
+              <div className="pt-9 usm:pt-12 rounded-tr-[2rem] pb-[76px] min-w-[59.9%] z-[1] bg-white">
+                <h2 className="text-[#121212] mb-1 font-bold text-[19px]">
+                  TRUSTED BY DAOs ALL OVER THE WORLD
+                </h2>
+
+                <div className="relative mmd:w-full mmd:overflow-y-hidden mmd:overflow-x-hidden cusscroller w-[472px] h-[70px] mt-4">
+                  <Image
+                    src={trusted}
+                    layout="fill"
+                    alt="dao"
+                    width={700}
+                    height={70}
+                  />
+                </div>
+              </div>
+
+              <div className="bg-[#1891fe] right-0 top-0 w-[45%] h-[225px] absolute rounded-br-[1rem] usm:hidden">
+                <div className="w-[90.4%] rounded-b-[1rem] bg-[#1891fe] right-0 h-[30px] absolute bottom-[-10px]"></div>
+              </div>
             </div>
           </div>
         </div>
       )}
     </>
   );
-
-  // return (
-  //   <>
-  //     {bigLoader && <Loader />}
-
-  //     {!bigLoader && (
-  //       <div className={styles.container}>
-
-  //         <div className="h-screen flex flex-col justify-center">
-  //           {Boolean(loginError.length) && (
-  //             <Alert className="my-2" severity="error">
-  //               {loginError}
-  //             </Alert>
-  //           )}
-  //           <div className="flex justify-around">
-  //             <div className="items-center mt-4 top-0 absolute flex justify-center">
-  //               <Image src={logo} alt="Clover" width={150} height={49.995} />
-  //             </div>
-  //             <div className="self-center">
-  //               <Button
-  //                 onClick={login}
-  //                 style={{
-  //                   fontFamily: "Poppins",
-  //                 }}
-  //                 className="!py-4 !px-8 rounded-lg !capitalize !font-semibold !text-xl !text-white !bg-[#1891fe]"
-  //               >
-  //                 Authenticate
-  //               </Button>
-  //             </div>
-  //             <div className="self-center">
-  //               <Button
-  //                 onClick={() => setOpen(true)}
-  //                 style={{
-  //                   fontFamily: "Poppins",
-  //                 }}
-  //                 className="!py-4 !px-8 rounded-lg !capitalize !font-semibold !text-xl !text-white !bg-[#1891fe]"
-  //               >
-  //                 Register DAO
-  //               </Button>
-  //             </div>
-  //           </div>
-  //         </div>
-  //       </div>
-  //     )}
-  //   </>
-  // );
 };
 
 export default Home;

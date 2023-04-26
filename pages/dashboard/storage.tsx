@@ -203,7 +203,7 @@ const Dashboard = () => {
     };
 
     const client = makeStorageClient(
-      process.env.NEXT_PUBLIC_STORAGEKEY
+      process.env.STORAGEKEY
     );
 
     files.forEach((file, i) => {

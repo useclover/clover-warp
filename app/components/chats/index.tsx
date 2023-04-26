@@ -607,8 +607,9 @@ const Chats = () => {
                                     notifications({
                                       title: `Vote campaign created by ${String(
                                         address
-                                      ).substring(0, 6)}...
-                      ${String(address).substring(38, 42)}`,
+                                      ).substring(0, 6)}...${String(
+                                        address
+                                      ).substring(38, 42)}`,
                                       message: voteDesc,
                                       receivers: nMessData[discussions][
                                         "participants"
@@ -660,7 +661,7 @@ const Chats = () => {
             </div>
           </Modal>
 
-          <div className="header">
+          <div className="header border-b-[#eef2f4] h-[80px] w-full border-b-solid border-b flex items-center py-0 px-5">
             <IconButton
               className="!hidden sst:!block"
               onClick={() => setSidebar(!sidebar)}
@@ -672,24 +673,30 @@ const Chats = () => {
               )}
             </IconButton>
 
-            <div className="logo">
+            <div className="logo flex-shrink-0 text-[#1890FF]">
               <Link href="/">
                 <a className="text-[#1890FF] cursor-pointer flex pl-4 items-center font-bold text-[18px]">
                   <Image src={logo} width={100} height={33.33} alt="clover" />
                 </a>
               </Link>
             </div>
-            <div className="search-bar">
+            <div className="search-bar h-[80px] z-[3] relative ml-[280px]">
               {/* <input type="text" placeholder="Search..." /> */}
             </div>
-            <div className="user-settings">
-              <div className="dark-light">
-                <FiMoon size={24} />
+            <div className="user-settings flex items-center cursor-pointer flex-shrink-0 ml-auto">
+              <div className="dark-light w-[22px] h-[22px] text-[#c1c7cd] flex-shrink-0">
+                <FiMoon
+                  className="w-full fill-transparent transition-all delay-500"
+                  size={24}
+                />
               </div>
-              <div className="settings">
-                <FiSettings size={24} />
+              <div className="settings w-[22px] h-[22px] text-[#c1c7cd] flex-shrink-0">
+                <FiSettings
+                  className="w-full fill-transparent transition-all delay-500"
+                  size={24}
+                />
               </div>
-              <div className="settings">
+              <div className="settings w-[22px] h-[22px] text-[#c1c7cd] flex-shrink-0">
                 <FiLogOut
                   onClick={logout}
                   className="hover:stroke-[#ff5100] transition-all delay-[400]"
@@ -698,8 +705,12 @@ const Chats = () => {
               </div>
             </div>
           </div>
-          <div className="wrapper">
-            <div className={`conversation-area cusscroller ${sidebar ? '!hidden' : '!block'}`}>
+          <div className="wrapper w-full flex flex-grow-[1] overflow-hidden">
+            <div
+              className={`conversation-area relative flex-col overflow-y-auto overflow-x-hidden w-[340px] flex-shrink-0 border-r-solid border-r border-r-[#eef2f4] cusscroller ${
+                sidebar ? "!hidden" : "!flex"
+              }`}
+            >
               <div
                 className={`msg`}
                 title="Add More Discussions, voting, airdrop"
