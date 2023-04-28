@@ -1,6 +1,6 @@
 {
-  "name": "clearcloud",
-  "version": "0.1.0",
+  "name": "clover",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -38,7 +38,7 @@
     "firebase": "^9.16.0",
     "fs": "^0.0.1-security",
     "magic-sdk": "^8.1.1",
-    "next": "12.1.6",
+    "next": "12.2.5",
     "nft.storage": "^6.4.0",
     "react": "18.2.0",
     "react-dom": "^18.2.0",
@@ -46,6 +46,7 @@
     "react-select": "^5.7.0",
     "react-tooltip": "^5.11.1",
     "unique-string": "^3.0.0",
+    "validator": "^13.9.0",
     "wagmi": "^0.11.2",
     "web3": "^1.8.2",
     "web3.storage": "^4.3.0"

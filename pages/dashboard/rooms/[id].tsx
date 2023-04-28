@@ -29,7 +29,7 @@ const Room = () => {
   const [loginData, setLoginData] = useState<{
     name: string;
     contract: string;
-    data: string;
+    data: string | number;
     participants: any;
   }>();
 
@@ -50,10 +50,10 @@ const Room = () => {
 
   const [isLoading, setLoader] = useState(true);
 
-  const { name, contract, data, participants } = loginData || {
+  const { name, contract, participants, data: randId } = loginData || {
     name: "",
     contract: "",
-    data: "",
+    data: 0,
     participants: {},
   };
 
@@ -66,7 +66,7 @@ const Room = () => {
       await beginStorageProvider({
         user: address || "",
         contract,
-        randId: data || "",
+        randId,
         participants,
       });
 
@@ -97,7 +97,7 @@ const Room = () => {
     if (name != "" && id !== undefined) {
       init();
     }
-  }, [data, address, id, contract, name, participants]);
+  }, [address, id, contract, name, participants]);
 
 
 

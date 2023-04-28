@@ -1,10 +1,8 @@
-import { store, dir, getFileList, updateSearch } from '.';
+import { store, dir, getFileList } from ".";
 import * as PushAPI from "@pushprotocol/restapi";
-import { db } from "../../../firebase";
-import { ref, update, get, set, child } from "firebase/database";
-import { ethers } from 'ethers';
-import axios from 'axios';
-export let lq:any;
+import { ethers } from "ethers";
+import axios from "axios";
+export let lq: any;
 
 export interface mess {
   [index: string]: {
@@ -16,23 +14,28 @@ export interface mess {
   }[];
 }
 
+export const notifications = async ({
+  title,
+  message,
+  receivers,
+  exclude,
+}: {
+  title: string;
+  message: string;
+  receivers: string[];
+  exclude: string;
+}) => {
+  const pk = process.env.NEXT_PUBLIC_MATIC_PRIVATE_KEY;
 
-export const notifications = async ({ title, message, receivers, exclude }: { title: string, message: string, receivers: string[], exclude: string }) => {
+  const pkey = `0x${pk}`;
 
-   const pk = process.env.NEXT_PUBLIC_MATIC_PRIVATE_KEY;
+  const signer = new ethers.Wallet(pkey);
 
-   const pkey = `0x${pk}`;
+  const channel = `eip155:5:${process.env.NEXT_PUBLIC_PUBLIC_KEY}`;
 
-   const signer = new ethers.Wallet(pkey);
-
-   const channel = `eip155:5:${process.env.NEXT_PUBLIC_PUBLIC_KEY}`;
-
-   try {
-    
+  try {
     receivers.forEach(async (val: string) => {
-
       if (val.toLowerCase() == exclude.toLowerCase()) {
-
         return;
       }
 
@@ -56,15 +59,13 @@ export const notifications = async ({ title, message, receivers, exclude }: { ti
         channel,
         env: "staging",
       });
+    });
 
-    })
-
-      return true;
-
-    }catch (err) {
-        console.log(err)
-    }
-}
+    return true;
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 export const beginStorageProvider = async ({
   user,
@@ -74,178 +75,148 @@ export const beginStorageProvider = async ({
 }: {
   user: string;
   contract: string;
-  randId: string;
+  randId: any;
   participants: any;
 }) => {
   lq = [randId, contract, participants, user];
 };
 
 export const retrieveMessages = async () => {
+  const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
-  const query = child(ref(db), `chats/${lq[0]}`);
+  const { data } = await axios.get(`/user/dao/${lq[0]}/chats`, {
+    baseURL: process.env.NEXT_PUBLIC_APP_URL,
 
-  const results = await get(query);
+    headers: { Authorization: token },
+  });
 
-  if (results.exists()) {
+  console.log(data, "s");
 
-    return results.val();
-
-  }
-
-  return {};
-
-}
+  return JSON.parse("data");
+};
 
 export const updateMessages = (prev: string) => {
-
   const mess = lq.get();
-}
+};
 
 export const saveMessages = async (updateNew: any) => {
-
-  try{
-
-    await set(ref(db, `chats/${lq[0]}`), updateNew);
-
+  try {
+    await axios.patch(`/user/dao/${lq[0]}/chats`, updateNew, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
+      },
+    });
 
     return true;
-
-  }catch(err) {
-
-    console.log(err)
+  } catch (err) {
+    console.log(err);
 
     return false;
-
   }
 };
 
 export const retrieveFiles = async (folder?: string[]) => {
+  const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
-    const query = child(
-      ref(db),
-      `files/${lq[0]}${folder ? "/" : ""}${(folder || []).join("/")}`
-    );
+  const {
+    data: { files },
+  } = await axios.get(`/user/dao/${lq[0]}/files`, {
+    baseURL: process.env.NEXT_PUBLIC_APP_URL,
+    headers: { Authorization: token },
+  });
 
-  const results = await get(query);
-
-  if (results.exists()) {
-
-    const fileData = results.val();
-
-    return fileData;
-
-  }
-
-  return [];
-
-}
+  return JSON.parse(files.data);
+};
 
 export const getRooms = async () => {
-  const query = child(ref(db), `rooms/${lq[0]}`);
+  const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
-  const results = await get(query);
+  const {
+    data: { rooms },
+  } = await axios.get(`/user/dao/${lq[0]}/rooms`, {
+    baseURL: process.env.NEXT_PUBLIC_APP_URL,
+    headers: { Authorization: token },
+  });
 
-  let data = [];
-
-  if (results.exists()) {
-
-    data = results.val();
-
-  }
-  
-  return data;
-  
-}
+  return rooms;
+};
 
 export const roomData = async (id: number) => {
+  const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
-    const query = child(ref(db), `rooms/${lq[0]}/${id}`);
+  const {
+    data: { room },
+  } = await axios.get(`/user/dao/${lq[0]}/rooms/${id}`, {
+    baseURL: process.env.NEXT_PUBLIC_APP_URL,
+    headers: { Authorization: token },
+  });
 
-    const results = await get(query);
-
-    if (results.exists()) {
-
-       return results.val();
-
-    }
-
-    return false;
-}
+  return room;
+};
 
 export const createRoom = async (name: string) => {
-
-      const query = child(ref(db), `rooms/${lq[0]}`);
-
-      const results = await get(query);
-
-      let data = 0;
-
-    if (results.exists()) {
-
-        data = results.val().length;
-
-    }
-
-    const { data: response } = await axios.post(
-      "https://iriko.testing.huddle01.com/api/v1/create-room",
-      {
-        title: name,
-        hostWallets: [lq[3]],
+  const { data: response } = await axios.post(
+    "https://iriko.testing.huddle01.com/api/v1/create-room",
+    {
+      title: name,
+      hostWallets: [lq[3]],
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": process.env.NEXT_PUBLIC_HUDDLE_SECRET as string,
       },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": process.env.NEXT_PUBLIC_HUDDLE_APPKEY,
-        },
-      }
-    );
+    }
+  );
 
-    await set(ref(db, `rooms/${lq[0]}/${data}`), {
+  await axios.post(
+    `/user/dao/${lq[0]}/rooms`,
+    {
       name,
       creator: lq[3],
       meetId: response.data.roomId,
-    });
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
+      },
+    }
+  );
 
-    return `https://app.huddle01.com/${response.data.roomId}`;
-
-}
+  return `https://app.huddle01.com/${response.data.roomId}`;
+};
 
 /**
  * @param dirfolder: array - showing file directory till destination
+ *
  * **/
 
 export const storeFiles = async (file: store[], dirfolder: string[]) => {
-  
-    const query = child(ref(db), `files/${lq[0]}${dirfolder ? "/" : ""}${(dirfolder || []).join("/")}`);
+  const {
+    data: { files },
+  } = await axios.get(`/user/dao/${lq[0]}/files`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
+    },
+  });
 
-    const results = await get(query);
+  const fileList = { ...JSON.parse(files.data) };
 
-    if(results.exists()){
+  file.forEach((e) => {
+    fileList.main.push(e);
+  });
 
-      const fileData = results.val();
-
-
-      await set(
-        ref(
-          db,
-          `files/${lq[0]}${dirfolder ? "/" : ""}${(dirfolder || []).join("/")}`
-        ),
-        [...fileData, ...file]
-      );
-
-      return [...fileData, ...file];
-
+  await axios.patch(
+    `/user/dao/${lq[0]}/files`,
+    {
+      data: JSON.stringify(fileList),
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
+      },
     }
+  );
 
-
-     await set(
-       ref(db, `files/${lq[0]}${dirfolder ? "/" : ""}${(dirfolder || []).join("/")}`),
-       file
-     );
-
-
-  
-    return file;
-
+  return file;
 };
-

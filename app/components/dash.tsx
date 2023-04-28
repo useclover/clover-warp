@@ -4,7 +4,7 @@ function Dash() {
   return (
     <>
       <Head>
-        <title>DAO Storage | ClearCloud</title>
+        <title>DAO Storage | Clover</title>
         <meta name="description" content={`Decentralized Cloud storage Made Easy For DAO members`} />
       </Head>
     </>
