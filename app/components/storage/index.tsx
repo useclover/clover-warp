@@ -88,13 +88,16 @@ const Storage = () => {
 
   const { name, contract, data, participants } = loginData || { name: '', contract: '', main: '', participants: {} };
 
+
   useEffect(() => {
 
     async function init() {
-      await beginStorageProvider({user: address || '', contract, randId: data || '', participants});
+      await beginStorageProvider({user: address || '', contract, randId: data, participants});
 
  
       const dir: any = await retrieveFiles(currentDir);
+
+      console.log(dir, 'ss')
 
       setLoader(false);
       setFileData(dir);
@@ -107,7 +110,7 @@ const Storage = () => {
       }
     }
 
-    if (name !== undefined) {
+    if (name !== undefined && Boolean(data)) {
       init();
     }
   }, [
@@ -216,7 +219,7 @@ const Storage = () => {
       setUpdate(!update);
     };
 
-    const client = makeStorageClient(process.env.STORAGE_KEY || '');
+    const client = makeStorageClient(process.env.NEXT_PUBLIC_STORAGE_KEY || '');
 
     files.forEach((file, i) => {
       return client.put([file], { onRootCidReady, onStoredChunk });

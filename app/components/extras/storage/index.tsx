@@ -87,7 +87,7 @@ export const initData:fstructure = {
 
 export const deleteFile = async (cid: string) => {
 
-    const token = process.env.STORAGE_KEY;
+    const token = process.env.NEXT_PUBLIC_STORAGE_KEY;
 
     const config = {
       data: {

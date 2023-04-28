@@ -16,6 +16,7 @@ module.exports = {
     screens: {
       "mms": { min: "1430px" },
       "mst": { max: "1230px" },
+      "mmst": { max: "1230px" },
       "sst": {max: "780px"},
       "st": { max: "750px" },
       "mmd": {max: "640px"},

@@ -25,7 +25,7 @@ export default function handler(
               "Content-Type": "application/json",
               Accept: "application/json",
             },
-            baseURL: process.env.API_URL || "",
+            baseURL: process.env.NEXT_PUBLIC_API_URL || "",
           }
         );
 

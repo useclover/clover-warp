@@ -78,7 +78,7 @@ const Rooms = () => {
 
   useEffect(() => {
 
-        if (!isInitialized) initialize(process.env.HUDDLE_PROJECTID || "");    
+        if (!isInitialized) initialize(process.env.NEXT_PUBLIC_HUDDLE_PROJECTID || "");    
 
   }, [isInitialized, initialize]);
 
@@ -100,7 +100,7 @@ const Rooms = () => {
   const { name, contract, data, participants } = loginData || {
     name: "",
     contract: "",
-    main: "",
+    data: "",
     participants: {},
   };
 
@@ -200,9 +200,7 @@ const Rooms = () => {
 
                             setAddNew(false);
 
-                            window?.open(create, "_blank")?.focus();
-                
-                            location.reload();
+                            window.location.href = create;
 
                             // Router.push(`/dashboard/rooms/${create}`);
 

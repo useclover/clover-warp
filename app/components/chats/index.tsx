@@ -88,6 +88,7 @@ const TabPanel = (props: TabPanelProps) => {
 
 
 const Chats = () => {
+
   const [loginData, setLoginData] = useState<any>({});
 
   const { address, isConnected } = useAccount();
@@ -100,9 +101,10 @@ const Chats = () => {
 
       setLoginData(data);
     }
+
   }, []);
 
-  const { name, contract, data: main, participants } = loginData;
+  const { name, contract, data: main, participants, creator } = loginData;
 
   document.querySelectorAll("textArea, .emoji-scroll-wrapper").forEach((e) => {
     e.classList.add("cusscroller");
@@ -999,7 +1001,7 @@ const Chats = () => {
                     </div>
                   </div>
                 </div>
-                <div className="detail-area cusscroller">
+                <div className="detail-area mmst:hidden cusscroller">
                   <div className="detail-area-header">
                     <div className="msg-profile group">
                       <Image
@@ -1011,8 +1013,8 @@ const Chats = () => {
                     </div>
                     <div className="detail-title capitalize">{`${group}`}</div>
                     <div className="detail-subtitle">
-                      Created by {main.substring(0, 6)}...
-                      {main.substring(38, 42)}
+                      Created by {creator.substring(0, 6)}...
+                      {creator.substring(38, 42)}
                     </div>
                   </div>
                   <div className="detail-changes">

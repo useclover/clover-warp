@@ -7,6 +7,7 @@ import bgLogo from "../public/images/logolg.png";
 // import { createAlchemyWeb3 } from "@alch/alchemy-web3";
 import { BiX } from "react-icons/bi";
 import axios from "axios";
+import validator from "validator";
 import hero from "../public/images/phone.svg";
 import { useState, useEffect, useContext } from "react";
 import {
@@ -19,7 +20,7 @@ import {
   IconButton,
 } from "@mui/material";
 import Loader from "../app/components/loader";
-import web3 from "web3";
+// import web3 from "web3";
 import contract from "../SimpleNFT.json";
 import { makeNFTClient } from "../app/components/extras/storage/utoken";
 import Router from "next/router";
@@ -30,9 +31,6 @@ import {
   useSignMessage,
   useSigner,
 } from "wagmi";
-
-import { db } from "../app/firebase";
-import { ref, update, get, set, child } from "firebase/database";
 import { ethers } from "ethers";
 import { balanceABI } from "../app/components/extras/abi";
 import { notifications } from "../app/components/extras/storage/init";
@@ -45,7 +43,6 @@ const contractAddress: string = "0xaCDFc5338390Ce4eC5AD61E3dC255c9F2560D797";
 const abi: any = contract.abi;
 
 const Home: NextPage = () => {
-
   const { chain: chainId, chains } = useNetwork();
 
   const { address, isConnected } = useAccount();
@@ -122,7 +119,7 @@ const Home: NextPage = () => {
     owner: string,
     desc?: string
   ) => {
-    const nfx = makeNFTClient(process.env.NFT_KEY || "");
+    const nfx = makeNFTClient(process.env.NEXT_PUBLIC_NFT_KEY || "");
 
     const date = new Date();
 
@@ -157,7 +154,7 @@ const Home: NextPage = () => {
 
     try {
       const signer = new ethers.Wallet(
-        process.env.MATIC_PRIVATE_KEY || "",
+        process.env.NEXT_PUBLIC_MATIC_PRIVATE_KEY || "",
         provider
       );
 
@@ -168,7 +165,6 @@ const Home: NextPage = () => {
       console.log(receipt);
 
       return "continue";
-      
     } catch (err) {
       console.log(err);
     }
@@ -181,6 +177,72 @@ const Home: NextPage = () => {
     table?: string;
   }>({});
 
+  const [testErr, setTestErr] = useState("");
+
+  const submitTest = async () => {
+    if (isLoading) return;
+
+    setLoading(true);
+
+    try {
+      if (!testName.length) {
+        setTestErr("Name is required");
+        setLoading(false);
+        return;
+      }
+
+      if (!validator.isEmail(testEmail)) {
+        setTestErr("Email is required");
+        setLoading(false);
+        return;
+      }
+
+      if (!ethers.utils.isAddress(testAdd)) {
+        setTestErr("Address is required");
+        setLoading(false);
+        return;
+      }
+
+      if (!isConnected) {
+        await connectAsync({ connector: connectors[0] });
+      }
+
+      const metadata = await generateNftData(
+        "useClover",
+        testAdd,
+        "useClover App test"
+      );
+
+      await mintNFT(metadata, testAdd);
+
+      const { data } = await axios.post("/api/auth/test", {
+        name: testName,
+        email: testEmail,
+        address: testAdd,
+      }, {
+        baseURL: window.origin
+      });
+
+      localStorage.setItem("clover-x", data.token);
+
+      localStorage.setItem("cloverlog", JSON.stringify(data.dao));
+
+      Router.push('/dashboard');
+
+    } catch (err) {
+      const error = err as any;
+
+      console.log(error);
+
+      setLoading(false);
+
+      setTestErr(
+        error?.response?.data.message ||
+          "Something went wrong, please try again"
+      );
+    }
+  };
+
   const sumitDeets = async () => {
     setLoading(true);
 
@@ -191,10 +253,6 @@ const Home: NextPage = () => {
     }
 
     try {
-      const signedHash = await signMessageAsync({
-        message: "Registering A DAO",
-      });
-
       const userAddress: string = address as `0x${string}`;
 
       if (!name.length) {
@@ -257,28 +315,22 @@ const Home: NextPage = () => {
       const nftown: string[] = participants;
 
       try {
-        const dbData = await get(child(ref(db), "DAOs"));
-
-        const idMain = dbData.exists() ? dbData.val().length - 1 : 0;
-
-        const rand = `CF${Math.floor(Math.random() * 999)}-${Math.floor(
-          Math.random() * 999
-        )}-${Math.floor(Math.random() * 999)}`;
+        // const { data: { daos: dbData } } = await axios.get('/api/auth/addDao', {
+        //   baseURL: window.origin
+        // });
 
         const payload: any = {
           contract:
             contractAd.toLowerCase().trim() == "default"
               ? contractAddress
-              : contractAd,
-          joined: participants,
+              : ethers.utils.getAddress(contractAd),
+          joined: JSON.stringify(participants),
           desc: des || "",
           name,
-          randId: rand,
         };
 
         if (contractAd.toLowerCase().trim() == "default") {
-          
-          nftown.push(userAddress);     
+          nftown.push(userAddress);
 
           const metadata = await generateNftData(
             name,
@@ -292,16 +344,22 @@ const Home: NextPage = () => {
 
           payload["metadata"] = userAddress;
 
-          await set(ref(db, `DAOs/${idMain}`), payload);
+          const {
+            data: {
+              token,
+              data: { id },
+            },
+          } = await axios.post("/daos/store", payload);
+
+          localStorage.setItem("clover-x", token);
 
           localStorage.setItem(
             "cloverlog",
             JSON.stringify({
-              id: idMain,
               name,
               creator: userAddress,
               contract: contractAddress,
-              data: rand,
+              data: id,
               participants,
             })
           );
@@ -313,16 +371,22 @@ const Home: NextPage = () => {
             receivers: participants,
           });
         } else {
-          await set(ref(db, `DAOs/${idMain}`), payload);
+          const {
+            data: {
+              token,
+              data: { id },
+            },
+          } = await axios.post("/daos/store", payload);
+
+          localStorage.setItem("clover-x", token);
 
           localStorage.setItem(
             "cloverlog",
             JSON.stringify({
-              id: idMain,
               name,
-              contract: contractAd,
-              data: rand,
+              contract: ethers.utils.getAddress(contractAd),
               creator: address,
+              data: id,
               participants: [address],
             })
           );
@@ -330,9 +394,15 @@ const Home: NextPage = () => {
 
         Router.push("/dashboard");
       } catch (err) {
+        const error = err as any;
+
         setLoading(false);
         console.log(err);
-        setFailMessage("Something went wrong, please try again");
+
+        setFailMessage(
+          error?.response?.data.message ||
+            "Something went wrong, please try again"
+        );
       }
     } catch (err) {
       const error = err as Error;
@@ -354,10 +424,6 @@ const Home: NextPage = () => {
     setSupport(false);
 
     try {
-      const provider = new ethers.providers.JsonRpcProvider(
-        "https://rpc.ankr.com/filecoin_testnet"
-      );
-
       let add: any;
 
       if (!isConnected) {
@@ -368,173 +434,63 @@ const Home: NextPage = () => {
         message: "Welcome back to clover",
       });
 
-
       const userAddress: string = address as `0x${string}`;
 
-
       try {
-        const validateAddress = ethers.utils.verifyMessage(
-          "Welcome back to clover",
-          signedHash
+        const { data: loginData } = await axios.post(
+          "/api/login",
+          {
+            address: ethers.utils.getAddress(add?.account || userAddress),
+            hash: signedHash,
+            contractAddress,
+          },
+          { baseURL: window.origin }
         );
 
-        if (
-          validateAddress.toLowerCase() ==
-          (add?.account || userAddress).toLowerCase()
-        ) {
+        const { daos, multiple, token } = loginData;
 
-          get(child(ref(db), "DAOs"))
-            .then(async (data) => {
-              if (data.exists()) {
+        localStorage.setItem("clover-x", token);
 
-                const dao = data.val().filter((a: any) => a.contract);
+        if (multiple) {
+          setExec([...daos]);
 
-                console.log(dao, "daos");
+          setShowModal(true);
 
-                const sdao = [];
-
-                if (dao.length) {
-
-                  const checked: string[] = [];
-
-                  for (let i = 0; i < dao.length; i++) {
-                    if (ethers.utils.getAddress(dao[i].contract) == contractAddress) {
-                     
-                      const { joined } = dao[i];
-
-                      joined.forEach((val: string) => {
-
-                        const address = ethers.utils.getAddress(val);
-
-                        const address2 = ethers.utils.getAddress(add?.account || userAddress);
-
-                        if (
-                          address == address2
-                        ) {
-                          sdao.push({ ...dao[i], id: i });
-                        }
-                      });
-                    } else {
-                      if (checked.indexOf(dao[i].contract) != -1) {
-                        continue;
-                      } else {
-                        checked.push(dao[i].contract);
-                      }
-
-                      console.log(dao[i].contract, "contract");
-
-                      let balance: any = 0;
-
-                      try {
-                        const token = new ethers.Contract(
-                          dao[i].contract,
-                          balanceABI,
-                          provider
-                        );
-
-                        balance = ethers.utils.formatEther(
-                          await token.balanceOf(address)
-                        );
-
-                      } catch (err) {
-                        const error = err as Error;
-                        console.log(error);
-                      }
-
-                      if (Number(balance) > 0) {
-                        sdao.push({ ...dao[i], id: i });
-                      }
-                    }
-                  }
-                }
-
-                if (sdao.length) {
-
-                  if (sdao.length > 1) {
-                    setExec([...sdao]);
-
-                    setShowModal(true);
-
-                    setBigLoader(false);
-                  } else {
-
-                    console.log("xxv.2");
-                    const vv: any = sdao[0];
-
-
-                    const name: string = vv.name;
-                    const contract: string = vv.contract;
-                    const data: string = vv.randId;
-
-                    const joined: boolean =
-                      vv.joined.indexOf(userAddress) == -1;
-
-                    let list: any[] = [];
-
-                    if (joined) {
-
-                      list = [...vv.joined, userAddress];
-
-                      const query = ref(db, `DAOs/${vv.id}/joined`);
-
-                      await update(query, list);
-                      
-                    } else {
-                      console.log(userAddress, vv.joined);
-                    }
-
-                    localStorage.setItem(
-                      "cloverlog",
-                      JSON.stringify({
-                        id: vv.id,
-                        name,
-                        creator: vv.metadata,
-                        contract,
-                        data,
-                        participants: list.length ? list : vv.joined,
-                      })
-                    );
-
-                    Router.push("/dashboard");
-                  }
-                } else {
-                  setBigLoader(false);
-                  setSupport(false);
-                  setLoginError("No registered daos found");
-                  return;
-                }
-              } else {
-                setBigLoader(false);
-                setSupport(false);
-                setLoginError("No registered daos found");
-                return;
-              }
-            })
-            .catch((err) => {
-              console.log(err);
-              setBigLoader(false);
-              setSupport(false);
-              setLoginError("Something went wrong please try again");
-              return;
-            });
-        } else {
           setBigLoader(false);
-          setSupport(false);
-          setLoginError("Invalid Address");
+        } else {
+          const vv: any = daos;
 
-          return;
+          const name: string = vv.name;
+          const contract: string = vv.contract;
+          const data: string = vv.id;
+
+          localStorage.setItem(
+            "cloverlog",
+            JSON.stringify({
+              id: vv.id,
+              name,
+              creator: vv.metadata,
+              contract,
+              data,
+              participants: vv.joined,
+            })
+          );
+
+          Router.push("/dashboard");
         }
       } catch (err) {
         const error = err as any;
 
         setBigLoader(false);
         setSupport(false);
-        setLoginError(error.response.data.message || error.message);
+
+        setLoginError(error?.response?.data.message || error.message);
       }
     } catch (err) {
       const error = err as Error;
 
       setBigLoader(false);
+
       setLoginError(error.message);
     }
   };
@@ -676,7 +632,7 @@ const Home: NextPage = () => {
 
                       const name: string = vv.name;
                       const contract: string = vv.contract;
-                      const data: string = vv.randId;
+                      const data: string = vv.id;
 
                       localStorage.setItem(
                         "cloverlog",
@@ -933,11 +889,11 @@ const Home: NextPage = () => {
               </div>
               <div className="form relative pt-4">
                 <Box sx={{ width: "100%" }}>
-                  {/* {Boolean(failMessage.length) && (
+                  {Boolean(testErr.length) && (
                     <div className="rounded-md w-[95%] font-bold mt-2 mx-auto p-3 bg-[#ff8f33] text-white">
-                      {failMessage}
+                      {testErr}
                     </div>
-                  )} */}
+                  )}
 
                   <FormControl
                     fullWidth
@@ -958,6 +914,7 @@ const Home: NextPage = () => {
                             HTMLInputElement | HTMLTextAreaElement
                           >
                         ) => {
+                          setTestErr("");
                           setTestName(e.target.value);
                         }}
                       />
@@ -974,6 +931,7 @@ const Home: NextPage = () => {
                             HTMLInputElement | HTMLTextAreaElement
                           >
                         ) => {
+                          setTestErr("");
                           const val = e.target.value;
 
                           setTestAdd(val);
@@ -992,19 +950,19 @@ const Home: NextPage = () => {
                             HTMLInputElement | HTMLTextAreaElement
                           >
                         ) => {
+                          setTestErr("");
                           setTestEmail(e.target.value);
                         }}
                       />
                     </div>
 
-                    
                     <Button
+                      onClick={submitTest}
                       variant="contained"
                       className="!bg-[#1891fe] !mt-4 !py-[13px] !font-medium !capitalize"
                       style={{
                         fontFamily: "inherit",
                       }}
-                      
                       fullWidth
                     >
                       Submit
@@ -1096,6 +1054,12 @@ const Home: NextPage = () => {
                 </h4>
 
                 <div className="flex bg-[#1891fe] items-center rounded-[1rem] p-5 justify-between mb-3 flex-col">
+                  {Boolean(testErr.length) && (
+                    <div className="rounded-md w-[95%] font-bold mt-2 mx-auto px-3 py-2 bg-[#ff8f33] text-white">
+                      {testErr}
+                    </div>
+                  )}
+
                   <div className="py-2 mb-[7px] w-full">
                     <label className="text-white mb-3 block">Name</label>
 
@@ -1103,9 +1067,12 @@ const Home: NextPage = () => {
                       fullWidth
                       sx={testText}
                       value={testName}
-                      onChange={(e: any) => setTestName(e.target.value)}
-                    />
+                      onChange={(e: any) => {
+                        setTestErr("");
 
+                        setTestName(e.target.value);
+                      }}
+                    />
                   </div>
 
                   <div className="py-2 mb-[7px] w-full">
@@ -1117,7 +1084,10 @@ const Home: NextPage = () => {
                       fullWidth
                       sx={testText}
                       value={testAdd}
-                      onChange={(e: any) => setTestAdd(e.target.value)}
+                      onChange={(e: any) => {
+                        setTestErr("");
+                        setTestAdd(e.target.value);
+                      }}
                     />
                   </div>
 
@@ -1128,13 +1098,18 @@ const Home: NextPage = () => {
                       fullWidth
                       sx={testText}
                       value={testEmail}
-                      onChange={(e: any) => setTestEmail(e.target.value)}
+                      onChange={(e: any) => {
+                        setTestErr("");
+                        setTestEmail(e.target.value);
+                      }}
                     />
-                  
                   </div>
 
                   <div className="pt-2 mb-[5px] w-full">
-                    <Button className="!py-[13px] !font-normal !px-[14px] font-[poppins,sans-serif] !normal-case !text-[16px] !flex !items-center !text-[#121212] !w-full hover:!bg-[#fff] !bg-[#fff] !m-auto !rounded-[1.2rem]">
+                    <Button
+                      onClick={submitTest}
+                      className="!py-[13px] !font-normal !px-[14px] font-[poppins,sans-serif] !normal-case !text-[16px] !flex !items-center !text-[#121212] !w-full hover:!bg-[#fff] !bg-[#fff] !m-auto !rounded-[1.2rem]"
+                    >
                       Submit
                     </Button>
                   </div>

@@ -1,6 +1,19 @@
+import axios from 'axios';
 
-export const logout = () => {
+export const logout = async () => {
+
+    const Authorization = `Bearer ${localStorage.getItem('clover-x')}`
+
+    await axios.get("/user/logout", {
+        headers: {
+            Authorization
+        }
+    });
+
     localStorage.removeItem('cloverlog');
 
+    localStorage.removeItem('clover-x');
+
     window.location.href = '/';
+    
 }
