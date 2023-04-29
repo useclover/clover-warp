@@ -126,8 +126,6 @@ export const retrieveFiles = async (folder?: string[]) => {
     baseURL: process.env.NEXT_PUBLIC_APP_URL,
     headers: { Authorization: token },
   });
-  console.log(files, 'e')
-
 
   return files.main == undefined ? files : files.main;
 

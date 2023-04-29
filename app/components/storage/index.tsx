@@ -72,11 +72,11 @@ const Storage = () => {
   const { success, error, loading, updateSuccess, updateLoading, errUpdate } =
     uploadData;
 
-  const triggerUpload = (
+  const triggerUpload = async (
     w: React.SyntheticEvent & { target: HTMLInputElement }
   ) => {
     if (w.target.files) {
-      uploadFiles(w.target.files);
+      await uploadFiles(w.target.files);
     }
   };
 
@@ -120,7 +120,10 @@ const Storage = () => {
     name,
   ]);
 
-  const uploadFiles = (files: FileList) => {
+  const uploadFiles = async (files: FileList) => {
+
+    updateLoading(true);
+
     let maxSize: number = 0;
     const blobFiles: File[] = [];
 
@@ -144,14 +147,16 @@ const Storage = () => {
       );
     }
 
-    uploadProvider(blobFiles, maxSize);
+    await uploadProvider(blobFiles, maxSize);
+
+
   };
 
-  const dropHere = (event: React.DragEvent<HTMLDivElement>) => {
+  const dropHere = async (event: React.DragEvent<HTMLDivElement>) => {
     event.stopPropagation();
     event.preventDefault();
     const fileList = event.dataTransfer.files;
-    uploadFiles(fileList);
+    await uploadFiles(fileList);
   };
 
   const dragHere = (event: React.DragEvent<HTMLDivElement>) => {
@@ -164,6 +169,8 @@ const Storage = () => {
     let index: number = 0;
     const addFiles: store[] = [];
 
+    updateLoading(true);
+
     const onRootCidReady = async (cid: string) => {
       errUpdate("");
       updateSuccess(true);
@@ -171,8 +178,11 @@ const Storage = () => {
       setUpdate(!update);
 
       console.log(cid, index);
+
       const name = files[index].name;
+
       const extension = name.split(".").pop();
+
       addFiles.push({
         name,
         date: files[index].lastModified,
@@ -195,12 +205,10 @@ const Storage = () => {
 
         updateLoading(false);
 
-        console.log('jeee')
+        setUpdate(!update);
 
         if (uploadData?.updateFile !== undefined) {
           uploadData.updateFile(dir);
-
-          setUpdate(!update);
         }
       }
 
@@ -211,13 +219,14 @@ const Storage = () => {
 
     const onStoredChunk = (size: number) => {
       uploaded += size;
+
       const pct: number = (uploaded / totalSize) * 100;
 
       console.log(`Uploading... ${pct.toFixed(2)}% complete`);
 
-      updateLoading(true);
 
       setUpdate(!update);
+
     };
 
     const client = makeStorageClient(process.env.NEXT_PUBLIC_STORAGE_KEY || '');
@@ -246,6 +255,8 @@ const Storage = () => {
   return (
     <>
     <Dash />
+      {(isLoading || notInit) && <Loader />}
+
       {!isLoading && !notInit && (
         <>
           <div
