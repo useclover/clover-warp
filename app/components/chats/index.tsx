@@ -105,6 +105,7 @@ const Chats = () => {
   }, []);
 
   const { name, contract, data: main, participants, creator } = loginData;
+  
 
   document.querySelectorAll("textArea, .emoji-scroll-wrapper").forEach((e) => {
     e.classList.add("cusscroller");

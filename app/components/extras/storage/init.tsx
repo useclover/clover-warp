@@ -84,15 +84,15 @@ export const beginStorageProvider = async ({
 export const retrieveMessages = async () => {
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
-  const { data } = await axios.get(`/user/dao/${lq[0]}/chats`, {
+  const { data: { chats } } = await axios.get(`/user/dao/${lq[0]}/chats`, {
     baseURL: process.env.NEXT_PUBLIC_APP_URL,
 
     headers: { Authorization: token },
   });
 
-  console.log(data, "s");
 
-  return JSON.parse("data");
+  return JSON.parse(chats.data);
+  
 };
 
 export const updateMessages = (prev: string) => {
