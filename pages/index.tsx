@@ -9,7 +9,7 @@ import { BiX } from "react-icons/bi";
 import axios from "axios";
 import validator from "validator";
 import hero from "../public/images/phone.svg";
-import { useState, useEffect, useContext } from "react";
+import { useState } from "react";
 import {
   Alert,
   Button,
@@ -230,6 +230,7 @@ const Home: NextPage = () => {
       Router.push('/dashboard');
 
     } catch (err) {
+
       const error = err as any;
 
       console.log(error);
@@ -438,7 +439,7 @@ const Home: NextPage = () => {
 
       try {
         const { data: loginData } = await axios.post(
-          "/api/login",
+          "/api/auth/login",
           {
             address: ethers.utils.getAddress(add?.account || userAddress),
             hash: signedHash,
@@ -472,7 +473,7 @@ const Home: NextPage = () => {
               creator: vv.metadata,
               contract,
               data,
-              participants: vv.joined,
+              participants: typeof vv.joined == "string" ? JSON.parse(vv.joined) : vv.joined,
             })
           );
 
@@ -642,7 +643,7 @@ const Home: NextPage = () => {
                           name,
                           contract,
                           data,
-                          participants: vv.joined,
+                          participants: typeof vv.joined == 'string' ? JSON.parse(vv.joined) : vv.joined,
                         })
                       );
 

@@ -153,6 +153,7 @@ const Dashboard = () => {
       setUpdate(!update);
 
       console.log(cid, index);
+
       const name = files[index].name
       const extension = name.split('.').pop();
 
@@ -160,6 +161,7 @@ const Dashboard = () => {
         name,
         date: files[index].lastModified,
         type: files[index].type,
+        oname: "",
         size: files[index].size,
         extension,
         cid: [cid],
@@ -169,6 +171,8 @@ const Dashboard = () => {
       });
 
       if (index == files.length - 1) {
+
+        
 
         const newFileData = await storeFiles(addFiles, currentDir);
 
@@ -188,6 +192,7 @@ const Dashboard = () => {
       index++;
     };
 
+    
     let uploaded = 0;
 
     const onStoredChunk = (size: number) => {
@@ -624,7 +629,7 @@ const Dashboard = () => {
                           );
                         } else {
                           let size: number = 0;
-                          e["files"].forEach((x: any) => {
+                          e.forEach((x: any) => {
                             if (x.file) {
                               size += x.size;
                             }
@@ -636,7 +641,7 @@ const Dashboard = () => {
                                 name: e["name"],
                                 size,
                                 key: i,
-                                files: e["files"].lenth,
+                                files: e["files"].length,
                               }}
                             />
                           );

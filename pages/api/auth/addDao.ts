@@ -1,7 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import * as ethers from 'ethers';
-import { db } from '../../../app/firebase';
-import { ref, get, set, child } from "firebase/database";
 import { balanceABI } from "../../../app/components/extras/abi";
 import axios from "axios";
 

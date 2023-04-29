@@ -2,8 +2,7 @@ import { BsPeople, BsPinAngle } from "react-icons/bs";
 import { getSize } from "../extras/folder";
 import { GenContext } from "../extras/contexts/genContext";
 import { useContext } from "react";
-import Link from 'next/link'
-import { store, dir } from "../extras/storage";
+import Link from 'next/link';
 const FileDes = ({
   color = { main: "#b3b3b3", text: "#808080", light: "#ececec" },
   data,
@@ -34,17 +33,17 @@ const FileDes = ({
 let lnk: string = "";
   if (context.fileList !== undefined) {
     const filex = context.fileList[key];
-    if (filex.file === true) {
+
       if (filex.links === undefined) {
-        lnk = `/${key}/${filex.name}`;
+        lnk = `/${key}/${filex.oname}`;
       } else {
         lnk = filex.links[0];
-      }
-      
+      } 
     }
-  }
+
 
   return (
+
     <Link href={lnk}>
     <a
     target="_blank"

@@ -37,11 +37,10 @@ import { GenContext } from "../extras/contexts/genContext";
 import {
   beginStorageProvider,
   lq,
+  retrieveFiles,
   retrieveMessages,
   saveMessages,
   notifications,
-  retrieveFiles,
-  storeFiles,
 } from "../extras/storage/init";
 import { FaCloud } from "react-icons/fa";
 import { CContext } from "../extras/contexts/CContext";
@@ -106,6 +105,7 @@ const Chats = () => {
 
   const { name, contract, data: main, participants, creator } = loginData;
 
+
   document.querySelectorAll("textArea, .emoji-scroll-wrapper").forEach((e) => {
     e.classList.add("cusscroller");
   });
@@ -156,6 +156,8 @@ const Chats = () => {
     },
   });
 
+  const [filelist, setFilelist] = useState<number | undefined>()
+
   const chatlst = Object.keys(messData);
 
   useEffect(() => {
@@ -168,6 +170,16 @@ const Chats = () => {
       });
 
       const mess = await retrieveMessages();
+
+      const flist = await retrieveFiles();
+
+      let tSize = 0;
+
+      flist.forEach((e: any) => {
+          tSize += e.size;
+      });
+
+      setFilelist(tSize / 1_073_741_824);
 
       if (mess[name]?.["messages"] === undefined) {
 
@@ -774,12 +786,12 @@ const Chats = () => {
                           backgroundColor: "#1890FF",
                         },
                       }}
-                      // value={(0.18/150) * 100}
-                      value={10}
+                      value={((filelist || 0) / 50) * 100}
                     />
 
                     <span className="msg-date font-bold text-[13px] min-w-fit ml-[3px]">
-                      15/150GB
+                      
+                      {(filelist)?.toFixed(2)}/50GB
                     </span>
                   </div>
                 </div>

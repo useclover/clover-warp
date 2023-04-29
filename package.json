@@ -35,7 +35,6 @@
     "emoji-picker-react": "^3.6.1",
     "ethereum-abi": "^0.0.1-security",
     "ethereumjs-abi": "^0.6.8",
-    "firebase": "^9.16.0",
     "fs": "^0.0.1-security",
     "magic-sdk": "^8.1.1",
     "next": "12.2.5",

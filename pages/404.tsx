@@ -55,14 +55,17 @@ let executed = useRef(false);
           set404(false);
 
           if (filex !== undefined) {
-            if (filex.file) {
+
               const blobparts: BlobPart[] = [];
               let mainBlob: Blob;
-              if (filex.cid.length > 1) {
-                filex.cid.forEach(async (data: string, i: number) => {
+
+              const cid = typeof filex.cid == 'string' ? JSON.parse(filex.cid) : filex.cid;
+
+              if (cid.length > 1) {
+                cid.forEach(async (data: string, i: number) => {
                   try {
                     const response = await fetch(
-                      `https://${data}.ipfs.dweb.link/${filex.name}`
+                      `https://${data}.ipfs.dweb.link/${filex.oname}`
                     );
 
                     const blob = await response.blob();
@@ -75,13 +78,15 @@ let executed = useRef(false);
                 mainBlob = new Blob(blobparts, { type: filex.type });
               } else {
                 try {
+
                   const response = await fetch(
-                    `https://${filex.cid[0]}.ipfs.dweb.link/${filex.name}`
+                    `https://${cid[0]}.ipfs.dweb.link/${filex.oname}`
                   );
 
                   const blob = await response.blob();
 
                   mainBlob = blob;
+
                 } catch (xx) {
                   setError(true);
                   return;
@@ -108,16 +113,14 @@ let executed = useRef(false);
                   a.style.display = "none";
                   a.href = linkk;
                   executed.current = true;
-                  a.download = filex.name;
+                  a.download = filex.oname;
                   document.body.appendChild(a);
                   a.click();
                   console.log(linkk);
                   window.URL.revokeObjectURL(linkk);
                 }
               }
-            } else {
-              setError(true);
-            }
+           
             setLoading(false);
           }
         } else {

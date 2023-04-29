@@ -1,6 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { db } from "../../../app/firebase";
-import { ref, update, get, set, child } from "firebase/database";
 import axios from "axios";
 import { ethers } from "ethers";
 import { balanceABI } from "../../../app/components/extras/abi";
@@ -18,6 +16,7 @@ export default function handler(
   res: NextApiResponse<Data>
 ) {
   if (req.method == "POST") {
+
     (async () => {
       const { address, contractAddress, hash } = req.body;
 
@@ -33,6 +32,7 @@ export default function handler(
             headers: { "X-App-Key": process.env.NEXT_PUBLIC_APP_KEY || "" },
           });
 
+
           const provider = new ethers.providers.JsonRpcProvider(
             "https://api.hyperspace.node.glif.io/rpc/v1"
           );
@@ -42,22 +42,28 @@ export default function handler(
           const sdao = [];
 
           if (dao.length) {
+
             const checked: string[] = [];
 
             for (let i = 0; i < dao.length; i++) {
-              if (ethers.utils.getAddress(dao[i].contract) == contractAddress) {
-                const { joined } = dao[i];
 
-                joined.forEach((val: string) => {
-                  const address = ethers.utils.getAddress(val);
+              if (ethers.utils.getAddress(dao[i].contract) == contractAddress) {
+
+                const { joined, metadata } = dao[i];
+
+                const rJoined = JSON.parse(joined);
+
+                [ ...rJoined, metadata ].forEach((val: string) => {
+                  const address1 = ethers.utils.getAddress(val);
 
                   const address2 = ethers.utils.getAddress(address);
 
-                  if (address == address2) {
-                    sdao.push({ ...dao[i], id: i });
+                  if (address1 == address2) {
+                    sdao.push({ ...dao[i] });
                   }
                 });
               } else {
+
                 if (checked.indexOf(dao[i].contract) != -1) {
                   continue;
                 } else {
@@ -133,7 +139,7 @@ export default function handler(
         console.log(error);
 
         res
-          .status(error?.status || 404)
+          .status(error?.status || 400)
           .json({
             error: true,
             message:
