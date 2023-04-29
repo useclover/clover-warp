@@ -20,6 +20,7 @@ jobs:
           server: ${{ secrets.ftp_host }}
           port: 22 # default is 22
           ssh_private_key: ${{ secrets.ftp_secret }}
+          delete_remote_files: true
 
 
           # will put all file under this path
