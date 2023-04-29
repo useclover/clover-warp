@@ -180,6 +180,7 @@ const Storage = () => {
         size: files[index].size,
         extension,
         cid: [cid],
+        oname: "",
         file: true,
         tag: "default",
         deleted: false,

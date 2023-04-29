@@ -192,11 +192,13 @@ const Dashboard = () => {
       index++;
     };
 
-    
+
     let uploaded = 0;
 
     const onStoredChunk = (size: number) => {
+      
       uploaded += size;
+
       const pct: number = (uploaded / totalSize) * 100;
 
       console.log(`Uploading... ${pct.toFixed(2)}% complete`);
