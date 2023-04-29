@@ -82,6 +82,7 @@ export const beginStorageProvider = async ({
 };
 
 export const retrieveMessages = async () => {
+
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
   const { data: { chats } } = await axios.get(`/user/dao/${lq[0]}/chats`, {
@@ -92,7 +93,7 @@ export const retrieveMessages = async () => {
 
 
   return JSON.parse(chats.data);
-  
+
 };
 
 export const updateMessages = (prev: string) => {
@@ -116,6 +117,7 @@ export const saveMessages = async (updateNew: any) => {
 };
 
 export const retrieveFiles = async (folder?: string[]) => {
+
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
   const {
@@ -124,8 +126,11 @@ export const retrieveFiles = async (folder?: string[]) => {
     baseURL: process.env.NEXT_PUBLIC_APP_URL,
     headers: { Authorization: token },
   });
+  console.log(files, 'e')
 
-  return JSON.parse(files.data);
+
+  return files.main == undefined ? files : files.main;
+
 };
 
 export const getRooms = async () => {
@@ -192,31 +197,29 @@ export const createRoom = async (name: string) => {
  * **/
 
 export const storeFiles = async (file: store[], dirfolder: string[]) => {
-  const {
-    data: { files },
-  } = await axios.get(`/user/dao/${lq[0]}/files`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
-    },
-  });
 
-  const fileList = { ...JSON.parse(files.data) };
+  for (let i = 0; i < file.length; i++) {
 
-  file.forEach((e) => {
-    fileList.main.push(e);
-  });
-
-  await axios.patch(
-    `/user/dao/${lq[0]}/files`,
-    {
-      data: JSON.stringify(fileList),
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
+    await axios.post(
+      `/user/dao/${lq[0]}/files`,
+      {
+        name: file[i].name,
+        type: file[i].type,
+        size: file[i].size,
+        dir: dirfolder,
+        cid: file[i].cid,
+        extension: file[i].extension,
+        tag: file[i].tag,
       },
-    }
-  );
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
+        },
+      }
+    );
+
+  }
+
 
   return file;
 };

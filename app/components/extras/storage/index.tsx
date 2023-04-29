@@ -6,6 +6,7 @@ export type store = {
     date?: string | number,
     tag: "default" | number | string,
     type: string,
+    oname: string,
     cid: string[],
     extension: string | undefined,
     links?: string[],
@@ -51,8 +52,6 @@ export const updateSearch = (files: (store | dir)[], newFiles: store[], fileFold
       newFiles.forEach(xx => {
           if(!update){
             
-            console.log(files)
-
             files.push(xx)
 
           }else{

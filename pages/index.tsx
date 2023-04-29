@@ -9,7 +9,7 @@ import { BiX } from "react-icons/bi";
 import axios from "axios";
 import validator from "validator";
 import hero from "../public/images/phone.svg";
-import { useState, useEffect, useContext } from "react";
+import { useState } from "react";
 import {
   Alert,
   Button,

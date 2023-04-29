@@ -97,8 +97,6 @@ const Storage = () => {
  
       const dir: any = await retrieveFiles(currentDir);
 
-      console.log(dir, 'ss')
-
       setLoader(false);
       setFileData(dir);
 
@@ -188,6 +186,8 @@ const Storage = () => {
       });
 
       if (index == files.length - 1) {
+
+
         const newFileData = await storeFiles(addFiles, currentDir);
         const dir = await retrieveFiles(currentDir);
         setFileData(newFileData);
@@ -409,7 +409,7 @@ const Storage = () => {
                       className="flist pt-7 grid gap-2 grid-flow-dense"
                     >
                       {dirContent.map((e: any, i: number) => {
-                        if (e["file"]) {
+
                           return (
                             <FileDes
                               key={i}
@@ -421,25 +421,25 @@ const Storage = () => {
                               text={e["extension"]}
                             />
                           );
-                        } else {
-                          let size: number = 0;
-                          e["files"].forEach((x: any) => {
-                            if (x.file) {
-                              size += x.size;
-                            }
-                          });
-                          return (
-                            <FolderDes
-                              key={i}
-                              data={{
-                                name: e["name"],
-                                size,
-                                key: i,
-                                files: e["files"].lenth,
-                              }}
-                            />
-                          );
-                        }
+                        // } else {
+                        //   let size: number = 0;
+                        //   e.forEach((x: any) => {
+                        //     if (x.file) {
+                        //       size += x.size;
+                        //     }
+                        //   });
+                        //   return (
+                        //     <FolderDes
+                        //       key={i}
+                        //       data={{
+                        //         name: e["name"],
+                        //         size,
+                        //         key: i,
+                        //         files: e["files"].length,
+                        //       }}
+                        //     />
+                        //   );
+                        // }
                       })}
                     </div>
                   )}
