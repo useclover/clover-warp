@@ -264,7 +264,7 @@ const Chats = () => {
           exclude: address || "",
         });
 
-        await saveMessages(serverData);
+        await saveMessages({data: JSON.stringify(newMess), receiver: group || ""});
 
         messData[group || ""]["messages"][index].sent = true;
 
@@ -459,7 +459,7 @@ const Chats = () => {
 
                                   nMessData[nname]["messages"] = [];
 
-                                  await saveMessages(JSON.stringify(nMessData));
+                                  // await saveMessages(JSON.stringify(nMessData));
 
                                   updateMessData(nMessData);
 
@@ -615,7 +615,7 @@ const Chats = () => {
                                     );
 
                                     await saveMessages(
-                                      JSON.stringify(nMessData)
+                                      {data: JSON.stringify(nMessData), receiver: discussions},
                                     );
 
                                     notifications({

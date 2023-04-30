@@ -85,14 +85,27 @@ export const retrieveMessages = async () => {
 
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
-  const { data: { chats } } = await axios.get(`/user/dao/${lq[0]}/chats`, {
+  const { data: { chatdata } } = await axios.get(`/user/dao/${lq[0]}/chats`, {
     baseURL: process.env.NEXT_PUBLIC_APP_URL,
-
     headers: { Authorization: token },
   });
 
+  const messages: any = {};
 
-  return JSON.parse(chats.data);
+  
+  console.log(chatdata, "ss");
+
+  chatdata.data.forEach((col: any) => {
+
+     if(messages[col.receiver] === undefined) messages[col.receiver] = { messages: [] };
+
+     const dx = JSON.parse(col.data);
+
+      messages[col.receiver].messages.push({ ...dx, isSending: false, date: new Date(col.created_at).getTime() });
+
+  });
+
+  return messages;
 
 };
 
@@ -101,14 +114,17 @@ export const updateMessages = (prev: string) => {
 };
 
 export const saveMessages = async (updateNew: any) => {
+
   try {
-    await axios.patch(`/user/dao/${lq[0]}/chats`, updateNew, {
+
+    await axios.post(`/user/dao/${lq[0]}/chats`, updateNew, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
       },
     });
 
     return true;
+
   } catch (err) {
     console.log(err);
 
@@ -217,7 +233,6 @@ export const storeFiles = async (file: store[], dirfolder: string[]) => {
     );
 
   }
-
 
   return file;
 };
