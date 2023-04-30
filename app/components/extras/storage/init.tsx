@@ -92,15 +92,18 @@ export const retrieveMessages = async () => {
 
   const messages: any = {};
 
+  
+  console.log(chatdata, "ss");
+
   chatdata.data.forEach((col: any) => {
 
      if(messages[col.receiver] === undefined) messages[col.receiver] = { messages: [] };
 
-      messages[col.receiver].messages.push({ ...col.data, date: new Date(col.created_at).getTime() });
+     const dx = JSON.parse(col.data);
+
+      messages[col.receiver].messages.push({ ...dx, isSending: false, date: new Date(col.created_at).getTime() });
 
   });
-
-  console.log(messages, 'ss')
 
   return messages;
 
