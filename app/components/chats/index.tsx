@@ -115,7 +115,6 @@ const Chats = () => {
     
       if (inputElem == null) return;
 
-
       const hx = inputElem.clientHeight + 13;
 
       emojiElem.style.bottom = `${hx}px`;
@@ -123,7 +122,6 @@ const Chats = () => {
       emojiElem.style.height = `${emojiElem.clientHeight - (58 - hx)}px`
 
   }
-
   
   document.querySelectorAll("textArea, .emoji-scroll-wrapper").forEach((e) => {
     e.classList.add("cusscroller");
@@ -294,7 +292,8 @@ const Chats = () => {
     }
   };
 
-  const onEClick = (event: any, eObject: any) => {
+  const onEClick = (eObject: any, event: any) => {
+
     setEnlargen(enlargen + 1);
     setMessageText(messageText + eObject.emoji);
   };
