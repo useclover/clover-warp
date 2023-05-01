@@ -2,6 +2,7 @@ import { useContext } from "react";
 import userx from "../../../public/images/user.svg";
 import { CContext } from "../extras/contexts/CContext";
 import { useAccount } from "wagmi";
+import Image from "next/image";
 
 
 interface Textm {
@@ -50,8 +51,8 @@ const Text = ({ content, sender, date, key, reply, sent, enlargen }: Textm) => {
         address == sender ? "owner" : ""
       }`}
     >
-      <div className="chat-msg-profile">
-        <img className="chat-msg-img" src={userx.src} alt={sender} />
+      <div className="chat-msg-profile relative">
+        <Image className="chat-msg-img" height={40} width={40} src={userx.src} alt={sender} />
 
         <div className="chat-msg-date">
           {`${sender.substring(0, 6)}...${sender.substring(38, 42)}`}{" "}

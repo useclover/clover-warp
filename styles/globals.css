@@ -413,13 +413,13 @@ a {
 }
 
 body::-webkit-scrollbar,
-.cusscroller::-webkit-scrollbar {
+.cusscroller::-webkit-scrollbar, .EmojiPickerReact .epr-body::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 body::-webkit-scrollbar-track,
-.cusscroller::-webkit-scrollbar-track {
+.cusscroller::-webkit-scrollbar-track, .EmojiPickerReact .epr-body::-webkit-scrollbar-track {
   background: transparent;
 }
 
@@ -641,8 +641,25 @@ body::-webkit-scrollbar-track,
   width: 60%;
 }
 
+body .EmojiPickerReact .epr-preview{
+  height:60px;
+}
+
+.EmojiPickerReact .epr-search-container .epr-icn-search{
+  left:13px;
+}
+
+.EmojiPickerReact .epr-search-container input.epr-search{
+  margin-left:5px;
+}
+
+body .EmojiPickerReact .epr-preview img{
+  height:30px;
+  width:30px;
+}
+
 body::-webkit-scrollbar-thumb,
-.cusscroller::-webkit-scrollbar-thumb {
+.cusscroller::-webkit-scrollbar-thumb, .EmojiPickerReact .epr-body::-webkit-scrollbar-thumb {
   background-color: rgb(219, 219, 219);
   border-radius: 20px;
 }
@@ -704,12 +721,22 @@ body::-webkit-scrollbar-thumb,
   display: flex;
 }
 
+body .EmojiPickerReact{
+    position:absolute !important;
+    z-index:100;
+    bottom:60px;
+    right:15px;
+}
+
 .msg-message {
   white-space: nowrap;
+  cursor:default;
   overflow: hidden;
   text-overflow: ellipsis;
   color: #969eaa;
 }
+
+
 
 .msg-date {
   font-size: 13px;

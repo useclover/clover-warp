@@ -78,7 +78,9 @@ export const beginStorageProvider = async ({
   randId: any;
   participants: any;
 }) => {
+
   lq = [randId, contract, participants, user];
+
 };
 
 export const retrieveMessages = async () => {
@@ -92,8 +94,6 @@ export const retrieveMessages = async () => {
 
   const messages: any = {};
 
-  
-  console.log(chatdata, "ss");
 
   chatdata.data.forEach((col: any) => {
 

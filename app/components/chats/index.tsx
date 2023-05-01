@@ -50,6 +50,7 @@ import Loader from "../loader";
 import { useAccount } from "wagmi";
 import Rooms from "../../../app/components/video";
 import { BiX } from "react-icons/bi";
+import EmojiPicker from "emoji-picker-react";
 
 
 interface TabPanelProps {
@@ -105,7 +106,25 @@ const Chats = () => {
 
   const { name, contract, data: main, participants, creator } = loginData;
 
+  const emojiModal = () => {
+      const emojiElem = document.querySelector('.EmojiPickerReact') as HTMLDivElement;
 
+      const inputElem = document.querySelector(".textbox") as HTMLDivElement;
+
+      if (emojiElem == null) return;
+    
+      if (inputElem == null) return;
+
+
+      const hx = inputElem.clientHeight + 13;
+
+      emojiElem.style.bottom = `${hx}px`;
+
+      emojiElem.style.height = `${emojiElem.clientHeight - (58 - hx)}px`
+
+  }
+
+  
   document.querySelectorAll("textArea, .emoji-scroll-wrapper").forEach((e) => {
     e.classList.add("cusscroller");
   });
@@ -614,9 +633,10 @@ const Chats = () => {
                                       newMess
                                     );
 
-                                    await saveMessages(
-                                      {data: JSON.stringify(nMessData), receiver: discussions},
-                                    );
+                                    await saveMessages({
+                                      data: JSON.stringify(nMessData),
+                                      receiver: discussions,
+                                    });
 
                                     notifications({
                                       title: `Vote campaign created by ${String(
@@ -790,8 +810,7 @@ const Chats = () => {
                     />
 
                     <span className="msg-date font-bold text-[13px] min-w-fit ml-[3px]">
-                      
-                      {(filelist)?.toFixed(2)}/50GB
+                      {filelist?.toFixed(2)}/50GB
                     </span>
                   </div>
                 </div>
@@ -938,16 +957,7 @@ const Chats = () => {
                     )}
 
                     {showEmoji && (
-                      <Picker
-                        searchPlaceholder="Search..."
-                        pickerStyle={{
-                          position: "absolute",
-                          height: "260px",
-                          bottom: "60px",
-                          right: "0px",
-                        }}
-                        onEmojiClick={onEClick}
-                      />
+                      <EmojiPicker height={390} onEmojiClick={onEClick} />
                     )}
 
                     <div className="flex w-full items-center relative">
@@ -955,6 +965,8 @@ const Chats = () => {
                         type="text"
                         value={messageText}
                         onKeyDown={(e) => {
+                          emojiModal();
+
                           if (
                             (e.keyCode == 13 || e.which === 13) &&
                             !e.shiftKey
@@ -971,6 +983,7 @@ const Chats = () => {
                         onChange={(e) => setMessageText(e.target.value)}
                         placeholder="Type something here..."
                         multiline
+                        className="textbox"
                         fullWidth
                         maxRows={3}
                         sx={{
@@ -992,15 +1005,20 @@ const Chats = () => {
                         }}
                       />
 
-                      <div className="flex absolute right-[10px] items-center">
-                        <MdOutlineEmojiEmotions
+                      <div className="flex absolute right-[6px] items-center">
+                        <IconButton
                           onClick={() => setShowEmoji(!showEmoji)}
-                          size={24}
-                          style={{
-                            fill: showEmoji ? "#ffd900" : undefined,
+                          size={"small"}
+                          sx={{
+                            background: showEmoji ? "rgba(0,0,0,0.1)" : "inherit",
                           }}
-                          className="feather fill-[#727272] transition-all delay-[400] feather-smile hover:fill-[#ffd900]"
-                        />
+                          className={`!min-w-[34px]`}
+                        >
+                          <MdOutlineEmojiEmotions
+                            size={24}
+                            className="feather fill-[#727272] transition-all delay-[400] feather-smile"
+                          />
+                        </IconButton>
 
                         {/* <FiVideo size={24} className="feather transition-all delay-[400] feather-video" />
                   
