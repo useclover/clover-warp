@@ -11,48 +11,46 @@ interface Textm {
   date: string | number;
   key: number;
   reply?: string;
-  enlargen: boolean
-  sent: boolean
+  selected: boolean;
+  messId: string;
+  enlargen: boolean;
+  sent: boolean;
+  setExtras: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const Text = ({ content, sender, date, key, reply, sent, enlargen }: Textm) => {
+const Text = ({ content, sender, date, key, reply, sent, enlargen, messId, setExtras, selected }: Textm) => {
 
   const { address, isConnected } = useAccount();
 
   const mCon = useContext(CContext);
 
-  const cdat = new Date();
   const exp = new Date(date);
 
-  const parseCdat = Date.parse(
-    `${cdat.getFullYear()}-${cdat.getMonth() + 1}-${cdat.getDate()}`
-  );
-
-  const parseMdat = Date.parse(
-    `${exp.getFullYear()}-${exp.getMonth() + 1}-${exp.getDate()}`
-  );
-
-  const ddate =
-    parseMdat == parseCdat
-      ? `${(exp.getHours() + 1) % 12 || exp.getHours() + 1}.${
+  const ddate = `${exp.getHours() % 12 || exp.getHours()}.${
           exp.getMinutes() + 1
-        }${exp.getHours() > 12 ? "pm" : "am"}`
-      : `${exp.getFullYear()}/${exp.getMonth() + 1}/${exp.getDate()} ${
-          (exp.getHours() + 1) % 12 || exp.getHours() + 1
-        }.${exp.getMinutes() + 1}${exp.getHours() > 12 ? "pm" : "am"}`;
+        }${exp.getHours() > 12 ? "pm" : "am"}`;
 
   return (
     <div
       style={{
         opacity: sent ? 1 : 0.3,
+        backgroundColor: selected ? "#f1f2f6e1" : undefined,
       }}
       key={key}
-      className={`chat-msg transition-all delay-[400] ${
+      id={messId}
+      onClick={() => setExtras(selected ? "" : messId)}
+      className={`chat-msg transition-all relative z-[1001] delay-[400] ${
         address == sender ? "owner" : ""
       }`}
     >
       <div className="chat-msg-profile relative">
-        <Image className="chat-msg-img" height={40} width={40} src={userx.src} alt={sender} />
+        <Image
+          className="chat-msg-img"
+          height={40}
+          width={40}
+          src={userx.src}
+          alt={sender}
+        />
 
         <div className="chat-msg-date">
           {`${sender.substring(0, 6)}...${sender.substring(38, 42)}`}{" "}

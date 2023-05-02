@@ -77,6 +77,7 @@
   background-color: #fff;
   position: sticky;
   bottom: 0;
+  z-index: 1001;
   left: 0;
 }
 
@@ -274,7 +275,7 @@ div[disabled] {
   display: flex;
 }
 
-.chat-area-group * {
+.chat-area-group>span {
   border: 2px solid #fff;
 }
 
@@ -282,10 +283,10 @@ div[disabled] {
   margin-left: -5px;
 }
 
-.chat-area-group span {
+.chat-area-group>span {
   width: 32px;
   height: 32px;
-  color: #1890FF;
+  color: #777;
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -493,8 +494,14 @@ body::-webkit-scrollbar-track,
 }
 
 .chat-msg {
+  cursor:pointer;
   display: flex;
-  padding: 0 20px 45px;
+  padding: 26px 20px 26px;
+  transition: all .3s;
+}
+
+.chat-msg:hover{
+  background-color: #f1f2f6e1;
 }
 
 .chat-msg-content {
