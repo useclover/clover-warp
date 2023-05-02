@@ -82,31 +82,68 @@ export const beginStorageProvider = async ({
 };
 
 export const retrieveMessages = async () => {
-
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
-  const { data: { chatdata } } = await axios.get(`/user/dao/${lq[0]}/chats`, {
+  const {
+    data: { chatdata },
+  } = await axios.get(`/user/dao/${lq[0]}/chats`, {
     baseURL: process.env.NEXT_PUBLIC_APP_URL,
     headers: { Authorization: token },
   });
 
   const messages: any = {};
 
-  
-  console.log(chatdata, "ss");
-
   chatdata.data.forEach((col: any) => {
+    if (messages[col.receiver] === undefined)
+      messages[col.receiver] = { messages: [] };
 
-     if(messages[col.receiver] === undefined) messages[col.receiver] = { messages: [] };
+    const months: string[] = [
+      "January",
+      "Febuary",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
 
-     const dx = JSON.parse(col.data);
+    const dx = JSON.parse(col.data);
 
-      messages[col.receiver].messages.push({ ...dx, isSending: false, date: new Date(col.created_at).getTime() });
+    const date = new Date(col.created_at);
 
+    const today =
+      new Date().getMonth() == date.getMonth() &&
+      new Date().getDate() == date.getDate() &&
+      new Date().getFullYear() == date.getFullYear();
+
+    const yesterday =
+      new Date().getMonth() == date.getMonth() &&
+      new Date().getDate() - 1 == date.getDate() &&
+      new Date().getFullYear() == date.getFullYear();
+
+
+    const index = today
+      ? "Today"
+      : yesterday
+      ? "Yesterday"
+      : `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+
+    messages[col.receiver].messages.push({
+      ...dx,
+      isSending: false,
+      messId: col.messId,
+      index,
+      date: date.getTime(),
+    });
+  
   });
 
   return messages;
-
 };
 
 export const updateMessages = (prev: string) => {
@@ -114,9 +151,7 @@ export const updateMessages = (prev: string) => {
 };
 
 export const saveMessages = async (updateNew: any) => {
-
   try {
-
     await axios.post(`/user/dao/${lq[0]}/chats`, updateNew, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
@@ -124,7 +159,6 @@ export const saveMessages = async (updateNew: any) => {
     });
 
     return true;
-
   } catch (err) {
     console.log(err);
 
@@ -133,7 +167,6 @@ export const saveMessages = async (updateNew: any) => {
 };
 
 export const retrieveFiles = async (folder?: string[]) => {
-
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
   const {
@@ -144,7 +177,6 @@ export const retrieveFiles = async (folder?: string[]) => {
   });
 
   return files.main == undefined ? files : files.main;
-
 };
 
 export const getRooms = async () => {
@@ -211,9 +243,7 @@ export const createRoom = async (name: string) => {
  * **/
 
 export const storeFiles = async (file: store[], dirfolder: string[]) => {
-
   for (let i = 0; i < file.length; i++) {
-
     await axios.post(
       `/user/dao/${lq[0]}/files`,
       {
@@ -231,7 +261,6 @@ export const storeFiles = async (file: store[], dirfolder: string[]) => {
         },
       }
     );
-
   }
 
   return file;

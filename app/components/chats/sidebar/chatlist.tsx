@@ -15,10 +15,11 @@ const Chatlist = ({name, img, lastMsg, time, selected, onClick}: {name: string, 
             return `${xd.getFullYear()}/${xd.getMonth() + 1}/${xd.getDate()}`
 
         }else if (delay > 3600) {
+            //hourly
             const xh = parseInt((delay / 3600).toString());
-            const xm = parseInt(((delay - (xh * 3600)) / 60).toString());
 
-            return xh + "hr" + (xh > 1 ? "s " : " ") + xm + 'min' + (xm > 1 ? "s" : "");
+            return xh + "hr" + (xh > 1 ? "s " : " ");
+
         }else if(delay > 60){
             const xx = parseInt((delay / 60).toString()); 
             

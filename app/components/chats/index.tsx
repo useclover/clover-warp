@@ -4,7 +4,8 @@ import Link from "next/link";
 import Router from "next/router";
 import logo from "../../../public/images/logo.png";
 import Select from "react-select";
-import { BsFolder, BsList, BsPlusLg } from "react-icons/bs";
+import { BsFolder, BsList, BsPlusLg, BsTrash } from "react-icons/bs";
+import { AiOutlineEdit } from "react-icons/ai";
 import {
   FiImage,
   FiSettings,
@@ -14,6 +15,7 @@ import {
   FiVideo,
   FiLogOut,
   FiX,
+  FiEdit3,
 } from "react-icons/fi";
 import Storage from "../storage";
 import { MdMeetingRoom, MdOutlineEmojiEmotions } from "react-icons/md";
@@ -50,6 +52,7 @@ import Loader from "../loader";
 import { useAccount } from "wagmi";
 import Rooms from "../../../app/components/video";
 import { BiX } from "react-icons/bi";
+import EmojiPicker from "emoji-picker-react";
 
 
 interface TabPanelProps {
@@ -105,7 +108,23 @@ const Chats = () => {
 
   const { name, contract, data: main, participants, creator } = loginData;
 
+  const emojiModal = () => {
+      const emojiElem = document.querySelector('.EmojiPickerReact') as HTMLDivElement;
 
+      const inputElem = document.querySelector(".textbox") as HTMLDivElement;
+
+      if (emojiElem == null) return;
+    
+      if (inputElem == null) return;
+
+      const hx = inputElem.clientHeight + 13;
+
+      emojiElem.style.bottom = `${hx}px`;
+
+      emojiElem.style.height = `${emojiElem.clientHeight - (58 - hx)}px`
+
+  }
+  
   document.querySelectorAll("textArea, .emoji-scroll-wrapper").forEach((e) => {
     e.classList.add("cusscroller");
   });
@@ -138,6 +157,8 @@ const Chats = () => {
   const [sidebar, setSidebar] = useState<boolean>(false);
 
   const [failMessage, setFailMessage] = useState<string>("");
+
+  const [extrasId, setExtras] = useState<string>("");
 
   const [messData, updateMessData] = useState<{
     [index: string]: { participants: any[]; messages: any[] };
@@ -186,7 +207,7 @@ const Chats = () => {
         if(mess[name] === undefined) mess[name] = {}; 
 
 
-         mess[name]["messages"] = [];
+         mess[name]["messages"] = {};
 
       }
 
@@ -213,7 +234,6 @@ const Chats = () => {
     type: "mess" | "vote" = "mess"
   ) => {
 
-    console.log(messageText);
 
     if (messageText.length) {
       if (messData[group || ""]["messages"] === undefined) {
@@ -236,13 +256,8 @@ const Chats = () => {
         newMess["content"][0].push(rContext.content || "");
       }
 
-      let index: number;
 
       messData[group || ""]["messages"].push(newMess);
-
-      index = messData[group || ""]["messages"].length - 1;
-
-      console.log(messData, 's')
 
       updateMessData(messData);
 
@@ -253,9 +268,9 @@ const Chats = () => {
       }
 
       try {
-        const serverData = { ...messData };
+        // const serverData = { ...messData };
 
-        serverData[group || ""]["messages"][index]["server"] = true;
+        // serverData[group || ""]["messages"][index]["server"] = true;
 
         notifications({
           title: `Message from ${address}`,
@@ -266,18 +281,21 @@ const Chats = () => {
 
         await saveMessages({data: JSON.stringify(newMess), receiver: group || ""});
 
-        messData[group || ""]["messages"][index].sent = true;
+        // messData[group || ""]["messages"][index].sent = true;
 
         updateMessData(messData);
+
       } catch (err) {
         console.log(err);
       }
     }
   };
 
-  const onEClick = (event: any, eObject: any) => {
+  const onEClick = (eObject: any, event: any) => {
+
     setEnlargen(enlargen + 1);
     setMessageText(messageText + eObject.emoji);
+
   };
 
   const [addNew, setAddNew] = useState<boolean>(false);
@@ -614,9 +632,10 @@ const Chats = () => {
                                       newMess
                                     );
 
-                                    await saveMessages(
-                                      {data: JSON.stringify(nMessData), receiver: discussions},
-                                    );
+                                    await saveMessages({
+                                      data: JSON.stringify(nMessData),
+                                      receiver: discussions,
+                                    });
 
                                     notifications({
                                       title: `Vote campaign created by ${String(
@@ -790,8 +809,7 @@ const Chats = () => {
                     />
 
                     <span className="msg-date font-bold text-[13px] min-w-fit ml-[3px]">
-                      
-                      {(filelist)?.toFixed(2)}/50GB
+                      {filelist?.toFixed(2)}/50GB
                     </span>
                   </div>
                 </div>
@@ -838,7 +856,33 @@ const Chats = () => {
                   <div className="chat-area-header">
                     <div className="chat-area-title capitalize">{group}</div>
                     <div className="chat-area-group">
-                      <span>{messData[group]["messages"].length}</span>
+                      
+                      <span style={{
+                        display: Boolean(extrasId) ? "none" : "flex",
+                      }}
+                      className="chat-length">
+                        {messData[group]["messages"].length}
+                      </span>
+
+                      <div 
+                      style={{
+                        width: Boolean(extrasId) ? "77px" : "0px",
+                      }}  
+                      className="transition-all overflow-hidden delay-300 w-[0px] flex items-center justify-center">
+                        <IconButton size="medium">
+                          <BsTrash
+                            size={20}
+                            className="relative -left-[1px] text-[#777]"
+                          />
+                        </IconButton>
+
+                        <IconButton size="medium">
+                          <FiEdit3
+                            size={20.4}
+                            className="relative -left-[1px] text-[#777]"
+                          />
+                        </IconButton>
+                      </div>
                     </div>
                   </div>
                   <div className="chat-area-main">
@@ -851,23 +895,52 @@ const Chats = () => {
                               date,
                               content,
                               reply,
+                              index, 
                               type,
+                              messId,
                               server,
                               sent,
                               enlargen,
                             },
                             i
-                          ) => (
-                            <Text
+                          ) => {
+
+                            let addNumb = false;
+
+                            const mess = messData[group]["messages"][i - 1];
+
+                            if (mess !== undefined) {
+
+                                const { index: prevIndex } = mess;
+
+                                if (prevIndex != index) {
+
+                                    addNumb = true;
+
+                                }
+
+                            }else{
+                              addNumb = true;
+                            }
+
+                            return <>
+                              {addNumb && <div key={i} style={{
+                                  zIndex: i + 1,
+                              }} className="text-[#777] text-[14px] flex items-center sticky cursor-default bg-white justify-center text-center w-full py-3">{index}</div>}
+
+                              <Text
                               sender={sender}
                               date={date}
+                              selected={extrasId == messId}
+                              setExtras={setExtras}
                               key={i}
+                              messId={messId}
                               content={content}
                               sent={server || sent}
                               reply={reply}
-                              enlargen={Boolean(enlargen)}
-                            />
-                          )
+                              enlargen={Boolean(enlargen)}  
+                            /></>
+                          }
                         )}
                       </>
                     )}
@@ -938,16 +1011,7 @@ const Chats = () => {
                     )}
 
                     {showEmoji && (
-                      <Picker
-                        searchPlaceholder="Search..."
-                        pickerStyle={{
-                          position: "absolute",
-                          height: "260px",
-                          bottom: "60px",
-                          right: "0px",
-                        }}
-                        onEmojiClick={onEClick}
-                      />
+                      <EmojiPicker height={390} onEmojiClick={onEClick} />
                     )}
 
                     <div className="flex w-full items-center relative">
@@ -955,6 +1019,8 @@ const Chats = () => {
                         type="text"
                         value={messageText}
                         onKeyDown={(e) => {
+                          emojiModal();
+
                           if (
                             (e.keyCode == 13 || e.which === 13) &&
                             !e.shiftKey
@@ -971,6 +1037,7 @@ const Chats = () => {
                         onChange={(e) => setMessageText(e.target.value)}
                         placeholder="Type something here..."
                         multiline
+                        className="textbox"
                         fullWidth
                         maxRows={3}
                         sx={{
@@ -992,15 +1059,22 @@ const Chats = () => {
                         }}
                       />
 
-                      <div className="flex absolute right-[10px] items-center">
-                        <MdOutlineEmojiEmotions
+                      <div className="flex absolute right-[6px] items-center">
+                        <IconButton
                           onClick={() => setShowEmoji(!showEmoji)}
-                          size={24}
-                          style={{
-                            fill: showEmoji ? "#ffd900" : undefined,
+                          size={"small"}
+                          sx={{
+                            background: showEmoji
+                              ? "rgba(0,0,0,0.1)"
+                              : "inherit",
                           }}
-                          className="feather fill-[#727272] transition-all delay-[400] feather-smile hover:fill-[#ffd900]"
-                        />
+                          className={`!min-w-[34px]`}
+                        >
+                          <MdOutlineEmojiEmotions
+                            size={24}
+                            className="feather fill-[#727272] transition-all delay-[400] feather-smile"
+                          />
+                        </IconButton>
 
                         {/* <FiVideo size={24} className="feather transition-all delay-[400] feather-video" />
                   
