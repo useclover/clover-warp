@@ -165,6 +165,10 @@ const Chats = () => {
 
   const [toggle, setToggle] = useState<string | number>('0');
 
+  const [delMessageMe, setDelMessageMe] = useState<boolean>(false);
+
+  const [delMessageEvryone, setDelMessageEvryone] = useState<boolean>(false);
+
   const [discussions, setDiscussion] = useState<string>('');
 
   const [voteDesc, setVoteDesc] = useState<string>('');
@@ -414,24 +418,66 @@ const Chats = () => {
                       <div className="flex justify-evenly mt-[20px]">
                         <Button
                           className="!bg-[#e8e8e8] !text-[#7c7c7c] !normal-case !rounded-lg !font-[inherit] !px-[20px] !py-[10px] !text-[14px] !font-[500] hover:!bg-[#d8d8d8]"
-                          onClick={() => {
+                          onClick={async () => {
+                            if (delMessageEvryone || delMessageMe) return;
+
+                            setDelMessageMe(true);
+
+                            await deleteMessageMe();
+
+                            setDelMessageMe(false);
+                            setExtras("");
                             setConDelete(false);
-                            deleteMessageMe();
+                            
                           }}
                         >
-                          Delete for me
+                          {delMessageMe ? (
+                            <>
+                              <div className="mr-3 h-[20px] text-[#7c7c7c]">
+                                <CircularProgress
+                                  color={"inherit"}
+                                  className="!w-[20px] !h-[20px]"
+                                />
+                              </div>{" "}
+                              <span>Just a Sec...</span>
+                            </>
+                          ) : (
+                            <>Delete for me</>
+                          )}
                         </Button>
 
                         {editableMess && (
                           <Button
                             className="!bg-[#e8e8e8] !text-[#7c7c7c] !font-[inherit] !normal-case
                           !rounded-lg !px-[20px] !py-[10px] !text-[14px] !font-[500] hover:!bg-[#d8d8d8]"
-                            onClick={() => {
+                            onClick={async () => {
+                              if (delMessageEvryone || delMessageMe) return;
+
+                              setDelMessageEvryone(true);
+
+                              await deleteMessageEvryone();
+
+                              setDelMessageEvryone(false);
+
                               setConDelete(false);
-                              deleteMessageEvryone();
+
+                              setExtras("");
+
                             }}
                           >
-                            Delete for everyone
+                            {delMessageEvryone ? (
+                              <>
+                                <div className="mr-3 h-[20px] text-[#7c7c7c]">
+                                  <CircularProgress
+                                    color={"inherit"}
+                                    className="!w-[20px] !h-[20px]"
+                                  />
+                                </div>{" "}
+                                <span>Just a Sec...</span>
+                              </>
+                            ) : (
+                              <>Delete for everyone</>
+                            )}
                           </Button>
                         )}
                       </div>

@@ -4,7 +4,6 @@ import { ethers } from "ethers";
 import axios from "axios";
 export let lq: any;
 
-const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
 export interface mess {
   [index: string]: {
@@ -84,6 +83,9 @@ export const beginStorageProvider = async ({
 };
 
 export const retrieveMessages = async (indexx?: number) => {
+
+  const token = `Bearer ${localStorage.getItem("clover-x")}`;
+
   const {
     data: { chatdata },
   } = await axios.get(`/dao/${lq[0]}/chats`, {
@@ -174,7 +176,10 @@ export const findMessId = (messBox: any[], id: string) => {
 }
 
 export const deleteMessagesAll = async (id: string) => {
-  await axios.patch(`/dao/${lq[0]}/chats/${id}/delete`, {
+
+  const token = `Bearer ${localStorage.getItem("clover-x")}`;
+
+  await axios.patch(`/dao/${lq[0]}/chats/${id}/delete`, {}, {
     baseURL: process.env.NEXT_PUBLIC_APP_URL,
     headers: { Authorization: token },
   });
@@ -183,6 +188,9 @@ export const deleteMessagesAll = async (id: string) => {
 };
 
 export const deleteMessages = async (id: string) => {
+
+  const token = `Bearer ${localStorage.getItem("clover-x")}`;
+
   await axios.delete(`/dao/${lq[0]}/chats/${id}`, {
     baseURL: process.env.NEXT_PUBLIC_APP_URL,
     headers: { Authorization: token },
@@ -193,6 +201,9 @@ export const deleteMessages = async (id: string) => {
 };
 
 export const updateMessages = async (id: string, update: any) => {
+
+  const token = `Bearer ${localStorage.getItem("clover-x")}`;
+
   await axios.patch(
     `/dao/${lq[0]}/chats/${id}`,
     { data: JSON.stringify(update) },
@@ -222,6 +233,9 @@ export const saveMessages = async (updateNew: any) => {
 };
 
 export const retrieveFiles = async (folder?: string[]) => {
+
+  const token = `Bearer ${localStorage.getItem("clover-x")}`;
+
   const {
     data: { files },
   } = await axios.get(`/dao/${lq[0]}/files`, {
@@ -233,6 +247,9 @@ export const retrieveFiles = async (folder?: string[]) => {
 };
 
 export const getRooms = async () => {
+
+  const token = `Bearer ${localStorage.getItem("clover-x")}`;
+
   const {
     data: { rooms },
   } = await axios.get(`/dao/${lq[0]}/rooms`, {
@@ -244,6 +261,9 @@ export const getRooms = async () => {
 };
 
 export const roomData = async (id: number) => {
+
+  const token = `Bearer ${localStorage.getItem("clover-x")}`;
+
   const {
     data: { room },
   } = await axios.get(`/dao/${lq[0]}/rooms/${id}`, {
