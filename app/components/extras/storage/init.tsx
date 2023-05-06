@@ -4,6 +4,8 @@ import { ethers } from "ethers";
 import axios from "axios";
 export let lq: any;
 
+const token = `Bearer ${localStorage.getItem("clover-x")}`;
+
 export interface mess {
   [index: string]: {
     content: string;
@@ -63,7 +65,7 @@ export const notifications = async ({
 
     return true;
   } catch (err) {
-    console.log(err);
+    console.log(err, "err");
   }
 };
 
@@ -81,12 +83,11 @@ export const beginStorageProvider = async ({
   lq = [randId, contract, participants, user];
 };
 
-export const retrieveMessages = async () => {
-  const token = `Bearer ${localStorage.getItem("clover-x")}`;
-
+export const retrieveMessages = async (indexx?: number) => {
   const {
     data: { chatdata },
-  } = await axios.get(`/user/dao/${lq[0]}/chats`, {
+  } = await axios.get(`/dao/${lq[0]}/chats`, {
+    params: { page: (indexx || 0) + 1 },
     baseURL: process.env.NEXT_PUBLIC_APP_URL,
     headers: { Authorization: token },
   });
@@ -94,8 +95,10 @@ export const retrieveMessages = async () => {
   const messages: any = {};
 
   chatdata.data.forEach((col: any) => {
-    if (messages[col.receiver] === undefined)
+    if (messages[col.receiver] === undefined) {
       messages[col.receiver] = { messages: [] };
+      messages[col.receiver]["messages"][indexx || 0] = [];
+    }
 
     const months: string[] = [
       "January",
@@ -126,33 +129,85 @@ export const retrieveMessages = async () => {
       new Date().getDate() - 1 == date.getDate() &&
       new Date().getFullYear() == date.getFullYear();
 
-
     const index = today
       ? "Today"
       : yesterday
       ? "Yesterday"
       : `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 
-    messages[col.receiver].messages.push({
-      ...dx,
-      isSending: false,
-      messId: col.messId,
-      index,
-      date: date.getTime(),
-    });
-  
+    const deleted = (dx?.deleted || []).includes(lq[3]);
+
+    if (!deleted)
+      messages[col.receiver].messages[indexx || 0].push({
+        ...dx,
+        isSending: false,
+        messId: col.messId,
+        index,
+        date: date.getTime(),
+      });
+      
   });
 
   return messages;
+
 };
 
-export const updateMessages = (prev: string) => {
-  const mess = lq.get();
+export const findMessId = (messBox: any[], id: string) => {
+
+  let mess: any = {};
+
+  messBox.forEach((v: any[], i: number) => {
+
+    v.forEach((val: any) => {
+
+      const { messId } = val;
+
+      if (messId == id) {
+        mess = val;
+      }
+
+    })
+  })
+
+  return mess;
+
+}
+
+export const deleteMessagesAll = async (id: string) => {
+  await axios.patch(`/dao/${lq[0]}/chats/${id}/delete`, {
+    baseURL: process.env.NEXT_PUBLIC_APP_URL,
+    headers: { Authorization: token },
+  });
+
+  return true;
+};
+
+export const deleteMessages = async (id: string) => {
+  await axios.delete(`/dao/${lq[0]}/chats/${id}`, {
+    baseURL: process.env.NEXT_PUBLIC_APP_URL,
+    headers: { Authorization: token },
+  });
+
+  return true;
+
+};
+
+export const updateMessages = async (id: string, update: any) => {
+  await axios.patch(
+    `/dao/${lq[0]}/chats/${id}`,
+    { data: JSON.stringify(update) },
+    {
+      baseURL: process.env.NEXT_PUBLIC_APP_URL,
+      headers: { Authorization: token },
+    }
+  );
+
+  return true;
 };
 
 export const saveMessages = async (updateNew: any) => {
   try {
-    await axios.post(`/user/dao/${lq[0]}/chats`, updateNew, {
+    await axios.post(`/dao/${lq[0]}/chats`, updateNew, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
       },
@@ -167,11 +222,9 @@ export const saveMessages = async (updateNew: any) => {
 };
 
 export const retrieveFiles = async (folder?: string[]) => {
-  const token = `Bearer ${localStorage.getItem("clover-x")}`;
-
   const {
     data: { files },
-  } = await axios.get(`/user/dao/${lq[0]}/files`, {
+  } = await axios.get(`/dao/${lq[0]}/files`, {
     baseURL: process.env.NEXT_PUBLIC_APP_URL,
     headers: { Authorization: token },
   });
@@ -180,11 +233,9 @@ export const retrieveFiles = async (folder?: string[]) => {
 };
 
 export const getRooms = async () => {
-  const token = `Bearer ${localStorage.getItem("clover-x")}`;
-
   const {
     data: { rooms },
-  } = await axios.get(`/user/dao/${lq[0]}/rooms`, {
+  } = await axios.get(`/dao/${lq[0]}/rooms`, {
     baseURL: process.env.NEXT_PUBLIC_APP_URL,
     headers: { Authorization: token },
   });
@@ -193,11 +244,9 @@ export const getRooms = async () => {
 };
 
 export const roomData = async (id: number) => {
-  const token = `Bearer ${localStorage.getItem("clover-x")}`;
-
   const {
     data: { room },
-  } = await axios.get(`/user/dao/${lq[0]}/rooms/${id}`, {
+  } = await axios.get(`/dao/${lq[0]}/rooms/${id}`, {
     baseURL: process.env.NEXT_PUBLIC_APP_URL,
     headers: { Authorization: token },
   });
@@ -221,7 +270,7 @@ export const createRoom = async (name: string) => {
   );
 
   await axios.post(
-    `/user/dao/${lq[0]}/rooms`,
+    `/dao/${lq[0]}/rooms`,
     {
       name,
       creator: lq[3],
@@ -245,7 +294,7 @@ export const createRoom = async (name: string) => {
 export const storeFiles = async (file: store[], dirfolder: string[]) => {
   for (let i = 0; i < file.length; i++) {
     await axios.post(
-      `/user/dao/${lq[0]}/files`,
+      `/dao/${lq[0]}/files`,
       {
         name: file[i].name,
         type: file[i].type,

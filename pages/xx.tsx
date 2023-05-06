@@ -8,7 +8,7 @@ const Xx = () => {
     (async () => {
 
       const { data } = await axios.get(
-        "http://localhost:8000/user/dao/1/files",
+        "http://localhost:8000/dao/1/files",
         {
           headers: {
             "X-App-Key": process.env.NEXT_PUBLIC_APP_KEY || "",
