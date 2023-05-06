@@ -37,7 +37,7 @@ export const AuthProvider = ({
 
       (async () => {
 
-        const { data } = await axios.get(`/user/dao/${daoId}`, {
+        const { data } = await axios.get(`/dao/${daoId}`, {
           headers: {
             Authorization: `Bearer ${token || ""}`,
           },

@@ -97,7 +97,7 @@ export default function handler(
           const {
             data: { token = false },
           } = await axios.post(
-            "/user/login",
+            "/login",
             {
               address,
             },

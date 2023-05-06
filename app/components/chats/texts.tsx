@@ -3,22 +3,24 @@ import userx from "../../../public/images/user.svg";
 import { CContext } from "../extras/contexts/CContext";
 import { useAccount } from "wagmi";
 import Image from "next/image";
+import { ethers } from "ethers";
 
 
 interface Textm {
   content: string[][];
   sender: string;
   date: string | number;
-  key: number;
   reply?: string;
   selected: boolean;
   messId: string;
   enlargen: boolean;
   sent: boolean;
+  replyDisabled: boolean;
   setExtras: React.Dispatch<React.SetStateAction<string>>;
+  setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Text = ({ content, sender, date, key, reply, sent, enlargen, messId, setExtras, selected }: Textm) => {
+const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras, selected, replyDisabled, setEditable }: Textm) => {
 
   const { address, isConnected } = useAccount();
 
@@ -36,9 +38,18 @@ const Text = ({ content, sender, date, key, reply, sent, enlargen, messId, setEx
         opacity: sent ? 1 : 0.3,
         backgroundColor: selected ? "#f1f2f6e1" : undefined,
       }}
-      key={key}
       id={messId}
-      onClick={() => setExtras(selected ? "" : messId)}
+      onClick={() => {
+        
+        setExtras(selected ? "" : messId)
+        
+        const add = address ? ethers.utils.getAddress(address) : '';
+
+        const add2 = ethers.utils.getAddress(sender);
+
+        setEditable(add == add2);
+
+      }}
       className={`chat-msg transition-all relative z-[1001] delay-[400] ${
         address == sender ? "owner" : ""
       }`}
@@ -59,7 +70,7 @@ const Text = ({ content, sender, date, key, reply, sent, enlargen, messId, setEx
       </div>
       <div className="chat-msg-content">
         {content.map((txt: string[], i: number) => (
-          <>
+          <div key={i}>
             {Boolean(txt[1]) && (
               <div className="chat-msg-text reply">
                 <span>{`Replied to ${
@@ -74,6 +85,9 @@ const Text = ({ content, sender, date, key, reply, sent, enlargen, messId, setEx
             <div
               key={i}
               onClick={(e: any) => {
+                
+                if (replyDisabled) return;
+
                 if (!(e.detail % 2)) {
                   if (mCon.update !== undefined) {
                     mCon.update({
@@ -91,7 +105,7 @@ const Text = ({ content, sender, date, key, reply, sent, enlargen, messId, setEx
             >
               {txt[0]}
             </div>
-          </>
+          </div>
         ))}
       </div>
     </div>

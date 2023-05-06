@@ -284,13 +284,10 @@ div[disabled] {
 }
 
 .chat-area-group>span {
-  width: 32px;
-  height: 32px;
+  width: 140px;
+  text-align: right;
   color: #777;
   border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   font-size: 14px;
   font-weight: 500;
 }
@@ -445,8 +442,8 @@ body::-webkit-scrollbar-track,
   display: flex;
   position: sticky;
   top: 0;
+  z-index:1300;
   left: 0;
-  z-index: 2;
   width: 100%;
   align-items: center;
   justify-content: space-between;

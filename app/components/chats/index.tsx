@@ -1,8 +1,9 @@
 import Image from "next/image";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import Link from "next/link";
 import Router from "next/router";
 import logo from "../../../public/images/logo.png";
+import axios from "axios";
 import Select from "react-select";
 import { BsFolder, BsList, BsPlusLg, BsTrash } from "react-icons/bs";
 import { AiOutlineEdit } from "react-icons/ai";
@@ -30,8 +31,8 @@ import {
   FormControl,
   Box,
   Tab,
+  CircularProgress,
 } from "@mui/material";
-import Picker from "emoji-picker-react";
 import { logout } from "../extras/logout";
 import empty from "../../../public/images/empty.png";
 import cicon from "../../../public/images/icon.png";
@@ -43,6 +44,10 @@ import {
   retrieveMessages,
   saveMessages,
   notifications,
+  deleteMessages,
+  deleteMessagesAll,
+  findMessId,
+  updateMessages,
 } from "../extras/storage/init";
 import { FaCloud } from "react-icons/fa";
 import { CContext } from "../extras/contexts/CContext";
@@ -51,7 +56,7 @@ import Chatlist from "./sidebar/chatlist";
 import Loader from "../loader";
 import { useAccount } from "wagmi";
 import Rooms from "../../../app/components/video";
-import { BiX } from "react-icons/bi";
+import { BiSend, BiX } from "react-icons/bi";
 import EmojiPicker from "emoji-picker-react";
 
 
@@ -133,6 +138,10 @@ const Chats = () => {
 
   const [messageText, setMessageText] = useState("");
 
+  const [chDate, setChDate] = useState<string>('');
+
+  const [edit, setEdit] = useState<string>('');
+
   const [group, setGroup] = useState<any>();
 
   const [currentDir, setCurrentDir] = useState<string[]>(["main"]);
@@ -148,7 +157,17 @@ const Chats = () => {
 
   const [disparts, setDisparts] = useState<(string | undefined)[]>([]);
 
+  const [prevMessLoading, setPrevMessLoading] = useState<boolean>(false);
+
+  const [preloadMess, setPreloadMess] = useState<boolean>(true);
+
+  const [editableMess, setEditableMess] = useState<boolean>(true);
+
   const [toggle, setToggle] = useState<string | number>('0');
+
+  const [delMessageMe, setDelMessageMe] = useState<boolean>(false);
+
+  const [delMessageEvryone, setDelMessageEvryone] = useState<boolean>(false);
 
   const [discussions, setDiscussion] = useState<string>('');
 
@@ -159,6 +178,10 @@ const Chats = () => {
   const [failMessage, setFailMessage] = useState<string>("");
 
   const [extrasId, setExtras] = useState<string>("");
+
+  const onceUpdate = useRef<boolean>(false);
+
+  const [beginChecks, setBegin] = useState<boolean>(false);
 
   const [messData, updateMessData] = useState<{
     [index: string]: { participants: any[]; messages: any[] };
@@ -202,7 +225,7 @@ const Chats = () => {
 
       setFilelist(tSize / 1_073_741_824);
 
-      if (mess[name]?.["messages"] === undefined) {
+      if (!Boolean(mess[name]?.["messages"])) {
 
         if(mess[name] === undefined) mess[name] = {}; 
 
@@ -217,13 +240,46 @@ const Chats = () => {
 
       updateMessData(mess);
 
+      setBegin(true);
+
       setLoader(false);
     }
 
     if (name != undefined) {
       init();
     }
+
+    
+
   }, [main, currentDir, uploadData, update, contract, name, address, participants, group]);
+
+  useEffect(() => {
+    if (!onceUpdate.current && beginChecks) {
+      
+      onceUpdate.current = true;
+
+      const upd = async () => {
+        const mess = await retrieveMessages();
+
+        if (!Boolean(mess[name]?.["messages"])) {
+          if (mess[name] === undefined) mess[name] = {};
+
+          mess[name]["messages"] = {};
+        }
+
+
+        updateMessData(mess);
+
+        setTimeout(() => upd(), 3000);
+
+      }
+      
+
+      upd();
+
+
+    }
+  }, [beginChecks]);
 
   const [enlargen, setEnlargen] = useState<number>(0);
 
@@ -234,10 +290,26 @@ const Chats = () => {
     type: "mess" | "vote" = "mess"
   ) => {
 
-
     if (messageText.length) {
-      if (messData[group || ""]["messages"] === undefined) {
-        messData[group || ""]["messages"] = [];
+
+      if (Boolean(edit)) {
+
+       const { content } = findMessId(
+         messData[group || ""]["messages"],
+         extrasId
+       );
+
+        content[0][0] = messageText;
+
+        setEdit("");
+
+        await updateMessages(extrasId, { content });
+
+        return;
+      }
+
+      if (messData[group || ""]["messages"][0] === undefined) {
+        messData[group || ""]["messages"][0] = [];
       }
 
       const newMess: any = {
@@ -257,7 +329,7 @@ const Chats = () => {
       }
 
 
-      messData[group || ""]["messages"].push(newMess);
+      messData[group || ""]["messages"][0].push(newMess);
 
       updateMessData(messData);
 
@@ -268,6 +340,7 @@ const Chats = () => {
       }
 
       try {
+
         // const serverData = { ...messData };
 
         // serverData[group || ""]["messages"][index]["server"] = true;
@@ -281,7 +354,7 @@ const Chats = () => {
 
         await saveMessages({data: JSON.stringify(newMess), receiver: group || ""});
 
-        // messData[group || ""]["messages"][index].sent = true;
+        // messData[group || ""]["messages"][0][index].sent = true;
 
         updateMessData(messData);
 
@@ -300,12 +373,121 @@ const Chats = () => {
 
   const [addNew, setAddNew] = useState<boolean>(false);
 
+  const [conDelete, setConDelete] = useState<boolean>(false);
+
+  const deleteMessageMe = async () => {
+      if (extrasId) {
+         const status = await deleteMessagesAll(extrasId);
+      }
+  }
+
+  const deleteMessageEvryone = async () => {
+      if (extrasId) {
+         const status = await deleteMessages(extrasId);
+      }
+  };
+
   return (
     <>
       {isLoading && <Loader />}
 
       {!isLoading && (
         <div className="app">
+          <Modal open={conDelete} onClose={() => setConDelete(false)}>
+            <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
+              <div className="2usm:px-0 mx-auto max-w-[500px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
+                <div className="rounded-lg bg-white shadow-lg shadow-[#cccccc]">
+                  <div className="border-b flex justify-between items-center py-[9px] px-[17px] text-[16px] font-[600]">
+                    Delete Message?
+                    <IconButton size={"medium"}>
+                      <FiX
+                        size={20}
+                        className="cursor-pointer"
+                        onClick={() => setConDelete(false)}
+                      />
+                    </IconButton>
+                  </div>
+                  <div className="form relative">
+                    <Box sx={{ width: "100%", padding: "15px 24px" }}>
+                      <span className="text-[#7c7c7c] mt-3 block font-[500] text-[16px] text-center ">
+                        {editableMess
+                          ? "You can either delete message for yourself or for everyone."
+                          : "Are you sur you want to delete message?"}
+                      </span>
+
+                      <div className="flex justify-evenly mt-[20px]">
+                        <Button
+                          className="!bg-[#e8e8e8] !text-[#7c7c7c] !normal-case !rounded-lg !font-[inherit] !px-[20px] !py-[10px] !text-[14px] !font-[500] hover:!bg-[#d8d8d8]"
+                          onClick={async () => {
+                            if (delMessageEvryone || delMessageMe) return;
+
+                            setDelMessageMe(true);
+
+                            await deleteMessageMe();
+
+                            setDelMessageMe(false);
+                            setExtras("");
+                            setConDelete(false);
+                            
+                          }}
+                        >
+                          {delMessageMe ? (
+                            <>
+                              <div className="mr-3 h-[20px] text-[#7c7c7c]">
+                                <CircularProgress
+                                  color={"inherit"}
+                                  className="!w-[20px] !h-[20px]"
+                                />
+                              </div>{" "}
+                              <span>Just a Sec...</span>
+                            </>
+                          ) : (
+                            <>Delete for me</>
+                          )}
+                        </Button>
+
+                        {editableMess && (
+                          <Button
+                            className="!bg-[#e8e8e8] !text-[#7c7c7c] !font-[inherit] !normal-case
+                          !rounded-lg !px-[20px] !py-[10px] !text-[14px] !font-[500] hover:!bg-[#d8d8d8]"
+                            onClick={async () => {
+                              if (delMessageEvryone || delMessageMe) return;
+
+                              setDelMessageEvryone(true);
+
+                              await deleteMessageEvryone();
+
+                              setDelMessageEvryone(false);
+
+                              setConDelete(false);
+
+                              setExtras("");
+
+                            }}
+                          >
+                            {delMessageEvryone ? (
+                              <>
+                                <div className="mr-3 h-[20px] text-[#7c7c7c]">
+                                  <CircularProgress
+                                    color={"inherit"}
+                                    className="!w-[20px] !h-[20px]"
+                                  />
+                                </div>{" "}
+                                <span>Just a Sec...</span>
+                              </>
+                            ) : (
+                              <>Delete for everyone</>
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                    </Box>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Modal>
+
           <Modal open={addNew} onClose={() => setAddNew(false)}>
             <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
               <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
@@ -852,96 +1034,168 @@ const Chats = () => {
 
             {Boolean(group != "" && typeof group == "string") && (
               <>
-                <div className="chat-area cusscroller">
+                <div
+                  onScroll={async (e: any) => {
+                    const label = document.querySelectorAll(".dateSeperate");
+
+                    label.forEach((element) => {
+                      const elem = element as HTMLDivElement;
+
+                      if (elem.offsetTop < e.target.scrollTop) {
+                        setChDate(elem.innerText);
+                      }
+                    });
+
+                    if (e.target.scrollTop <= 20 && preloadMess) {
+                      if (prevMessLoading) return;
+
+                      setPrevMessLoading(true);
+
+                      const dataMess = await retrieveMessages(
+                        messData[group]["messages"].length
+                      );
+
+                      if (Object.values(dataMess).length) {
+                        messData[group]["messages"].push(dataMess);
+
+                        setPrevMessLoading(false);
+                      } else {
+                        setPrevMessLoading(false);
+                      }
+                    } else {
+                      setPreloadMess(false);
+                      return;
+                    }
+                  }}
+                  className="chat-area cusscroller"
+                >
                   <div className="chat-area-header">
                     <div className="chat-area-title capitalize">{group}</div>
                     <div className="chat-area-group">
-                      
-                      <span style={{
-                        display: Boolean(extrasId) ? "none" : "flex",
-                      }}
-                      className="chat-length">
-                        {messData[group]["messages"].length}
+                      <span
+                        style={{
+                          display: Boolean(extrasId) ? "none" : "flex",
+                        }}
+                        className="chat-length"
+                      >
+                        {chDate}
                       </span>
 
-                      <div 
-                      style={{
-                        width: Boolean(extrasId) ? "77px" : "0px",
-                      }}  
-                      className="transition-all overflow-hidden delay-300 w-[0px] flex items-center justify-center">
-                        <IconButton size="medium">
+                      <div
+                        style={{
+                          width: Boolean(extrasId) ? "77px" : "0px",
+                        }}
+                        className="transition-all overflow-hidden delay-300 w-[0px] flex items-center justify-center"
+                      >
+                        <IconButton
+                          onClick={() => setConDelete(true)}
+                          size="medium"
+                        >
                           <BsTrash
                             size={20}
                             className="relative -left-[1px] text-[#777]"
                           />
                         </IconButton>
 
-                        <IconButton size="medium">
-                          <FiEdit3
-                            size={20.4}
-                            className="relative -left-[1px] text-[#777]"
-                          />
-                        </IconButton>
+                        {editableMess && (
+                          <IconButton
+                            onClick={() => {
+                              const { content } = findMessId(
+                                messData[group || ""]["messages"],
+                                extrasId
+                              );
+
+                              if (!content?.[0]?.[0]) return;
+
+                              setEdit(content[0][0]);
+
+                              setMessageText(content[0][0]);
+                            }}
+                            size="medium"
+                          >
+                            <FiEdit3
+                              size={20.4}
+                              className="relative -left-[1px] text-[#777]"
+                            />
+                          </IconButton>
+                        )}
                       </div>
                     </div>
                   </div>
                   <div className="chat-area-main">
+                    {prevMessLoading && (
+                      <div className="text-[#1890FF] flex items-center justify-center py-2">
+                        <CircularProgress size={18} color={"inherit"} />
+                      </div>
+                    )}
+
                     {Boolean(messData[group]["messages"].length) && (
                       <>
-                        {messData[group]["messages"].map(
-                          (
-                            {
-                              sender,
-                              date,
-                              content,
-                              reply,
-                              index, 
-                              type,
-                              messId,
-                              server,
-                              sent,
-                              enlargen,
-                            },
-                            i
-                          ) => {
+                        {messData[group]["messages"]
+                          .reverse()
+                          .map((v: any, ii: number) => {
+                            return v.map(
+                              (
+                                {
+                                  sender,
+                                  date,
+                                  content,
+                                  reply,
+                                  index,
+                                  type,
+                                  messId,
+                                  server,
+                                  sent,
+                                  enlargen,
+                                }: any,
+                                i: number
+                              ) => {
+                                let addNumb = false;
 
-                            let addNumb = false;
+                                const mess =
+                                  messData[group]["messages"][ii][i - 1];
 
-                            const mess = messData[group]["messages"][i - 1];
+                                if (mess !== undefined) {
+                                  const { index: prevIndex } = mess;
 
-                            if (mess !== undefined) {
-
-                                const { index: prevIndex } = mess;
-
-                                if (prevIndex != index) {
-
+                                  if (prevIndex != index) {
                                     addNumb = true;
-
+                                  }
+                                } else {
+                                  addNumb = true;
                                 }
 
-                            }else{
-                              addNumb = true;
-                            }
+                                return (
+                                  <div key={i}>
+                                    {addNumb && (
+                                      <div
+                                        style={{
+                                          zIndex: i + 1,
+                                        }}
+                                        className="text-[#777] text-[14px] flex items-center sticky cursor-default bg-white dateSeperate justify-center text-center w-full py-3"
+                                      >
+                                        {index}
+                                      </div>
+                                    )}
 
-                            return <>
-                              {addNumb && <div key={i} style={{
-                                  zIndex: i + 1,
-                              }} className="text-[#777] text-[14px] flex items-center sticky cursor-default bg-white justify-center text-center w-full py-3">{index}</div>}
-
-                              <Text
-                              sender={sender}
-                              date={date}
-                              selected={extrasId == messId}
-                              setExtras={setExtras}
-                              key={i}
-                              messId={messId}
-                              content={content}
-                              sent={server || sent}
-                              reply={reply}
-                              enlargen={Boolean(enlargen)}  
-                            /></>
-                          }
-                        )}
+                                    <Text
+                                      replyDisabled={Boolean(edit)}
+                                      sender={sender}
+                                      date={date}
+                                      selected={extrasId == messId}
+                                      setExtras={setExtras}
+                                      setEditable={setEditableMess}
+                                      messId={messId}
+                                      content={content}
+                                      sent={server || sent}
+                                      reply={reply}
+                                      enlargen={Boolean(enlargen)}
+                                    />
+                                  </div>
+                                );
+                              }
+                            );
+                          })}
                       </>
                     )}
                     {!Boolean(messData[group]["messages"].length) && (
@@ -978,7 +1232,32 @@ const Chats = () => {
                       </div>
                     )}
                   </div>
+
                   <div className="chat-area-footer">
+                    {Boolean(edit) && (
+                      <div className="flex items-center py-[7px] w-full">
+                        <IconButton
+                          onClick={() => {
+                            setEdit("");
+                            setMessageText("");
+                          }}
+                          className="!mr-2 !w-[28px] !h-[28px]"
+                          size={"small"}
+                        >
+                          <FiX
+                            className={
+                              "!text-[rgba(0,0,0,0.5)] hover:!text-[rgba(0,0,0,0.5)]"
+                            }
+                            size={15}
+                          />
+                        </IconButton>
+
+                        <div className="opacity-[.7] flex flex-col">
+                          <span className="text-[14px]">Editting message</span>
+                        </div>
+                      </div>
+                    )}
+
                     {Boolean(rContext?.sender) && (
                       <div className="flex justify-between items-center w-full">
                         <div className="py-[10px] opacity-[.7] flex flex-col">
@@ -1013,76 +1292,87 @@ const Chats = () => {
                     {showEmoji && (
                       <EmojiPicker height={390} onEmojiClick={onEClick} />
                     )}
+                    <div className="flex w-full items-center">
+                      <div className="flex w-full transition-all delay-300 items-center relative">
+                        <TextField
+                          type="text"
+                          value={messageText}
+                          onChange={(e) => {
+                            const val = e.target.value;
 
-                    <div className="flex w-full items-center relative">
-                      <TextField
-                        type="text"
-                        value={messageText}
-                        onKeyDown={(e) => {
-                          emojiModal();
-
-                          if (
-                            (e.keyCode == 13 || e.which === 13) &&
-                            !e.shiftKey
-                          ) {
-                            e.preventDefault();
-                            moveMessage(enlargen == 1);
-
-                            setEnlargen(0);
-                            setMessageText("");
-                          } else {
-                            setEnlargen(0);
-                          }
-                        }}
-                        onChange={(e) => setMessageText(e.target.value)}
-                        placeholder="Type something here..."
-                        multiline
-                        className="textbox"
-                        fullWidth
-                        maxRows={3}
-                        sx={{
-                          "& .MuiInputBase-root": {
-                            padding: "12px",
-                            paddingRight: "45px",
-                            marginRight: "12px",
-                            marginLeft: "4px",
-                            borderRadius: "16px",
-                            backgroundColor: "#f3f3f3",
-                          },
-                          "& .MuiOutlinedInput-notchedOutline": {
-                            border: "none !important",
-                          },
-                          "& .MuiInputBase-input": {
-                            fontSize: "15px",
-                            fontFamily: "Poppins !important",
-                          },
-                        }}
-                      />
-
-                      <div className="flex absolute right-[6px] items-center">
-                        <IconButton
-                          onClick={() => setShowEmoji(!showEmoji)}
-                          size={"small"}
-                          sx={{
-                            background: showEmoji
-                              ? "rgba(0,0,0,0.1)"
-                              : "inherit",
+                            setMessageText(val);
                           }}
-                          className={`!min-w-[34px]`}
-                        >
-                          <MdOutlineEmojiEmotions
-                            size={24}
-                            className="feather fill-[#727272] transition-all delay-[400] feather-smile"
-                          />
-                        </IconButton>
+                          placeholder="Type something here..."
+                          multiline
+                          className="textbox"
+                          fullWidth
+                          maxRows={3}
+                          sx={{
+                            "& .MuiInputBase-root": {
+                              padding: "12px",
+                              paddingRight: "45px",
+                              marginRight: "12px",
+                              marginLeft: "4px",
+                              borderRadius: "16px",
+                              backgroundColor: "#f3f3f3",
+                            },
+                            "& .MuiOutlinedInput-notchedOutline": {
+                              border: "none !important",
+                            },
+                            "& .MuiInputBase-input": {
+                              fontSize: "15px",
+                              fontFamily: "Poppins !important",
+                            },
+                          }}
+                        />
 
-                        {/* <FiVideo size={24} className="feather transition-all delay-[400] feather-video" />
+                        <div className="flex absolute right-[6px] items-center">
+                          <IconButton
+                            onClick={() => setShowEmoji(!showEmoji)}
+                            size={"small"}
+                            sx={{
+                              background: showEmoji
+                                ? "rgba(0,0,0,0.1)"
+                                : "inherit",
+                            }}
+                            className={`!min-w-[34px]`}
+                          >
+                            <MdOutlineEmojiEmotions
+                              size={24}
+                              className="feather fill-[#727272] transition-all delay-[400] feather-smile"
+                            />
+                          </IconButton>
+
+                          {/* <FiVideo size={24} className="feather transition-all delay-[400] feather-video" />
                   
               <FiImage size={24} className="feather transition-all delay-[400] feather-image" />
 
               <FiPlusCircle size={24} className="feather transition-all delay-[400] feather-plus-circle" />
 
               <FiPaperclip size={24} className="feather transition-all delay-[400] feather-paperclip" /> */}
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          width: Boolean(messageText) ? "60px" : "0px",
+                          minWidth: Boolean(messageText) ? "60px" : "0px",
+                        }}
+                        className="overflow-hidden sendButton-holder max-w-[60px] transition-all delay-500 h-[45px]"
+                      >
+                        <Button
+                          onClick={() => {
+                            emojiModal();
+
+                            moveMessage(enlargen == 1);
+
+                            setEnlargen(0);
+
+                            setMessageText("");
+                          }}
+                          className="!bg-[#1890FF] !ml-3  !normal-case !rounded-[50%] !max-w-[45px] !min-w-[45px] !w-[45px] !h-[45px] !font-[inherit] !p-[10px]"
+                        >
+                          <BiSend className={"!text-[#fff]"} size={20} />
+                        </Button>
                       </div>
                     </div>
                   </div>

@@ -4,7 +4,7 @@ export const logout = async () => {
 
     const Authorization = `Bearer ${localStorage.getItem('clover-x')}`
 
-    await axios.get("/user/logout", {
+    await axios.get("/logout", {
         headers: {
             Authorization
         }
