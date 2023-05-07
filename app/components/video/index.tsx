@@ -237,7 +237,7 @@ const Rooms = () => {
               <BsPlusLg size={25} />
             </Button>
 
-            <div className="w-full st:!pl-0 pb-[65px] transition-all delay-500 h-full flex flex-col">
+            <div className="w-full st:!pl-0 pb-[65px] transition-all delay-500 h-full flex flex-col cusscroller overflow-y-scroll overflow-x-hidden">
               {/* <div className="my-2">
                 <ToggleButtonGroup
                   value={tagValue}
@@ -381,13 +381,12 @@ const Rooms = () => {
                                       <MdMeetingRoom size={21} />
                                     </div>
                                     <div className="truncate">
-                                      <h3 className="truncate flex items-center text-[17px] leading-[20px] font-[500] text-[#121212]">
+                                      <h3 className="truncate flex items-center text-[17px] leading-[20px] font-[500] text-[#121212] mb-[2px]">
                                         {name}
                                       </h3>
                                       <span className="block text-[14px] leading-[1.2] truncate w-full text-[#575757]">
-                                        hosted by 
-                                        {owner.substring(0, 6)}...
-                                        {owner.substring(38, 42)}
+                                        {`hosted by ${owner.substring(0, 6)}...
+                                        ${owner.substring(38, 42)}`}
                                       </span>
                                     </div>
                                   </div>

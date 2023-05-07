@@ -275,6 +275,8 @@ export const roomData = async (id: number) => {
 };
 
 export const createRoom = async (name: string) => {
+
+
   const { data: response } = await axios.post(
     "https://iriko.testing.huddle01.com/api/v1/create-room",
     {
@@ -284,7 +286,7 @@ export const createRoom = async (name: string) => {
     {
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.NEXT_PUBLIC_HUDDLE_SECRET as string,
+        "x-api-key": process.env.NEXT_PUBLIC_HUDDLE_APPKEY as string,
       },
     }
   );
