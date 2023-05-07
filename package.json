@@ -36,6 +36,7 @@
     "ethereum-abi": "^0.0.1-security",
     "ethereumjs-abi": "^0.6.8",
     "fs": "^0.0.1-security",
+    "logger": "^0.0.1",
     "magic-sdk": "^8.1.1",
     "next": "12.2.5",
     "nft.storage": "^6.4.0",
