@@ -402,7 +402,7 @@ body {
 }
 
 body *:not(i, svg){
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif !important;
 }
 
 a {
@@ -477,6 +477,9 @@ body::-webkit-scrollbar-track,
   flex-shrink: 0;
   margin-top: auto;
   margin-bottom: -20px;
+  height:40px;
+  border-radius:50%;
+  background:rgba(231,231,231,1);
   position: relative;
 }
 

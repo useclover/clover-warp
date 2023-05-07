@@ -2,7 +2,8 @@ import { useEffect, Suspense } from 'react';
 import Router from 'next/router';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
-import { CCprovider } from '../../app/components/extras/contexts/CContext';
+import Base from '../../app/components/base';
+
 
 const Discuss = () => {
 
@@ -21,10 +22,10 @@ const Discuss = () => {
         <Head>
           <title> Discuss with DAO Members | Clover</title>
         </Head>
-        
-        <CCprovider>
+
+        <Base>
           <Chats />
-        </CCprovider>
+        </Base>
       </>
     );
 
