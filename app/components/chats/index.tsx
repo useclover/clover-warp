@@ -278,8 +278,6 @@ const Chats = () => {
 
         updateMessData(messData);
 
-        rContext.update?.({chatlst: Object.keys(messData)});
-
         const chatArea = document.querySelector(".chat-area");
 
         if (chatArea !== null) {
