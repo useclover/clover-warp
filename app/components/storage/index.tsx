@@ -254,7 +254,7 @@ const Storage = () => {
 
   return (
     <>
-    <Dash />
+      <Dash />
       {(isLoading || notInit) && <Loader />}
 
       {!isLoading && !notInit && (
@@ -268,19 +268,18 @@ const Storage = () => {
             }}
             className="w-full flex items-start justify-between filedrop min-h-screen"
           >
-            
-              <Button
-                onClick={() => {
-                  const elem = document?.querySelector(
-                    ".input_upload"
-                  ) as HTMLElement;
+            <Button
+              onClick={() => {
+                const elem = document?.querySelector(
+                  ".input_upload"
+                ) as HTMLElement;
 
-                  elem?.click();
-                }}
-                className="!py-2 !mr-4 !flex !fixed !right-[15px] !bottom-[20px] !cursor-pointer !justify-center !z-[90] !items-center !px-4 !bg-[#1890FF] !text-white !w-[64px] !h-[64px] !rounded-[50%] overflow-hidden hover:bg-[#0c75d6] font-[300]"
-              >
-                <BsPlusLg size={25} />
-              </Button>
+                elem?.click();
+              }}
+              className="!py-2 !mr-4 !flex !fixed !right-[15px] !bottom-[20px] !cursor-pointer !justify-center !z-[90] !items-center !px-4 !bg-[#1890FF] !text-white !border-solid !border-white !border-[2px] !w-[64px] !h-[64px] !rounded-[50%] overflow-hidden hover:bg-[#0c75d6] font-[300]"
+            >
+              <BsPlusLg size={25} />
+            </Button>
 
             <input
               type="file"
@@ -421,18 +420,17 @@ const Storage = () => {
                       className="flist pt-7 grid gap-2 grid-flow-dense"
                     >
                       {dirContent.map((e: any, i: number) => {
-
-                          return (
-                            <FileDes
-                              key={i}
-                              data={{
-                                name: e["name"],
-                                size: e["size"],
-                                key: i,
-                              }}
-                              text={e["extension"]}
-                            />
-                          );
+                        return (
+                          <FileDes
+                            key={i}
+                            data={{
+                              name: e["name"],
+                              size: e["size"],
+                              key: i,
+                            }}
+                            text={e["extension"]}
+                          />
+                        );
                         // } else {
                         //   let size: number = 0;
                         //   e.forEach((x: any) => {

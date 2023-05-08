@@ -1,12 +1,7 @@
 import Image from "next/image";
 import { useEffect, useState, useContext, useRef } from "react";
-import Link from "next/link";
 import Router from "next/router";
-import logo from "../../../public/images/logo.png";
-import axios from "axios";
-import Select from "react-select";
-import { BsFolder, BsList, BsPlusLg, BsTrash } from "react-icons/bs";
-import { AiOutlineEdit } from "react-icons/ai";
+import { BsFolder, BsList, BsTrash } from "react-icons/bs";
 import {
   FiImage,
   FiSettings,
@@ -18,29 +13,23 @@ import {
   FiX,
   FiEdit3,
 } from "react-icons/fi";
-import Storage from "../storage";
-import { MdMeetingRoom, MdOutlineEmojiEmotions } from "react-icons/md";
+import { MdOutlineEmojiEmotions } from "react-icons/md";
 import {
   LinearProgress,
   TextField,
   IconButton,
   Button,
   Modal,
-  ToggleButtonGroup,
-  ToggleButton,
-  FormControl,
   Box,
   Tab,
   CircularProgress,
 } from "@mui/material";
-import { logout } from "../extras/logout";
 import empty from "../../../public/images/empty.png";
 import cicon from "../../../public/images/icon.png";
 import { GenContext } from "../extras/contexts/genContext";
 import {
   beginStorageProvider,
   lq,
-  retrieveFiles,
   retrieveMessages,
   saveMessages,
   notifications,
@@ -49,49 +38,13 @@ import {
   findMessId,
   updateMessages,
 } from "../extras/storage/init";
-import { FaCloud } from "react-icons/fa";
 import { CContext } from "../extras/contexts/CContext";
 import Text from "./texts";
-import Chatlist from "./sidebar/chatlist";
 import Loader from "../loader";
 import { useAccount } from "wagmi";
-import Rooms from "../../../app/components/video";
 import { BiSend, BiX } from "react-icons/bi";
 import EmojiPicker from "emoji-picker-react";
 
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-  className?: string;
-  padding?: number;
-}
-
-const TabPanel = (props: TabPanelProps) => {
-  const { children, padding, value, index, className = "", ...other } = props;
-
-  const pc = {
-    p: padding,
-    py: padding !== undefined ? undefined : 2,
-  };
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box className={className} sx={pc}>
-          {children}
-        </Box>
-      )}
-    </div>
-  );
-};
 
 
 const Chats = () => {
@@ -142,7 +95,9 @@ const Chats = () => {
 
   const [edit, setEdit] = useState<string>('');
 
-  const [group, setGroup] = useState<any>();
+  const rContext = useContext(CContext);
+
+  const { group } = rContext;
 
   const [currentDir, setCurrentDir] = useState<string[]>(["main"]);
 
@@ -153,29 +108,15 @@ const Chats = () => {
 
   const [isLoading, setLoader] = useState(true);
 
-  const [nname, setNname] = useState<string>("");
-
-  const [disparts, setDisparts] = useState<(string | undefined)[]>([]);
-
   const [prevMessLoading, setPrevMessLoading] = useState<boolean>(false);
 
   const [preloadMess, setPreloadMess] = useState<boolean>(true);
 
   const [editableMess, setEditableMess] = useState<boolean>(true);
 
-  const [toggle, setToggle] = useState<string | number>('0');
-
   const [delMessageMe, setDelMessageMe] = useState<boolean>(false);
 
   const [delMessageEvryone, setDelMessageEvryone] = useState<boolean>(false);
-
-  const [discussions, setDiscussion] = useState<string>('');
-
-  const [voteDesc, setVoteDesc] = useState<string>('');
-
-  const [sidebar, setSidebar] = useState<boolean>(false);
-
-  const [failMessage, setFailMessage] = useState<string>("");
 
   const [extrasId, setExtras] = useState<string>("");
 
@@ -184,28 +125,16 @@ const Chats = () => {
   const [beginChecks, setBegin] = useState<boolean>(false);
 
   const [messData, updateMessData] = useState<{
-    [index: string]: { participants: any[]; messages: any[] };
-  }>({
-    current: {
-      messages: [
-        {
-          content: [["This is a test"]],
-          isSending: false,
-          sender: "address",
-          read: false,
-          date: new Date().getTime(),
-        },
-      ],
-      participants: [],
-    },
-  });
+    [index: string]: { [index: string]: any[] };
+  }>({});
 
-  const [filelist, setFilelist] = useState<number | undefined>()
-
-  const chatlst = Object.keys(messData);
 
   useEffect(() => {
+
     async function init() {
+
+      setChDate("");
+
       await beginStorageProvider({
         user: address || "",
         contract,
@@ -215,27 +144,15 @@ const Chats = () => {
 
       const mess = await retrieveMessages();
 
-      const flist = await retrieveFiles();
-
-      let tSize = 0;
-
-      flist.forEach((e: any) => {
-          tSize += e.size;
-      });
-
-      setFilelist(tSize / 1_073_741_824);
-
       if (!Boolean(mess[name]?.["messages"])) {
+        if (mess[name] === undefined) mess[name] = {};
 
-        if(mess[name] === undefined) mess[name] = {}; 
-
-
-         mess[name]["messages"] = {};
+        mess[name]["messages"] = {};
 
       }
 
       if (group === undefined) {
-        setGroup(name);
+        rContext.update?.({ group: name });
       }
 
       updateMessData(mess);
@@ -243,15 +160,25 @@ const Chats = () => {
       setBegin(true);
 
       setLoader(false);
+    
     }
 
     if (name != undefined) {
       init();
     }
+  }, [
+    main,
+    currentDir,
+    uploadData,
+    update,
+    contract,
+    name,
+    address,
+    participants,
+    group,
+    rContext
+  ]);
 
-    
-
-  }, [main, currentDir, uploadData, update, contract, name, address, participants, group]);
 
   useEffect(() => {
     if (!onceUpdate.current && beginChecks) {
@@ -271,7 +198,7 @@ const Chats = () => {
         updateMessData(mess);
 
         setTimeout(() => upd(), 3000);
-
+        
       }
       
 
@@ -282,8 +209,6 @@ const Chats = () => {
   }, [beginChecks]);
 
   const [enlargen, setEnlargen] = useState<number>(0);
-
-  const rContext = useContext(CContext);
 
   const moveMessage = async (
     enlargen: boolean,
@@ -308,8 +233,10 @@ const Chats = () => {
         return;
       }
 
-      if (messData[group || ""]["messages"][0] === undefined) {
-        messData[group || ""]["messages"][0] = [];
+      if (!Boolean(messData[group || ""]?.["messages"][0])) {
+        messData[group || ""] = {
+          messages: [[]]
+        }       
       }
 
       const newMess: any = {
@@ -331,13 +258,6 @@ const Chats = () => {
 
       messData[group || ""]["messages"][0].push(newMess);
 
-      updateMessData(messData);
-
-      const chatArea = document.querySelector(".chat-area");
-
-      if (chatArea !== null) {
-        chatArea.scrollTop = chatArea.scrollHeight;
-      }
 
       try {
 
@@ -358,6 +278,12 @@ const Chats = () => {
 
         updateMessData(messData);
 
+        const chatArea = document.querySelector(".chat-area");
+
+        if (chatArea !== null) {
+          chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
       } catch (err) {
         console.log(err);
       }
@@ -371,7 +297,6 @@ const Chats = () => {
 
   };
 
-  const [addNew, setAddNew] = useState<boolean>(false);
 
   const [conDelete, setConDelete] = useState<boolean>(false);
 
@@ -392,7 +317,7 @@ const Chats = () => {
       {isLoading && <Loader />}
 
       {!isLoading && (
-        <div className="app">
+        <>
           <Modal open={conDelete} onClose={() => setConDelete(false)}>
             <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
               <div className="2usm:px-0 mx-auto max-w-[500px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
@@ -412,7 +337,7 @@ const Chats = () => {
                       <span className="text-[#7c7c7c] mt-3 block font-[500] text-[16px] text-center ">
                         {editableMess
                           ? "You can either delete message for yourself or for everyone."
-                          : "Are you sur you want to delete message?"}
+                          : "Are you sure you want to delete message?"}
                       </span>
 
                       <div className="flex justify-evenly mt-[20px]">
@@ -428,7 +353,6 @@ const Chats = () => {
                             setDelMessageMe(false);
                             setExtras("");
                             setConDelete(false);
-                            
                           }}
                         >
                           {delMessageMe ? (
@@ -462,7 +386,6 @@ const Chats = () => {
                               setConDelete(false);
 
                               setExtras("");
-
                             }}
                           >
                             {delMessageEvryone ? (
@@ -488,551 +411,8 @@ const Chats = () => {
             </div>
           </Modal>
 
-          <Modal open={addNew} onClose={() => setAddNew(false)}>
-            <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
-              <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
-                <div className="rounded-lg bg-white shadow-lg shadow-[#cccccc]">
-                  <div className="border-b flex justify-between py-[14px] px-[17px] text-xl font-bold">
-                    Create New
-                    <FiX
-                      size={20}
-                      className="cursor-pointer"
-                      onClick={() => setAddNew(false)}
-                    />
-                  </div>
-                  <div className="form relative">
-                    <Box sx={{ width: "100%" }}>
-                      {Boolean(failMessage.length) && (
-                        <div className="rounded-md w-[95%] font-bold mt-2 mx-auto p-3 bg-[#ff8f33] text-white">
-                          {failMessage}
-                        </div>
-                      )}
-
-                      <FormControl
-                        fullWidth
-                        sx={{
-                          px: 5,
-                          py: 3,
-                        }}
-                      >
-                        <div>
-                          <ToggleButtonGroup
-                            value={toggle}
-                            className="cusscroller"
-                            sx={{
-                              width: "100%",
-                              padding: "0px 10px",
-                              margin: "10px 0px 20px",
-                              "& .Mui-selected": {
-                                backgroundColor: `#1890FF !important`,
-                                color: `#fff !important`,
-                              },
-                              "& .MuiToggleButtonGroup-grouped": {
-                                borderRadius: "4rem !important",
-                                minWidth: 55,
-                                fontFamily: "Poppins, sans-serif",
-                                paddingTop: "4px",
-                                margin: "0px 10px",
-                                paddingBottom: "4px",
-                                border:
-                                  "1px solid rgba(0, 0, 0, 0.12) !important",
-                              },
-                            }}
-                            exclusive
-                            onChange={(e: any) => {
-                              if (e.target.value != "2") {
-                                setToggle(e.target.value);
-                              }
-                            }}
-                          >
-                            <ToggleButton
-                              sx={{
-                                textTransform: "capitalize",
-                                fontWeight: "500",
-                              }}
-                              value={"0"}
-                            >
-                              Discussion Channel
-                            </ToggleButton>
-                            <ToggleButton
-                              sx={{
-                                textTransform: "capitalize",
-                                fontWeight: "500",
-                              }}
-                              value={"1"}
-                            >
-                              A new voting campaign
-                            </ToggleButton>
-                            {contract.toLowerCase() ==
-                              "0xacdfc5338390ce4ec5ad61e3dc255c9f2560d797" && (
-                              <ToggleButton
-                                sx={{
-                                  textTransform: "capitalize",
-                                  fontWeight: "500",
-                                }}
-                                value={"2"}
-                              >
-                                A New Participant
-                              </ToggleButton>
-                            )}
-                          </ToggleButtonGroup>
-                        </div>
-
-                        <TabPanel padding={0} value={Number(toggle)} index={0}>
-                          <div>
-                            <TextField
-                              fullWidth
-                              id="outlined-basic"
-                              label="Name of discussion channel"
-                              variant="outlined"
-                              value={nname}
-                              onChange={(
-                                e: React.ChangeEvent<
-                                  HTMLInputElement | HTMLTextAreaElement
-                                >
-                              ) => {
-                                setNname(e.target.value);
-                                setFailMessage("");
-                              }}
-                            />
-                          </div>
-
-                          <div className="mt-4">
-                            <label className="text-[#808080] mb-2 block">
-                              Add members, click on registered members to add
-                            </label>
-
-                            <div className="flex w-full items-center cusscroller flex-nowrap overflow-y-hidden overflow-x-scroll">
-                              {participants.map(
-                                (v: string, i: number) =>
-                                  v.toLowerCase() != address?.toLowerCase() && (
-                                    <div
-                                      onClick={() => {
-                                        const selected = [...disparts];
-
-                                        if (selected[i] !== undefined) {
-                                          selected[i] = undefined;
-
-                                          setDisparts(selected);
-                                        } else {
-                                          selected[i] = v;
-
-                                          setDisparts(selected);
-                                        }
-                                      }}
-                                      style={
-                                        disparts[i] !== undefined
-                                          ? {
-                                              color: "#fff",
-                                              backgroundColor: "#1890FF",
-                                            }
-                                          : {}
-                                      }
-                                      className="truncate cursor-pointer rounded-[4rem] max-w-[200px] hover:max-w-[450px] py-1 px-[10px] font-[500] text-[#444444] delay-500 transition-all border border-solid border-[rgba(0,0,0,0.12)] mx-[3px]"
-                                      key={i}
-                                    >
-                                      {v}
-                                    </div>
-                                  )
-                              )}
-                            </div>
-                            <span className="text-[14px] block mt-1 text-[#b6b6b6]">
-                              Not selecting any item, selects every item
-                            </span>
-                          </div>
-
-                          <Button
-                            variant="contained"
-                            className="!bg-[#1891fe] !mt-4 !py-[13px] !font-medium !capitalize"
-                            style={{
-                              fontFamily: "inherit",
-                            }}
-                            onClick={async () => {
-                              if (nname.length) {
-                                setLoader(true);
-
-                                try {
-                                  const nMessData = { ...messData };
-
-                                  nMessData[nname]["participants"] =
-                                    disparts.filter((v) => v !== undefined);
-
-                                  nMessData[nname]["messages"] = [];
-
-                                  // await saveMessages(JSON.stringify(nMessData));
-
-                                  updateMessData(nMessData);
-
-                                  setGroup(nname);
-
-                                  setDisparts([]);
-
-                                  setAddNew(false);
-
-                                  setLoader(false);
-                                } catch (err: any) {
-                                  setLoader(false);
-
-                                  setFailMessage(
-                                    "Something went wrong, please try again later"
-                                  );
-                                }
-                              } else {
-                                setFailMessage("Name of channel is required");
-                              }
-                            }}
-                            fullWidth
-                          >
-                            Create
-                          </Button>
-                        </TabPanel>
-
-                        <TabPanel padding={0} value={Number(toggle)} index={1}>
-                          <div className="mb-4">
-                            <TextField
-                              fullWidth
-                              id="outlined-basic"
-                              label="Name"
-                              variant="outlined"
-                              value={nname}
-                              onChange={(
-                                e: React.ChangeEvent<
-                                  HTMLInputElement | HTMLTextAreaElement
-                                >
-                              ) => {
-                                setNname(e.target.value);
-                                setFailMessage("");
-                              }}
-                            />
-                          </div>
-
-                          <div className="mb-4">
-                            <TextField
-                              fullWidth
-                              id="outlined-basic"
-                              label="Description"
-                              multiline
-                              variant="outlined"
-                              value={voteDesc}
-                              onChange={(
-                                e: React.ChangeEvent<
-                                  HTMLInputElement | HTMLTextAreaElement
-                                >
-                              ) => {
-                                setVoteDesc(e.target.value);
-                                setFailMessage("");
-                              }}
-                            />
-                          </div>
-
-                          <div className="mb-5">
-                            <label className="text-[#808080] mb-2 block">
-                              Select Discussion Channel participants can vote on
-                            </label>
-
-                            <Select
-                              isClearable={false}
-                              value={discussions}
-                              onChange={(e: any) => setDiscussion(e)}
-                              name="Channels"
-                              placeholder={"Channels..."}
-                              options={Object.keys(messData)}
-                              styles={{
-                                option: (provided: any, state: any) => {
-                                  return {
-                                    ...provided,
-                                    backgroundColor: state.isSelected
-                                      ? "#dfdfdf"
-                                      : "transparent",
-                                    cursor: "pointer",
-                                    "&:active": {
-                                      backgroundColor: "#dfdfdf",
-
-                                      color: "#121212 !important",
-                                    },
-                                    "&:hover": {
-                                      backgroundColor: state.isSelected
-                                        ? undefined
-                                        : `#dfdfdff2`,
-                                    },
-                                  };
-                                },
-                                container: (provided: any, state: any) => ({
-                                  ...provided,
-                                  "& .select__control": {
-                                    borderWidth: "0px",
-                                    borderRadius: "0px",
-                                    backgroundColor: "transparent",
-                                    borderBottomWidth: "1px",
-                                  },
-                                  "& .select__value-container": {
-                                    paddingLeft: "0px",
-                                  },
-                                  "& .select__control:hover": {
-                                    borderBottomWidth: "2px",
-                                    borderBottomColor: "#121212",
-                                  },
-                                  "& .select__control--is-focused": {
-                                    borderWidth: "0px",
-                                    borderBottomWidth: "2px",
-                                    borderBottomColor: `#1891fe !important`,
-                                    boxShadow: "none",
-                                  },
-                                }),
-                              }}
-                              classNamePrefix="select"
-                            />
-                          </div>
-
-                          <Button
-                            variant="contained"
-                            className="!bg-[#1891fe] !mt-4 !py-[13px] !font-medium !capitalize"
-                            style={{
-                              fontFamily: "inherit",
-                            }}
-                            onClick={async () => {
-                              if (
-                                nname.length &&
-                                voteDesc.length &&
-                                discussions.length
-                              ) {
-                                setLoader(true);
-
-                                try {
-                                  const nMessData = { ...messData };
-
-                                  if (nMessData[discussions] !== undefined) {
-                                    const newMess: any = {
-                                      content: { name: nname, desc: voteDesc },
-                                      sent: true,
-                                      type: "vote",
-                                      creator: address,
-                                      expiry: new Date().getTime(),
-                                    };
-
-                                    nMessData[discussions]["messages"].push(
-                                      newMess
-                                    );
-
-                                    await saveMessages({
-                                      data: JSON.stringify(nMessData),
-                                      receiver: discussions,
-                                    });
-
-                                    notifications({
-                                      title: `Vote campaign created by ${String(
-                                        address
-                                      ).substring(0, 6)}...${String(
-                                        address
-                                      ).substring(38, 42)}`,
-                                      message: voteDesc,
-                                      receivers: nMessData[discussions][
-                                        "participants"
-                                      ].length
-                                        ? nMessData[discussions]["participants"]
-                                        : lq[2],
-                                      exclude: address || "",
-                                    });
-
-                                    updateMessData(nMessData);
-
-                                    setGroup(discussions);
-
-                                    setDisparts([]);
-
-                                    setAddNew(false);
-
-                                    setLoader(false);
-                                  } else {
-                                    setLoader(false);
-
-                                    setFailMessage(
-                                      "Discussion channel not found"
-                                    );
-                                  }
-                                } catch (err: any) {
-                                  setLoader(false);
-
-                                  setFailMessage(
-                                    "Something went wrong, please try again later"
-                                  );
-                                }
-                              } else {
-                                setFailMessage(
-                                  "Please all inputs are required"
-                                );
-                              }
-                            }}
-                            fullWidth
-                          >
-                            Create
-                          </Button>
-                        </TabPanel>
-                      </FormControl>
-                    </Box>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Modal>
-
-          <div className="header border-b-[#eef2f4] h-[80px] w-full border-b-solid border-b flex items-center py-0 px-5">
-            <IconButton
-              className="!hidden sst:!block"
-              onClick={() => setSidebar(!sidebar)}
-            >
-              {sidebar ? (
-                <BsList className="text-[#1890FF] cursor-pointer text-[30px]" />
-              ) : (
-                <BiX className="text-[#1890FF] cursor-pointer text-[30px]" />
-              )}
-            </IconButton>
-
-            <div className="logo flex-shrink-0 text-[#1890FF]">
-              <Link href="/">
-                <a className="text-[#1890FF] cursor-pointer flex pl-4 items-center font-bold text-[18px]">
-                  <Image src={logo} width={100} height={33.33} alt="clover" />
-                </a>
-              </Link>
-            </div>
-            <div className="search-bar h-[80px] z-[3] relative ml-[280px]">
-              {/* <input type="text" placeholder="Search..." /> */}
-            </div>
-            <div className="user-settings flex items-center cursor-pointer flex-shrink-0 ml-auto">
-              <div className="dark-light w-[22px] h-[22px] text-[#c1c7cd] flex-shrink-0">
-                <FiMoon
-                  className="w-full fill-transparent transition-all delay-500"
-                  size={24}
-                />
-              </div>
-              <div className="settings w-[22px] h-[22px] text-[#c1c7cd] flex-shrink-0">
-                <FiSettings
-                  className="w-full fill-transparent transition-all delay-500"
-                  size={24}
-                />
-              </div>
-              <div className="settings w-[22px] h-[22px] text-[#c1c7cd] flex-shrink-0">
-                <FiLogOut
-                  onClick={logout}
-                  className="hover:stroke-[#ff5100] transition-all delay-[400]"
-                  size={24}
-                />
-              </div>
-            </div>
-          </div>
           <div className="wrapper w-full flex flex-grow-[1] overflow-hidden">
-            <div
-              className={`conversation-area relative flex-col overflow-y-auto overflow-x-hidden w-[340px] flex-shrink-0 border-r-solid border-r border-r-[#eef2f4] cusscroller ${
-                sidebar ? "!hidden" : "!flex"
-              }`}
-            >
-              <div
-                className={`msg`}
-                title="Add More Discussions, voting, airdrop"
-                onClick={() => setAddNew(true)}
-              >
-                <div className="w-[44px] min-w-[44px] flex items-center justify-center mr-[15px] rounded-[50%] bg-[#1890FF] h-[44px]">
-                  <BsPlusLg size={19} color="#fff" />
-                </div>
-                <div className="msg-detail w-full">
-                  <div className="msg-username">
-                    Add New Channels/Participants
-                  </div>
-                  <div className="msg-content">
-                    <span className="msg-message">
-                      Add More Discussions, voting, airdrop
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className={`msg ${group === true ? "active" : ""}`}
-                title="Meeting rooms"
-                onClick={() => setGroup(true)}
-              >
-                <div className="w-[44px] min-w-[44px] flex items-center justify-center mr-[15px] rounded-[50%] bg-[#1890FF] h-[44px]">
-                  <MdMeetingRoom size={19} color="#fff" />
-                </div>
-                <div className="msg-detail w-full">
-                  <div className="msg-username">Meeting Rooms</div>
-                  <div className="msg-content">
-                    <span className="msg-message">
-                      Rooms for conferences, meetings
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className={`msg ${Boolean(group) ? "" : "active"}`}
-                onClick={() => {
-                  setGroup("");
-                }}
-              >
-                <div className="w-[44px] min-w-[44px] flex items-center justify-center mr-[15px] rounded-[50%] bg-[#1890FF] h-[44px]">
-                  <FaCloud size={26} color="#fff" />
-                </div>
-                <div className="msg-detail w-full">
-                  <div className="msg-username">DAO Storage</div>
-                  <div className="msg-content">
-                    <LinearProgress
-                      variant="determinate"
-                      sx={{
-                        height: 6,
-                        width: "100%",
-                        borderRadius: "5rem",
-                        backgroundColor: "#D9D9D9",
-                        "& .MuiLinearProgress-bar": {
-                          backgroundColor: "#1890FF",
-                        },
-                      }}
-                      value={((filelist || 0) / 50) * 100}
-                    />
-
-                    <span className="msg-date font-bold text-[13px] min-w-fit ml-[3px]">
-                      {filelist?.toFixed(2)}/50GB
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {chatlst.map((gps, i) => {
-                const clst =
-                  messData[gps]["messages"][
-                    messData[gps]["messages"].length - 1
-                  ];
-
-                return (
-                  <Chatlist
-                    key={i}
-                    onClick={() => {
-                      setGroup(gps);
-
-                      if (rContext.update !== undefined) {
-                        rContext.update({
-                          content: undefined,
-                          sender: undefined,
-                        });
-                      }
-                    }}
-                    time={clst !== undefined ? clst["date"] : undefined}
-                    img={cicon.src}
-                    selected={gps == group}
-                    lastMsg={clst !== undefined ? clst["content"] : ""}
-                    name={`${gps} ${!i ? "(Main)" : ""}`}
-                  />
-                );
-              })}
-
-              <div className="overlay"></div>
-            </div>
-
-            {group == "" && <Storage />}
-
-            {group === true && <Rooms />}
-
-            {Boolean(group != "" && typeof group == "string") && (
+            {
               <>
                 <div
                   onScroll={async (e: any) => {
@@ -1041,7 +421,7 @@ const Chats = () => {
                     label.forEach((element) => {
                       const elem = element as HTMLDivElement;
 
-                      if (elem.offsetTop < e.target.scrollTop) {
+                      if (elem.offsetTop - 70 < e.target.scrollTop) {
                         setChDate(elem.innerText);
                       }
                     });
@@ -1052,11 +432,11 @@ const Chats = () => {
                       setPrevMessLoading(true);
 
                       const dataMess = await retrieveMessages(
-                        messData[group]["messages"].length
+                        messData[group || ""]?.["messages"]?.length || 0,
                       );
 
                       if (Object.values(dataMess).length) {
-                        messData[group]["messages"].push(dataMess);
+                        messData[group || ""]["messages"].push(dataMess);
 
                         setPrevMessLoading(false);
                       } else {
@@ -1076,14 +456,14 @@ const Chats = () => {
                         style={{
                           display: Boolean(extrasId) ? "none" : "flex",
                         }}
-                        className="chat-length"
+                        className="chat-length items-center"
                       >
                         {chDate}
                       </span>
 
                       <div
                         style={{
-                          width: Boolean(extrasId) ? "77px" : "0px",
+                          width: Boolean(extrasId) ? "fit-content" : "0px",
                         }}
                         className="transition-all overflow-hidden delay-300 w-[0px] flex items-center justify-center"
                       >
@@ -1129,9 +509,9 @@ const Chats = () => {
                       </div>
                     )}
 
-                    {Boolean(messData[group]["messages"].length) && (
+                    {Boolean(messData[group || ""]?.["messages"]?.length) && (
                       <>
-                        {messData[group]["messages"]
+                        {messData[group || ""]["messages"]
                           .reverse()
                           .map((v: any, ii: number) => {
                             return v.map(
@@ -1153,7 +533,7 @@ const Chats = () => {
                                 let addNumb = false;
 
                                 const mess =
-                                  messData[group]["messages"][ii][i - 1];
+                                  messData[group || ""]["messages"][ii][i - 1];
 
                                 if (mess !== undefined) {
                                   const { index: prevIndex } = mess;
@@ -1198,7 +578,7 @@ const Chats = () => {
                           })}
                       </>
                     )}
-                    {!Boolean(messData[group]["messages"].length) && (
+                    {!Boolean(messData[group || ""]?.["messages"]?.length) && (
                       <div
                         className="empty"
                         style={{
@@ -1277,12 +657,11 @@ const Chats = () => {
                           <FiX
                             size={24}
                             onClick={() => {
-                              if (rContext.update !== undefined) {
-                                rContext.update({
+                             
+                                rContext.update?.({
                                   content: undefined,
                                   sender: undefined,
                                 });
-                              }
                             }}
                           />
                         </div>
@@ -1314,7 +693,7 @@ const Chats = () => {
                               marginRight: "12px",
                               marginLeft: "4px",
                               borderRadius: "16px",
-                              backgroundColor: "#f3f3f3",
+                              backgroundColor: "#e9e9e9",
                             },
                             "& .MuiOutlinedInput-notchedOutline": {
                               border: "none !important",
@@ -1422,9 +801,9 @@ const Chats = () => {
                   </div>
                 </div>
               </>
-            )}
+            }
           </div>
-        </div>
+        </>
       )}
     </>
   );

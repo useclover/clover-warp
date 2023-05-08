@@ -3,6 +3,7 @@ import { GenProvider } from "../app/components/extras/contexts/genContext";
 import AuthProvider from "../app/components/extras/contexts/AuthContext";
 import "../styles/globals.css";
 import axios from 'axios';
+import { CCprovider } from "../app/components/extras/contexts/CContext";
 
 function MyApp({ Component, pageProps }: AppProps) {
 
@@ -11,7 +12,9 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <AuthProvider>
       <GenProvider>
-        <Component {...pageProps} />
+        <CCprovider>
+          <Component {...pageProps} />
+        </CCprovider>
       </GenProvider>
     </AuthProvider>
   );

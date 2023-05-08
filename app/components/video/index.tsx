@@ -232,7 +232,7 @@ const Rooms = () => {
           <div className="w-full flex items-start justify-between filedrop min-h-screen">
             <Button
               onClick={() => setAddNew(true)}
-              className="!py-2 !mr-4 !flex !fixed !right-[15px] !bottom-[20px] !cursor-pointer !justify-center !z-[90] !items-center !px-4 !bg-[#1890FF] !text-white !w-[64px] !h-[64px] !rounded-[50%] overflow-hidden hover:bg-[#0c75d6] font-[300]"
+              className="!py-2 !mr-4 !flex !fixed !right-[15px] !bottom-[20px] !cursor-pointer !justify-center !z-[90] !items-center !px-4 !bg-[#1890FF] !text-white !border-solid !border-white !border-[2px] !w-[64px] !h-[64px] !rounded-[50%] overflow-hidden hover:bg-[#0c75d6] font-[300]"
             >
               <BsPlusLg size={25} />
             </Button>
@@ -365,7 +365,7 @@ const Rooms = () => {
                                       margin: "auto",
                                       backgroundColor: "#1890FF",
                                     }}
-                                    className="text-[100px] font-bold"
+                                    className="text-[60px] font-bold"
                                     variant="rounded"
                                   >
                                     {(
