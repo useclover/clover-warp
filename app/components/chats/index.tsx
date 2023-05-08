@@ -95,7 +95,9 @@ const Chats = () => {
 
   const [edit, setEdit] = useState<string>('');
 
-  const [group, setGroup] = useState<any>();
+  const rContext = useContext(CContext);
+
+  const { group } = rContext;
 
   const [currentDir, setCurrentDir] = useState<string[]>(["main"]);
 
@@ -123,25 +125,16 @@ const Chats = () => {
   const [beginChecks, setBegin] = useState<boolean>(false);
 
   const [messData, updateMessData] = useState<{
-    [index: string]: { participants: any[]; messages: any[] };
-  }>({
-    current: {
-      messages: [
-        {
-          content: [["This is a test"]],
-          isSending: false,
-          sender: "address",
-          read: false,
-          date: new Date().getTime(),
-        },
-      ],
-      participants: [],
-    },
-  });
+    [index: string]: { [index: string]: any[] };
+  }>({});
 
 
   useEffect(() => {
+
     async function init() {
+
+      setChDate("");
+
       await beginStorageProvider({
         user: address || "",
         contract,
@@ -151,18 +144,15 @@ const Chats = () => {
 
       const mess = await retrieveMessages();
 
-
       if (!Boolean(mess[name]?.["messages"])) {
+        if (mess[name] === undefined) mess[name] = {};
 
-        if(mess[name] === undefined) mess[name] = {}; 
-
-
-         mess[name]["messages"] = {};
+        mess[name]["messages"] = {};
 
       }
 
       if (group === undefined) {
-        setGroup(name);
+        rContext.update?.({ group: name });
       }
 
       updateMessData(mess);
@@ -170,15 +160,25 @@ const Chats = () => {
       setBegin(true);
 
       setLoader(false);
+    
     }
 
     if (name != undefined) {
       init();
     }
+  }, [
+    main,
+    currentDir,
+    uploadData,
+    update,
+    contract,
+    name,
+    address,
+    participants,
+    group,
+    rContext
+  ]);
 
-    
-
-  }, [main, currentDir, uploadData, update, contract, name, address, participants, group]);
 
   useEffect(() => {
     if (!onceUpdate.current && beginChecks) {
@@ -198,7 +198,7 @@ const Chats = () => {
         updateMessData(mess);
 
         setTimeout(() => upd(), 3000);
-
+        
       }
       
 
@@ -209,8 +209,6 @@ const Chats = () => {
   }, [beginChecks]);
 
   const [enlargen, setEnlargen] = useState<number>(0);
-
-  const rContext = useContext(CContext);
 
   const moveMessage = async (
     enlargen: boolean,
@@ -235,8 +233,10 @@ const Chats = () => {
         return;
       }
 
-      if (messData[group || ""]["messages"][0] === undefined) {
-        messData[group || ""]["messages"][0] = [];
+      if (!Boolean(messData[group || ""]?.["messages"][0])) {
+        messData[group || ""] = {
+          messages: [[]]
+        }       
       }
 
       const newMess: any = {
@@ -258,13 +258,6 @@ const Chats = () => {
 
       messData[group || ""]["messages"][0].push(newMess);
 
-      updateMessData(messData);
-
-      const chatArea = document.querySelector(".chat-area");
-
-      if (chatArea !== null) {
-        chatArea.scrollTop = chatArea.scrollHeight;
-      }
 
       try {
 
@@ -284,6 +277,14 @@ const Chats = () => {
         // messData[group || ""]["messages"][0][index].sent = true;
 
         updateMessData(messData);
+
+        rContext.update?.({chatlst: Object.keys(messData)});
+
+        const chatArea = document.querySelector(".chat-area");
+
+        if (chatArea !== null) {
+          chatArea.scrollTop = chatArea.scrollHeight;
+        }
 
       } catch (err) {
         console.log(err);
@@ -422,7 +423,7 @@ const Chats = () => {
                     label.forEach((element) => {
                       const elem = element as HTMLDivElement;
 
-                      if (elem.offsetTop < e.target.scrollTop) {
+                      if (elem.offsetTop - 70 < e.target.scrollTop) {
                         setChDate(elem.innerText);
                       }
                     });
@@ -433,11 +434,11 @@ const Chats = () => {
                       setPrevMessLoading(true);
 
                       const dataMess = await retrieveMessages(
-                        messData[group]["messages"].length
+                        messData[group || ""]?.["messages"]?.length || 0,
                       );
 
                       if (Object.values(dataMess).length) {
-                        messData[group]["messages"].push(dataMess);
+                        messData[group || ""]["messages"].push(dataMess);
 
                         setPrevMessLoading(false);
                       } else {
@@ -510,9 +511,9 @@ const Chats = () => {
                       </div>
                     )}
 
-                    {Boolean(messData[group]["messages"].length) && (
+                    {Boolean(messData[group || ""]?.["messages"]?.length) && (
                       <>
-                        {messData[group]["messages"]
+                        {messData[group || ""]["messages"]
                           .reverse()
                           .map((v: any, ii: number) => {
                             return v.map(
@@ -534,7 +535,7 @@ const Chats = () => {
                                 let addNumb = false;
 
                                 const mess =
-                                  messData[group]["messages"][ii][i - 1];
+                                  messData[group || ""]["messages"][ii][i - 1];
 
                                 if (mess !== undefined) {
                                   const { index: prevIndex } = mess;
@@ -579,7 +580,7 @@ const Chats = () => {
                           })}
                       </>
                     )}
-                    {!Boolean(messData[group]["messages"].length) && (
+                    {!Boolean(messData[group || ""]?.["messages"]?.length) && (
                       <div
                         className="empty"
                         style={{
@@ -658,12 +659,11 @@ const Chats = () => {
                           <FiX
                             size={24}
                             onClick={() => {
-                              if (rContext.update !== undefined) {
-                                rContext.update({
+                             
+                                rContext.update?.({
                                   content: undefined,
                                   sender: undefined,
                                 });
-                              }
                             }}
                           />
                         </div>

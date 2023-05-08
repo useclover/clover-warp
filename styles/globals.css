@@ -286,6 +286,7 @@ div[disabled] {
 .chat-area-group>span {
   width: 140px;
   text-align: right;
+  justify-content: right;
   color: #777;
   border-radius: 50%;
   font-size: 14px;

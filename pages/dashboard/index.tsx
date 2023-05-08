@@ -3,7 +3,7 @@ import Router from 'next/router';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import Base from '../../app/components/base';
-
+import Chats from '../../app/components/chats';
 
 const Discuss = () => {
 
@@ -13,8 +13,8 @@ const Discuss = () => {
       }
     }, []);
 
-    const Chats = dynamic(() => (import("../../app/components/chats"))
-     , { ssr: false });
+    // const Chats = dynamic(() => (import("../../app/components/chats"))
+    //  , { ssr: false });
 
      
     return (

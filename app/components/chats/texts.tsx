@@ -28,14 +28,16 @@ const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras,
 
   const exp = new Date(date);
 
+  const min = exp.getMinutes() + 1
+
   const ddate = `${exp.getHours() % 12 || exp.getHours()}.${
-          exp.getMinutes() + 1
+            min > 9 ? min : `0${min}`
         }${exp.getHours() > 12 ? "pm" : "am"}`;
 
   return (
     <div
       style={{
-        opacity: sent ? 1 : 0.3,
+        // opacity: sent ? 1 : 0.3,
         backgroundColor: selected ? "#f1f2f6e1" : undefined,
       }}
       id={messId}

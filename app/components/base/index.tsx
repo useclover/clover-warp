@@ -124,8 +124,6 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
   const { name, contract, data: main, participants, creator } = loginData;
 
-  
-  const [group, setGroup] = useState<any>();
 
   const [currentDir, setCurrentDir] = useState<string[]>(["main"]);
 
@@ -150,28 +148,14 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
   const [failMessage, setFailMessage] = useState<string>("");
 
-  const [messData, updateMessData] = useState<{
-    [index: string]: { participants: any[]; messages: any[] };
-  }>({
-    current: {
-      messages: [
-        {
-          content: [["This is a test"]],
-          isSending: false,
-          sender: "address",
-          read: false,
-          date: new Date().getTime(),
-        },
-      ],
-      participants: [],
-    },
-  });
+  const [messData, updateMessData] = useState<{[index: string]: { [index: string]: any[] }}>({});
 
   const [filelist, setFilelist] = useState<number | undefined>();
 
-    const rContext = useContext(CContext);
+  const rContext = useContext(CContext);
 
-  const chatlst = Object.keys(messData);
+  const { group } = rContext;
+
 
   useEffect(() => {
     async function init() {
@@ -198,15 +182,18 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
         if (mess[name] === undefined) mess[name] = {};
 
         mess[name]["messages"] = {};
+
       }
 
-      if (rContext.group === undefined) {
+      if (group === undefined) {
         rContext.update?.({group: name});
       }
 
       updateMessData(mess);
 
+
       setLoader(false);
+
     }
 
     if (name != undefined) {
@@ -221,8 +208,8 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
     name,
     address,
     participants,
-    rContext.group,
-  ]);
+    group,
+  ]);  
 
   const route = async (path: string) => {
 
@@ -247,7 +234,10 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
             <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
               <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
                 <div className="rounded-lg bg-white shadow-lg shadow-[#cccccc]">
-                  <div className="border-b flex justify-between py-[14px] px-[17px] text-xl font-bold">
+                  <div
+                    className="border-b flex justify-be
+                  tween py-[14px] px-[17px] text-xl font-bold"
+                  >
                     Create New
                     <FiX
                       size={20}
@@ -407,27 +397,30 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                 setLoader(true);
 
                                 try {
-                                  const nMessData = { ...messData };
+                                  if (messData[nname] !== undefined) {
+                                    setFailMessage(
+                                      "Discussion name already exists"
+                                    );
+                                    return;
+                                  }
 
-                                  nMessData[nname]["participants"] =
-                                    disparts.filter((v) => v !== undefined);
+                                  rContext.update?.({ group: nname });
 
-                                  nMessData[nname]["messages"] = [];
+                                  if (
+                                    pathname[pathname.length - 1] != "dashboard"
+                                  ) {
+                                    await router.push("/dashboard");
+                                  } else {
+                                    setDisparts([]);
 
-                                  // await saveMessages(JSON.stringify(nMessData));
+                                    setAddNew(false);
 
-                                  updateMessData(nMessData);
-
-                                  rContext.update?.
-                                  ({group: nname});
-
-                                  setDisparts([]);
-
-                                  setAddNew(false);
-
-                                  setLoader(false);
+                                    setLoader(false);
+                                  }
                                 } catch (err: any) {
                                   setLoader(false);
+
+                                  console.log(err);
 
                                   setFailMessage(
                                     "Something went wrong, please try again later"
@@ -592,9 +585,9 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
                                     updateMessData(nMessData);
 
-                                     rContext.update?.({
-                                       group: discussions
-                                     });
+                                    rContext.update?.({
+                                      group: discussions,
+                                    });
 
                                     setDisparts([]);
 
@@ -707,7 +700,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
               <div
                 className={`msg ${pathname.includes("rooms") ? "active" : ""}`}
                 title="Meeting rooms"
-                onClick={async () => route('rooms')}
+                onClick={async () => route("rooms")}
               >
                 <div className="w-[44px] min-w-[44px] flex items-center justify-center mr-[15px] rounded-[50%] bg-[#1890FF] h-[44px]">
                   <MdMeetingRoom size={19} color="#fff" />
@@ -726,7 +719,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                 className={`msg ${
                   pathname.includes("storage") ? "active" : ""
                 }`}
-                onClick={async () => route('storage')}
+                onClick={async () => route("storage")}
               >
                 <div className="w-[44px] min-w-[44px] flex items-center justify-center mr-[15px] rounded-[50%] bg-[#1890FF] h-[44px]">
                   <FaCloud size={26} color="#fff" />
@@ -755,33 +748,32 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                 </div>
               </div>
 
-              {chatlst.map((gps, i) => {
+              {Object.keys(messData).map((gps, i) => {
                 const clst =
-                  messData[gps]["messages"][
-                    messData[gps]["messages"].length - 1
+                  messData[gps]["messages"][0][
+                    messData[gps]["messages"][0].length - 1
                   ];
 
                 return (
                   <Chatlist
                     key={i}
                     onClick={async () => {
-
-                       rContext.update?.({
-                         group: gps,
-                       });
+                      rContext.update?.({
+                        group: gps,
+                      });
 
                       if (pathname[pathname.length - 1] != "dashboard") {
                         setLoader(true);
 
                         await router.push("/dashboard");
-
-
                       }
-
                     }}
                     time={clst !== undefined ? clst["date"] : undefined}
                     img={cicon.src}
-                    selected={pathname[pathname.length - 1] == 'dashboard' && gps == rContext.group}
+                    selected={
+                      pathname[pathname.length - 1] == "dashboard" &&
+                      gps == group
+                    }
                     lastMsg={clst !== undefined ? clst["content"] : ""}
                     name={`${gps} ${!i ? "(Main)" : ""}`}
                   />
