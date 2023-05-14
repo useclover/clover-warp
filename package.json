@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "build": "next build",
     "export": "next export",
     "start": "next start -p 3001",
@@ -44,6 +44,7 @@
     "react-dom": "^18.2.0",
     "react-icons": "^4.4.0",
     "react-select": "^5.7.0",
+    "react-swipeable-views": "^0.14.0",
     "react-tooltip": "^5.11.1",
     "unique-string": "^3.0.0",
     "validator": "^13.9.0",

@@ -6,6 +6,7 @@ import styles from "../styles/Home.module.css";
 import bgLogo from "../public/images/logolg.png";
 // import { createAlchemyWeb3 } from "@alch/alchemy-web3";
 import { BiX } from "react-icons/bi";
+import { AiOutlineAppstoreAdd } from "react-icons/ai";
 import axios from "axios";
 import validator from "validator";
 import hero from "../public/images/phone.svg";
@@ -18,6 +19,8 @@ import {
   FormControl,
   TextField,
   IconButton,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
 import Loader from "../app/components/loader";
 // import web3 from "web3";
@@ -36,7 +39,8 @@ import { balanceABI } from "../app/components/extras/abi";
 import { notifications } from "../app/components/extras/storage/init";
 import Link from "next/link";
 import trusted from "../public/images/trust.svg";
-import { BsList } from "react-icons/bs";
+import { BsList, BsPatchPlusFill, BsPlusCircle, BsPlusCircleFill } from "react-icons/bs";
+import { MdClose, MdPersonAddAlt } from "react-icons/md";
 
 // 0x74367351f1a6809ced9cc70654c6bf8c2d1913c9;
 const contractAddress: string = "0xaCDFc5338390Ce4eC5AD61E3dC255c9F2560D797";
@@ -73,6 +77,7 @@ const Home: NextPage = () => {
   const [name, setName] = useState<string>("");
   const [des, setDes] = useState<string>("");
   const [contractAd, setContractAd] = useState<string>("");
+  const [daoType, setDaoType] = useState<"default" | "exist">("default");
   const [participants, setParticipants] = useState<string[]>([]);
   const [part, setPart] = useState<string>("");
   const [bigLoader, setBigLoader] = useState<boolean>(false);
@@ -274,7 +279,7 @@ const Home: NextPage = () => {
         );
         setLoading(false);
         return;
-      } else if (contractAd.toLowerCase().trim() == "default") {
+      } else if (daoType == "default") {
         if (participants.length) {
           participants.forEach(async (v) => {
             if (!ethers.utils.isAddress(v)) {
@@ -322,7 +327,7 @@ const Home: NextPage = () => {
 
         const payload: any = {
           contract:
-            contractAd.toLowerCase().trim() == "default"
+            daoType == "default"
               ? contractAddress
               : ethers.utils.getAddress(contractAd),
           joined: JSON.stringify(participants),
@@ -330,7 +335,7 @@ const Home: NextPage = () => {
           name,
         };
 
-        if (contractAd.toLowerCase().trim() == "default") {
+        if (daoType == "default") {
           nftown.push(userAddress);
 
           const metadata = await generateNftData(
@@ -507,7 +512,7 @@ const Home: NextPage = () => {
       {bigLoader && <Loader />}
 
       <Modal open={sidebar} onClose={() => setSidebar(false)}>
-        <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
+        <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen cusscroller flex items-center bg-[#ffffffb0]">
           <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
             <div className="min-h-screen fixed w-[60%] top-0 left-0 justify-center bg-white flex flex-col shadow-lg shadow-[#cccccc]">
               <div className="flex top-0 pt-5 pb-2 items-center justify-between px-4 absolute w-full">
@@ -516,7 +521,7 @@ const Home: NextPage = () => {
                 </div>
 
                 <IconButton onClick={() => setSidebar(false)}>
-                  <BiX className="text-[#1891fe]" size={30} />
+                  <BiX className="text-[rgb(24, 145, 254)]" size={30} />
                 </IconButton>
               </div>
 
@@ -547,16 +552,14 @@ const Home: NextPage = () => {
       </Modal>
 
       <Modal open={start} onClose={closeStart}>
-        <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
+        <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex cusscroller items-center bg-[#ffffffb0]">
           <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
             <div className="rounded-lg bg-white shadow-lg shadow-[#cccccc]">
-              <div className="border-b flex justify-between py-[14px] px-[17px] text-xl font-bold">
+              <div className="border-b flex justify-between py-[14px] px-[17px] text-xl font-bold items-center">
                 Get Started
-                <BiX
-                  size={20}
-                  className="cursor-pointer"
-                  onClick={closeStart}
-                />
+                <IconButton size={"medium"} onClick={closeStart}>
+                  <BiX size={22} className="cursor-pointer" />
+                </IconButton>
               </div>
 
               <div className={styles.container}>
@@ -643,7 +646,10 @@ const Home: NextPage = () => {
                           name,
                           contract,
                           data,
-                          participants: typeof vv.joined == 'string' ? JSON.parse(vv.joined) : vv.joined,
+                          participants:
+                            typeof vv.joined == "string"
+                              ? JSON.parse(vv.joined)
+                              : vv.joined,
                         })
                       );
 
@@ -674,86 +680,162 @@ const Home: NextPage = () => {
         </div>
       ) : null}
 
-      <Modal open={open} onClose={handleClose}>
-        <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
-          <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
-            {isLoading && (
-              <Loader
-                sx={{
-                  backgroundColor: "rgba(255,255,255,.6)",
-                  backdropFilter: "blur(5px)",
-                }}
-                fixed={false}
-                incLogo={false}
-              />
-            )}
-
-            <div className="rounded-lg bg-white shadow-lg shadow-[#cccccc]">
-              <div className="border-b flex justify-between py-[14px] px-[17px] text-xl font-bold">
-                Register DAO
-                <BiX
-                  size={20}
-                  className="cursor-pointer"
-                  onClick={handleClose}
-                />
+      <Modal
+        open={open}
+        sx={{
+          "&& .MuiBackdrop-root": {
+            backdropFilter: "blur(5px)",
+            width: "calc(100% - 8px)",
+          },
+        }}
+        onClose={handleClose}
+        className="overflow-y-scroll overflow-x-hidden cusscroller flex justify-center"
+        aria-labelledby="Switch Networks to continue"
+        aria-describedby="Switch Networks"
+      >
+        <Box
+          className="sm:!w-full 3md:!px-1 h-fit 3mdd:px-[2px]"
+          sx={{
+            minWidth: 300,
+            width: "70%",
+            maxWidth: 800,
+            borderRadius: 6,
+            outline: "none",
+            p: 1,
+            position: "relative",
+            margin: "auto",
+          }}
+        >
+          <div className="py-4 px-6 bg-white -mb-[1px] rounded-t-[.9rem]">
+            <div className="mb-2 flex items-start justify-between">
+              <div>
+                <h2 className="font-[500] text-[rgb(32,33,36)] text-[1.55rem] 3md:text-[1.2rem]">
+                  Register DAO
+                </h2>
+                <span className="text-[rgb(69,70,73)] font-[500] text-[14px]">
+                  Create a DAO or Add existing DAOs to our service
+                </span>
               </div>
-              <div className="form relative pt-4">
-                <Box sx={{ width: "100%" }}>
-                  {Boolean(failMessage.length) && (
-                    <div className="rounded-md w-[95%] font-bold mt-2 mx-auto p-3 bg-[#ff8f33] text-white">
-                      {failMessage}
-                    </div>
-                  )}
 
-                  <FormControl
-                    fullWidth
+              <IconButton size={"medium"} onClick={handleClose}>
+                <MdClose
+                  size={20}
+                  color={"rgb(32,33,36)"}
+                  className="cursor-pointer"
+                />
+              </IconButton>
+            </div>
+
+            <div className="form relative pt-4">
+              <Box sx={{ width: "100%" }}>
+                {Boolean(failMessage.length) && (
+                  <div className="rounded-md w-[95%] font-bold mt-2 mx-auto p-3 bg-[#ff8f33] text-white">
+                    {failMessage}
+                  </div>
+                )}
+
+                <FormControl
+                  fullWidth
+                  sx={{
+                    px: 2,
+                    py: 3,
+                  }}
+                >
+                  <ToggleButtonGroup
+                    value={daoType}
                     sx={{
-                      px: 5,
-                      py: 3,
+                      justifyContent: "space-between",
+                      marginBottom: "15px !important",
+                      width: "100%",
+                      "& .Mui-selected": {
+                        backgroundColor: `rgba(24, 145, 254, 0.8) !important`,
+                        color: `#fff !important`,
+                      },
+                      "& .MuiButtonBase-root:first-of-type": {
+                        marginRight: "0px !important",
+                        marginLeft: "0px !important",
+                      },
+                      "& .MuiButtonBase-root": {
+                        padding: "10px 15px !important",
+                      },
+                      "& .MuiToggleButtonGroup-grouped": {
+                        borderRadius: "4px !important",
+                        minWidth: 55,
+                        marginLeft: 3,
+                        backgroundColor: "#1212121a",
+                        border: "none",
+                      },
+                    }}
+                    exclusive
+                    className="w-full cusscroller overflow-y-hidden justify-around mb-2 pb-1"
+                    onChange={(e: any) => {
+                      setDaoType(e.target.value);
                     }}
                   >
-                    <div>
-                      <TextField
-                        fullWidth
-                        id="outlined-basic"
-                        label="Name of DAO"
-                        variant="outlined"
-                        value={name}
-                        onChange={(
-                          e: React.ChangeEvent<
-                            HTMLInputElement | HTMLTextAreaElement
-                          >
-                        ) => {
-                          setName(e.target.value);
-                        }}
-                      />
-                    </div>
-                    <div className="mt-3">
-                      <TextField
-                        fullWidth
-                        id="outlined-basic"
-                        label="Description of DAO"
-                        variant="outlined"
-                        helperText="Short Description Of DAO, Can be left empty - max 300 characters"
-                        value={des}
-                        onChange={(
-                          e: React.ChangeEvent<
-                            HTMLInputElement | HTMLTextAreaElement
-                          >
-                        ) => {
-                          const val = e.target.value;
+                    <ToggleButton
+                      sx={{
+                        textTransform: "capitalize",
+                        fontWeight: "bold",
+                      }}
+                      value={"default"}
+                    >
+                      <MdPersonAddAlt className="mr-2" size={20} /> Create New
+                    </ToggleButton>
+                    <ToggleButton
+                      sx={{
+                        textTransform: "capitalize",
+                        fontWeight: "bold",
+                      }}
+                      value={"exist"}
+                    >
+                      <AiOutlineAppstoreAdd className="mr-2" size={20} /> Add
+                      Existing
+                    </ToggleButton>
+                  </ToggleButtonGroup>
 
-                          setDes(val.substring(0, 300));
-                        }}
-                      />
-                    </div>
+                  <div>
+                    <TextField
+                      fullWidth
+                      id="outlined-basic"
+                      label="Name of DAO"
+                      variant="outlined"
+                      value={name}
+                      onChange={(
+                        e: React.ChangeEvent<
+                          HTMLInputElement | HTMLTextAreaElement
+                        >
+                      ) => {
+                        setName(e.target.value);
+                      }}
+                    />
+                  </div>
+                  <div className="mt-3">
+                    <TextField
+                      fullWidth
+                      id="outlined-basic"
+                      label="Description of DAO"
+                      variant="outlined"
+                      helperText="Short Description Of DAO, Can be left empty - max 300 characters"
+                      value={des}
+                      onChange={(
+                        e: React.ChangeEvent<
+                          HTMLInputElement | HTMLTextAreaElement
+                        >
+                      ) => {
+                        const val = e.target.value;
+
+                        setDes(val.substring(0, 300));
+                      }}
+                    />
+                  </div>
+                  {daoType == "exist" && (
                     <div className="my-3">
                       <TextField
                         fullWidth
                         id="outlined-basic"
                         label="Contract Address"
                         variant="outlined"
-                        helperText="Contract address of the token that would allow users into the DAO - use `default` if you want one generated by us"
+                        helperText="Contract address of the token that would allow users into the DAO"
                         value={contractAd}
                         onChange={(
                           e: React.ChangeEvent<
@@ -764,61 +846,49 @@ const Home: NextPage = () => {
                         }}
                       />
                     </div>
+                  )}
 
-                    {contractAd.toLowerCase().trim() == "default" && (
-                      <>
-                        <div className="py-3 font-bold">Participants</div>
-                        <div className="flex w-full my-2 cusscroller overflow-hidden overflow-x-scroll items-center">
-                          {participants.map((e, i: number) => (
-                            <div
-                              className="border text-[#777] border-solid ml-[2px] rounded p-2"
-                              key={i}
-                            >
+                  {daoType == "default" && (
+                    <>
+                      <label className="py-3 font-semibold">Participants</label>
+                      <div className="flex w-full my-2 cusscroller overflow-hidden overflow-x-scroll items-center">
+                        {participants.map((e, i: number) => (
+                          <div
+                            className="border text-[#777] border-solid ml-[2px] rounded p-2 flex items-center justify-between"
+                            key={i}
+                          >
+                            <span>
                               {e.substring(0, 5) +
                                 "...." +
                                 e.substring(e.length - 5, e.length)}
-                            </div>
-                          ))}
-                        </div>
-
-                        <TextField
-                          fullWidth
-                          id="outlined-basic"
-                          helperText="if left empty, only you would have access to the DAO"
-                          variant="outlined"
-                          value={part}
-                          placeholder="click enter to add address"
-                          onChange={(e: any) => {
-                            setPart(e.target.value);
-                          }}
-                          onKeyUp={(e: any) => {
-                            setPart(e.target.value);
-
-                            if (e.keyCode == 13 || e.which === 13) {
-                              if (part.length) {
-                                if (
-                                  !ethers.utils.isAddress(part) ||
-                                  (participants.includes(
-                                    ethers.utils.getAddress(part)
-                                  ) &&
-                                    ethers.utils.isAddress(part))
-                                ) {
-                                  setPart("");
-                                  return;
-                                }
-
+                            </span>
+                            <MdClose
+                              size={15}
+                              className={"ml-1"}
+                              onClick={() => {
                                 const partx: string[] = [...participants];
-                                partx.push(ethers.utils.getAddress(part));
-
+                                partx.splice(i, 1);
                                 setParticipants(partx);
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
 
-                                setPart("");
-                              }
-                            }
-                          }}
-                          onBlur={(e: any) => {
-                            setPart(e.target.value);
+                      <TextField
+                        fullWidth
+                        id="outlined-basic"
+                        helperText="if left empty, only you would have access to the newly created DAO"
+                        variant="outlined"
+                        value={part}
+                        placeholder="click enter to add address"
+                        onChange={(e: any) => {
+                          setPart(e.target.value);
+                        }}
+                        onKeyUp={(e: any) => {
+                          setPart(e.target.value);
 
+                          if (e.keyCode == 13 || e.which === 13) {
                             if (part.length) {
                               if (
                                 !ethers.utils.isAddress(part) ||
@@ -838,35 +908,62 @@ const Home: NextPage = () => {
 
                               setPart("");
                             }
-                          }}
-                        />
-                      </>
-                    )}
+                          }
+                        }}
+                        onBlur={(e: any) => {
+                          setPart(e.target.value);
 
-                    <Button
-                      variant="contained"
-                      className="!bg-[#1891fe] !mt-4 !py-[13px] !font-medium !capitalize"
-                      style={{
-                        fontFamily: "inherit",
-                      }}
-                      onClick={() => {
-                        setFailMessage("");
-                        sumitDeets();
-                      }}
-                      fullWidth
-                    >
-                      Create
-                    </Button>
-                  </FormControl>
-                </Box>
-              </div>
+                          if (part.length) {
+                            if (
+                              !ethers.utils.isAddress(part) ||
+                              (participants.includes(
+                                ethers.utils.getAddress(part)
+                              ) &&
+                                ethers.utils.isAddress(part))
+                            ) {
+                              setPart("");
+                              return;
+                            }
+
+                            const partx: string[] = [...participants];
+                            partx.push(ethers.utils.getAddress(part));
+
+                            setParticipants(partx);
+
+                            setPart("");
+                          }
+                        }}
+                      />
+                    </>
+                  )}
+                </FormControl>
+              </Box>
             </div>
           </div>
-        </div>
+
+          <div className="bg-[#efefef] flex justify-center items-center rounded-b-[.9rem] px-6 py-4">
+            <div className="flex items-center">
+              <Button
+                onClick={() => {
+                  setFailMessage("");
+                  sumitDeets();
+                }}
+                className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#1891fe] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+              >
+                <BsPatchPlusFill
+                  color={"inherit"}
+                  className={"mr-2 !fill-white"}
+                  size={20}
+                />{" "}
+                Register
+              </Button>
+            </div>
+          </div>
+        </Box>
       </Modal>
 
       <Modal open={improve} onClose={() => setImprove(false)}>
-        <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
+        <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex cusscroller items-center bg-[#ffffffb0]">
           <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
             {isLoading && (
               <Loader

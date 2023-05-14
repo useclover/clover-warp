@@ -45,8 +45,6 @@ import { useAccount } from "wagmi";
 import { BiSend, BiX } from "react-icons/bi";
 import EmojiPicker from "emoji-picker-react";
 
-
-
 const Chats = () => {
 
   const [loginData, setLoginData] = useState<any>({});
@@ -255,9 +253,7 @@ const Chats = () => {
         newMess["content"][0].push(rContext.content || "");
       }
 
-
       messData[group || ""]["messages"][0].push(newMess);
-
 
       try {
 
@@ -319,7 +315,7 @@ const Chats = () => {
       {!isLoading && (
         <>
           <Modal open={conDelete} onClose={() => setConDelete(false)}>
-            <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
+            <div className="w-screen cusscroller overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
               <div className="2usm:px-0 mx-auto max-w-[500px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
                 <div className="rounded-lg bg-white shadow-lg shadow-[#cccccc]">
                   <div className="border-b flex justify-between items-center py-[9px] px-[17px] text-[16px] font-[600]">

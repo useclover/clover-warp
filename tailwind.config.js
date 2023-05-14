@@ -25,7 +25,11 @@ module.exports = {
       "2sm": { max: "975px" },
       usm: { max: "940px" },
     },
-    extend: {},
+    extend: {
+      backgroundImage: {
+          pattern: "./public/images/"
+      }
+    },
   },
   plugins: [],
 };

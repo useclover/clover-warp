@@ -231,7 +231,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
       {!isLoading && (
         <div className="app">
           <Modal open={addNew} onClose={() => setAddNew(false)}>
-            <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
+            <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex cusscroller items-center bg-[#ffffffb0]">
               <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
                 <div className="rounded-lg bg-white shadow-lg shadow-[#cccccc]">
                   <div
@@ -369,7 +369,8 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                         disparts[i] !== undefined
                                           ? {
                                               color: "#fff",
-                                              backgroundColor: "#1890FF",
+                                              backgroundColor:
+                                                "rgb(24, 144, 255)",
                                             }
                                           : {}
                                       }
