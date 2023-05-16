@@ -167,7 +167,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
     setTimeout(updateGroupChat, 3000)
 
   }
-
+  
   useEffect(() => {
     async function init() {
       await beginStorageProvider({

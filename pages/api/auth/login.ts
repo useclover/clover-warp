@@ -29,6 +29,7 @@ export default function handler(
         if (validateAddress == address) {
           
           const { data } = await axios.get("/daos", {
+            baseURL: process.env.NEXT_PUBLIC_APP_URL || "",
             headers: { "X-App-Key": process.env.NEXT_PUBLIC_APP_KEY || "" },
           });
 
@@ -102,6 +103,7 @@ export default function handler(
               address,
             },
             {
+              baseURL: process.env.NEXT_PUBLIC_APP_URL || '', 
               headers: { "X-App-Key": process.env.NEXT_PUBLIC_APP_KEY || "" },
             }
           );
