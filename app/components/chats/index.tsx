@@ -145,7 +145,7 @@ const Chats = () => {
       if (!Boolean(mess[name]?.["messages"])) {
         if (mess[name] === undefined) mess[name] = {};
 
-        mess[name]["messages"] = {};
+        mess[name]["messages"] = [];
 
       }
 
@@ -189,9 +189,22 @@ const Chats = () => {
         if (!Boolean(mess[name]?.["messages"])) {
           if (mess[name] === undefined) mess[name] = {};
 
-          mess[name]["messages"] = {};
+          mess[name]["messages"] = [];
         }
 
+        // sync old and new data
+
+       const old = messData[name]["messages"];
+
+       const neww = mess[name]['messages'];            
+
+        // old.forEach((mess: any, i: number) => {
+
+        //   if (neww[i] ) {
+
+        //   }
+
+        // });        
 
         updateMessData(mess);
 
@@ -270,7 +283,6 @@ const Chats = () => {
 
         await saveMessages({data: JSON.stringify(newMess), receiver: group || ""});
 
-        // messData[group || ""]["messages"][0][index].sent = true;
 
         updateMessData(messData);
 

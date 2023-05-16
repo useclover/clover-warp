@@ -5277,6 +5277,11 @@ crypto-random-string@^4.0.0:
   dependencies:
     type-fest "^1.0.1"
 
+cryptr@^6.2.0:
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/cryptr/-/cryptr-6.2.0.tgz#30dd4754447f9f5d18d5ea8a8dfbae08f00e5cbb"
+  integrity sha512-jYi8SxvOFebTT7EYOABiPpHKY6lwWaP9IVcvT/aIVJUVoFdzTgi0ySPCL78q1ig8w2kwfXFCZACXoCXaye57aw==
+
 cssesc@^3.0.0:
   version "3.0.0"
   resolved "https://repo.huaweicloud.com/repository/npm/cssesc/-/cssesc-3.0.0.tgz#37741919903b868565e1c09ea747445cd18983ee"

@@ -273,10 +273,11 @@ const Home: NextPage = () => {
         return;
       }
 
-      if (!contractAd.length) {
+      if (!contractAd.length && daoType !== "default") {
         setFailMessage(
-          "A contract address is required if you dont have one leave as default"
+          "A contract address is required if you dont have one use the create new option"
         );
+        
         setLoading(false);
         return;
       } else if (daoType == "default") {
@@ -551,19 +552,61 @@ const Home: NextPage = () => {
         </div>
       </Modal>
 
-      <Modal open={start} onClose={closeStart}>
-        <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex cusscroller items-center bg-[#ffffffb0]">
-          <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
-            <div className="rounded-lg bg-white shadow-lg shadow-[#cccccc]">
-              <div className="border-b flex justify-between py-[14px] px-[17px] text-xl font-bold items-center">
-                Get Started
-                <IconButton size={"medium"} onClick={closeStart}>
-                  <BiX size={22} className="cursor-pointer" />
-                </IconButton>
+     
+
+      <Modal
+        sx={{
+          "&& .MuiBackdrop-root": {
+            backdropFilter: "blur(5px)",
+            width: "calc(100% - 8px)",
+          },
+        }}
+        open={start}
+        className="overflow-y-scroll overflow-x-hidden cusscroller flex justify-center"
+        onClose={closeStart}
+        aria-labelledby="Clover Auth"
+        aria-describedby="Begin Login or Signup on Clover"
+      >
+
+        <Box
+          className="sm:!w-full 3md:!px-1 h-fit 3mdd:px-[2px]"
+          sx={{
+            minWidth: 300,
+            width: "70%",
+            maxWidth: 800,
+            borderRadius: 6,
+            outline: "none",
+            p: 1,
+            position: "relative",
+            margin: "auto",
+          }}
+        >
+          <div className="py-4 px-6 bg-white -mb-[1px] rounded-[.9rem]">
+            
+            
+            <div className="mb-2 flex items-start justify-between">
+              <div>
+                <h2 className="font-[500] text-[rgb(32,33,36)] text-[1.55rem] 3md:text-[1.2rem]">
+                  Get Started
+                </h2>
+                <span className="text-[rgb(69,70,73)] font-[500] text-[14px]">
+                  Login in to your DAOs or Register DAO
+                </span>
               </div>
 
+              <IconButton size={"medium"} onClick={handleClose}>
+                <MdClose
+                  size={20}
+                  color={"rgb(32,33,36)"}
+                  className="cursor-pointer"
+                />
+              </IconButton>
+            </div>
+
+            <div className="form relative pt-4">
+              
               <div className={styles.container}>
-                <div className="h-[300px] flex flex-col justify-center">
+                <div className="h-[220px] flex flex-col justify-center">
                   {Boolean(loginError.length) && (
                     <Alert className="my-2" severity="error">
                       {loginError}
@@ -583,7 +626,10 @@ const Home: NextPage = () => {
                     </div>
                     <div className="self-center">
                       <Button
-                        onClick={() => setOpen(true)}
+                        onClick={() => {
+                          setOpen(true);
+                          closeStart();
+                        }}
                         style={{
                           fontFamily: "Poppins",
                         }}
@@ -595,10 +641,14 @@ const Home: NextPage = () => {
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
-        </div>
+
+          
+        </Box>
       </Modal>
+
 
       {showModal ? (
         <div
@@ -690,9 +740,10 @@ const Home: NextPage = () => {
         }}
         onClose={handleClose}
         className="overflow-y-scroll overflow-x-hidden cusscroller flex justify-center"
-        aria-labelledby="Switch Networks to continue"
-        aria-describedby="Switch Networks"
+        aria-labelledby="Register DAO on Clover"
+        aria-describedby="Register DAO"
       >
+
         <Box
           className="sm:!w-full 3md:!px-1 h-fit 3mdd:px-[2px]"
           sx={{
@@ -707,6 +758,8 @@ const Home: NextPage = () => {
           }}
         >
           <div className="py-4 px-6 bg-white -mb-[1px] rounded-t-[.9rem]">
+            
+            
             <div className="mb-2 flex items-start justify-between">
               <div>
                 <h2 className="font-[500] text-[rgb(32,33,36)] text-[1.55rem] 3md:text-[1.2rem]">
@@ -767,7 +820,7 @@ const Home: NextPage = () => {
                       },
                     }}
                     exclusive
-                    className="w-full cusscroller overflow-y-hidden justify-around mb-2 pb-1"
+                    className="w-full cusscroller overflow-y-hidden justify-around mb-4 pb-1"
                     onChange={(e: any) => {
                       setDaoType(e.target.value);
                     }}
@@ -809,7 +862,7 @@ const Home: NextPage = () => {
                       }}
                     />
                   </div>
-                  <div className="mt-3">
+                  <div className="mt-6">
                     <TextField
                       fullWidth
                       id="outlined-basic"
@@ -829,7 +882,7 @@ const Home: NextPage = () => {
                     />
                   </div>
                   {daoType == "exist" && (
-                    <div className="my-3">
+                    <div className="my-6">
                       <TextField
                         fullWidth
                         id="outlined-basic"
@@ -850,7 +903,7 @@ const Home: NextPage = () => {
 
                   {daoType == "default" && (
                     <>
-                      <label className="py-3 font-semibold">Participants</label>
+                      <label className="mt-5">Participants</label>
                       <div className="flex w-full my-2 cusscroller overflow-hidden overflow-x-scroll items-center">
                         {participants.map((e, i: number) => (
                           <div
@@ -864,7 +917,7 @@ const Home: NextPage = () => {
                             </span>
                             <MdClose
                               size={15}
-                              className={"ml-1"}
+                              className={"ml-1 cursor-pointer hover:text-[#121212]"}
                               onClick={() => {
                                 const partx: string[] = [...participants];
                                 partx.splice(i, 1);

@@ -90,7 +90,6 @@ export const retrieveMessages = async (indexx?: number) => {
     data: { chatdata },
   } = await axios.get(`/dao/${lq[0]}/chats`, {
     params: { page: (indexx || 0) + 1 },
-    baseURL: process.env.NEXT_PUBLIC_APP_URL,
     headers: { Authorization: token },
   });
 
@@ -180,7 +179,6 @@ export const deleteMessagesAll = async (id: string) => {
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
   await axios.patch(`/dao/${lq[0]}/chats/${id}/delete`, {}, {
-    baseURL: process.env.NEXT_PUBLIC_APP_URL,
     headers: { Authorization: token },
   });
 
@@ -192,7 +190,6 @@ export const deleteMessages = async (id: string) => {
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
   await axios.delete(`/dao/${lq[0]}/chats/${id}`, {
-    baseURL: process.env.NEXT_PUBLIC_APP_URL,
     headers: { Authorization: token },
   });
 
@@ -208,7 +205,6 @@ export const updateMessages = async (id: string, update: any) => {
     `/dao/${lq[0]}/chats/${id}`,
     { data: JSON.stringify(update) },
     {
-      baseURL: process.env.NEXT_PUBLIC_APP_URL,
       headers: { Authorization: token },
     }
   );
@@ -232,6 +228,44 @@ export const saveMessages = async (updateNew: any) => {
   }
 };
 
+export const createGroupChat = async (groupname: string) => {
+
+  const token = `Bearer ${localStorage.getItem("clover-x")}`;
+
+  const { data: { group } } = await axios.post(`/dao/${lq[0]}/group`, { groupname }, {
+    headers: {
+      Authorization: token
+    }
+  });
+
+  return group;
+
+}
+
+export const retrieveGroupChats = async () => {
+
+  const token = `Bearer ${localStorage.getItem('clover-x')}`
+
+  const { data: { groups } } = await axios.get(`/dao/${lq[0]}/group`, {
+      headers: {
+        Authorization: token
+      }
+  });
+
+  const groupChats: any = [];
+
+  groups.forEach((val: any) => {
+        
+      const { groupname } = val;
+  
+      groupChats.push(groupname);
+
+  })
+
+  return groupChats;
+
+}
+
 export const retrieveFiles = async (folder?: string[]) => {
 
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
@@ -239,7 +273,6 @@ export const retrieveFiles = async (folder?: string[]) => {
   const {
     data: { files },
   } = await axios.get(`/dao/${lq[0]}/files`, {
-    baseURL: process.env.NEXT_PUBLIC_APP_URL,
     headers: { Authorization: token },
   });
 
@@ -253,7 +286,6 @@ export const getRooms = async () => {
   const {
     data: { rooms },
   } = await axios.get(`/dao/${lq[0]}/rooms`, {
-    baseURL: process.env.NEXT_PUBLIC_APP_URL,
     headers: { Authorization: token },
   });
 
@@ -267,7 +299,6 @@ export const roomData = async (id: number) => {
   const {
     data: { room },
   } = await axios.get(`/dao/${lq[0]}/rooms/${id}`, {
-    baseURL: process.env.NEXT_PUBLIC_APP_URL,
     headers: { Authorization: token },
   });
 
@@ -278,12 +309,13 @@ export const createRoom = async (name: string) => {
 
 
   const { data: response } = await axios.post(
-    "https://iriko.testing.huddle01.com/api/v1/create-room",
+    "/create-room",
     {
       title: name,
       hostWallets: [lq[3]],
     },
     {
+      baseURL: "https://iriko.testing.huddle01.com/api/v1",
       headers: {
         "Content-Type": "application/json",
         "x-api-key": process.env.NEXT_PUBLIC_HUDDLE_APPKEY as string,
