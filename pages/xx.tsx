@@ -1,13 +1,21 @@
 import axios from 'axios'
 import { useEffect } from 'react';
 
+
 const Xx = () => {
 
   useEffect(() => {
 
   }, [])
 
-  return <div>Welcome back</div>
+  return <div>
+
+    <div className="w-full h-[500px] bg-pattern">
+
+
+    </div>
+
+  </div>
 
 }
 

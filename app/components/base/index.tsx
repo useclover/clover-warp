@@ -45,6 +45,8 @@ import {
   deleteMessagesAll,
   findMessId,
   updateMessages,
+  retrieveGroupChats,
+  createGroupChat,
 } from "../extras/storage/init";
 import { FaCloud } from "react-icons/fa";
 import { CContext } from "../extras/contexts/CContext";
@@ -156,6 +158,15 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
   const { group } = rContext;
 
+  const [groupChat, setGroupChat] = useState<string[]>([]);
+
+  const updateGroupChat =  async () => {
+
+    setGroupChat(await retrieveGroupChats());
+
+    setTimeout(updateGroupChat, 3000)
+
+  }
 
   useEffect(() => {
     async function init() {
@@ -169,6 +180,9 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
       const mess = await retrieveMessages();
 
       const flist = await retrieveFiles();
+
+      setGroupChat(await retrieveGroupChats());
+
 
       let tSize = 0;
 
@@ -191,6 +205,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
       updateMessData(mess);
 
+      updateGroupChat();
 
       setLoader(false);
 
@@ -210,6 +225,8 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
     participants,
     group,
   ]);  
+
+  
 
   const route = async (path: string) => {
 
@@ -231,7 +248,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
       {!isLoading && (
         <div className="app">
           <Modal open={addNew} onClose={() => setAddNew(false)}>
-            <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
+            <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex cusscroller items-center bg-[#ffffffb0]">
               <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
                 <div className="rounded-lg bg-white shadow-lg shadow-[#cccccc]">
                   <div
@@ -369,7 +386,8 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                         disparts[i] !== undefined
                                           ? {
                                               color: "#fff",
-                                              backgroundColor: "#1890FF",
+                                              backgroundColor:
+                                                "rgb(24, 144, 255)",
                                             }
                                           : {}
                                       }
@@ -397,12 +415,15 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                 setLoader(true);
 
                                 try {
+
                                   if (messData[nname] !== undefined) {
                                     setFailMessage(
                                       "Discussion name already exists"
                                     );
                                     return;
                                   }
+
+                                  await createGroupChat(nname);
 
                                   rContext.update?.({ group: nname });
 
@@ -748,7 +769,8 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                 </div>
               </div>
 
-              {Object.keys(messData).map((gps, i) => {
+              {groupChat.map((gps, i) => {
+
                 const clst =
                   messData[gps]["messages"][0][
                     messData[gps]["messages"][0].length - 1

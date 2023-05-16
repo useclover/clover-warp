@@ -45,8 +45,6 @@ import { useAccount } from "wagmi";
 import { BiSend, BiX } from "react-icons/bi";
 import EmojiPicker from "emoji-picker-react";
 
-
-
 const Chats = () => {
 
   const [loginData, setLoginData] = useState<any>({});
@@ -147,7 +145,7 @@ const Chats = () => {
       if (!Boolean(mess[name]?.["messages"])) {
         if (mess[name] === undefined) mess[name] = {};
 
-        mess[name]["messages"] = {};
+        mess[name]["messages"] = [];
 
       }
 
@@ -191,9 +189,22 @@ const Chats = () => {
         if (!Boolean(mess[name]?.["messages"])) {
           if (mess[name] === undefined) mess[name] = {};
 
-          mess[name]["messages"] = {};
+          mess[name]["messages"] = [];
         }
 
+        // sync old and new data
+
+       const old = messData[name]["messages"];
+
+       const neww = mess[name]['messages'];            
+
+        // old.forEach((mess: any, i: number) => {
+
+        //   if (neww[i] ) {
+
+        //   }
+
+        // });        
 
         updateMessData(mess);
 
@@ -255,9 +266,7 @@ const Chats = () => {
         newMess["content"][0].push(rContext.content || "");
       }
 
-
       messData[group || ""]["messages"][0].push(newMess);
-
 
       try {
 
@@ -274,7 +283,6 @@ const Chats = () => {
 
         await saveMessages({data: JSON.stringify(newMess), receiver: group || ""});
 
-        // messData[group || ""]["messages"][0][index].sent = true;
 
         updateMessData(messData);
 
@@ -319,7 +327,7 @@ const Chats = () => {
       {!isLoading && (
         <>
           <Modal open={conDelete} onClose={() => setConDelete(false)}>
-            <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
+            <div className="w-screen cusscroller overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
               <div className="2usm:px-0 mx-auto max-w-[500px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
                 <div className="rounded-lg bg-white shadow-lg shadow-[#cccccc]">
                   <div className="border-b flex justify-between items-center py-[9px] px-[17px] text-[16px] font-[600]">
