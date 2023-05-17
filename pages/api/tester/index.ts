@@ -13,10 +13,13 @@ export default function handler(
 ) {
 
   if (req.method === "POST") {
+
     const { name, email, address } = req.body;
 
     (async () => {
+      
       try {
+
         await axios.post(
           "/tester/create",
           { name, email, address },
@@ -30,6 +33,7 @@ export default function handler(
         );
 
         res.status(201).json({ message: "success", error: false });
+
       } catch (err) {
         const error = err as any;
 
