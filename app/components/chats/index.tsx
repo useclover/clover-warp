@@ -776,8 +776,8 @@ const Chats = () => {
                     </div>
                     <div className="detail-title capitalize">{`${group}`}</div>
                     <div className="detail-subtitle">
-                      Created by {creator.substring(0, 6)}...
-                      {creator.substring(38, 42)}
+                      Created by {creator?.substring(0, 6)}...
+                      {creator?.substring(38, 42)}
                     </div>
                   </div>
                   <div className="detail-changes">

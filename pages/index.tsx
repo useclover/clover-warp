@@ -250,7 +250,8 @@ const Home: NextPage = () => {
   };
 
   const sumitDeets = async () => {
-    setLoading(true);
+   
+    setBigLoader(true);
 
     let send: boolean = false;
 
@@ -263,13 +264,13 @@ const Home: NextPage = () => {
 
       if (!name.length) {
         setFailMessage("Name is required");
-        setLoading(false);
+        setBigLoader(false);
         return;
       }
 
       if (des.length > 300) {
         setFailMessage("Description requires a max of 300 characters");
-        setLoading(false);
+        setBigLoader(false);
         return;
       }
 
@@ -278,13 +279,13 @@ const Home: NextPage = () => {
           "A contract address is required if you dont have one use the create new option"
         );
         
-        setLoading(false);
+        setBigLoader(false);
         return;
       } else if (daoType == "default") {
         if (participants.length) {
           participants.forEach(async (v) => {
             if (!ethers.utils.isAddress(v)) {
-              setLoading(false);
+              setBigLoader(false);
               setFailMessage(
                 `Error Retrieving data from ${v}, check the address and try again`
               );
@@ -311,7 +312,7 @@ const Home: NextPage = () => {
         const active = balance > 0;
 
         if (!active) {
-          setLoading(false);
+          setBigLoader(false);
           setFailMessage("Your contract address does not exist in your wallet");
           return;
         }
@@ -400,10 +401,11 @@ const Home: NextPage = () => {
         }
 
         Router.push("/dashboard");
+
       } catch (err) {
         const error = err as any;
 
-        setLoading(false);
+        setBigLoader(false);
         console.log(err);
 
         setFailMessage(
@@ -415,7 +417,7 @@ const Home: NextPage = () => {
       const error = err as Error;
 
       console.log(error);
-      setLoading(false);
+      setBigLoader(false);
       setFailMessage("Something went wrong, please try again");
     }
   };
@@ -820,7 +822,7 @@ const Home: NextPage = () => {
                       },
                     }}
                     exclusive
-                    className="w-full cusscroller overflow-y-hidden justify-around mb-4 pb-1"
+                    className="w-full cusscroller overflow-y-hidden !justify-around mb-4 pb-1"
                     onChange={(e: any) => {
                       setDaoType(e.target.value);
                     }}

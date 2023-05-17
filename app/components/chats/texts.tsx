@@ -66,7 +66,7 @@ const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras,
         />
 
         <div className="chat-msg-date">
-          {`${sender.substring(0, 6)}...${sender.substring(38, 42)}`}{" "}
+          {Boolean(sender) && `${sender?.substring(0, 6)}...${sender?.substring(38, 42)}`}{" "}
           <span>{ddate}</span>
         </div>
       </div>
