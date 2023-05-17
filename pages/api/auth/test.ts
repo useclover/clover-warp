@@ -24,13 +24,20 @@ export default function handler(
 
         try{
 
-        const { data } = await axios.post("/testing/store", {
-          name, email, address
-        }, {
-          headers: {
-            "X-App-Key": process.env.NEXT_PUBLIC_APP_KEY || "",
+        const { data } = await axios.post(
+          "/testing/store",
+          {
+            name,
+            email,
+            address,
+          },
+          {
+            baseURL: process.env.NEXT_PUBLIC_APP_URL || "",
+            headers: {
+              "X-App-Key": process.env.NEXT_PUBLIC_APP_KEY || "",
+            },
           }
-        });
+        );
 
         res.status(201).json({
           message: "Success",

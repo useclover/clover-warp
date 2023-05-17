@@ -20,7 +20,10 @@ export default function handler(
 
       (async () => {
 
-        const { data: { daos } } = await axios.get("/daos", {
+        const {
+          data: { daos },
+        } = await axios.get("/daos", {
+          baseURL: process.env.NEXT_PUBLIC_APP_URL || "",
           headers: { "X-App-Key": process.env.NEXT_PUBLIC_APP_KEY || "" },
         });
 

@@ -21,6 +21,7 @@ export default function handler(
           "/tester/create",
           { name, email, address },
           {
+            baseURL: process.env.NEXT_PUBLIC_APP_URL || "",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
