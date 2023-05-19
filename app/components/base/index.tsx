@@ -167,7 +167,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
     setTimeout(updateGroupChat, 3000)
 
   }
-  
+
   useEffect(() => {
     async function init() {
       await beginStorageProvider({
@@ -180,8 +180,6 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
       const mess = await retrieveMessages();
 
       const flist = await retrieveFiles();
-
-      setGroupChat(await retrieveGroupChats());
 
 
       let tSize = 0;
@@ -771,10 +769,12 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
               {groupChat.map((gps, i) => {
 
-                const clst =
-                  messData[gps]["messages"][0][
-                    messData[gps]["messages"][0].length - 1
-                  ];
+                console.log(gps, messData[gps], 'chatlist')
+
+                const clst = messData[gps] !== undefined ?
+                  messData[gps]?.["messages"]?.[0]?.[
+                    messData[gps]["messages"]?.[0]?.length - 1
+                  ] : undefined;
 
                 return (
                   <Chatlist
