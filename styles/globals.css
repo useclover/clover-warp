@@ -514,7 +514,7 @@ body::-webkit-scrollbar-track,
 }
 
 .chat-msg-text {
-  background-color: #f1f2f6;
+  background-color: #d7d7d7;
   padding: 15px;
   border-radius: 16px;
   line-height: 1.5;

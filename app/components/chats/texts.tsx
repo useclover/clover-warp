@@ -22,6 +22,7 @@ interface Textm {
 
 const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras, selected, replyDisabled, setEditable }: Textm) => {
 
+  
   const { address, isConnected } = useAccount();
 
   const mCon = useContext(CContext);

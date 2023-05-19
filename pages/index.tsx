@@ -425,6 +425,7 @@ const Home: NextPage = () => {
   const [exec, setExec] = useState<object[]>([]);
 
   const login = async () => {
+
     setLoginError("");
     setBigLoader(true);
 
@@ -514,6 +515,8 @@ const Home: NextPage = () => {
 
       {bigLoader && <Loader />}
 
+      {!bigLoader && (
+        <>
       <Modal open={sidebar} onClose={() => setSidebar(false)}>
         <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen cusscroller flex items-center bg-[#ffffffb0]">
           <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
@@ -1128,7 +1131,7 @@ const Home: NextPage = () => {
         </div>
       </Modal>
 
-      {!bigLoader && (
+      
         <div className="min-w-screen max-h-screen overflow-y-scroll overflow-x-hidden cusscroller relative bg-white p-4">
           <div className="max-w-[1430px] mx-auto">
             <div className="bg-[#1890FF] usm:flex-col rounded-t-[1rem] usm:rounded-[1rem] rounded-bl-[1rem] min-w-full py-5 px-[40px] flex justify-center relative">
@@ -1293,6 +1296,7 @@ const Home: NextPage = () => {
             </div>
           </div>
         </div>
+        </>
       )}
     </>
   );

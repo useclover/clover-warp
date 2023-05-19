@@ -252,10 +252,8 @@ const Chats = () => {
 
       const newMess: any = {
         content: [[messageText]],
-        isSending: true,
         sent: false,
         type,
-        server: false,
         enlargen,
         sender: address,
         date: new Date().getTime(),
@@ -522,6 +520,7 @@ const Chats = () => {
                         {messData[group || ""]["messages"]
                           .reverse()
                           .map((v: any, ii: number) => {
+                            
                             return v.map(
                               (
                                 {
@@ -575,7 +574,7 @@ const Chats = () => {
                                       setEditable={setEditableMess}
                                       messId={messId}
                                       content={content}
-                                      sent={server || sent}
+                                      sent={sent}
                                       reply={reply}
                                       enlargen={Boolean(enlargen)}
                                     />

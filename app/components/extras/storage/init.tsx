@@ -11,7 +11,6 @@ export interface mess {
     read: boolean;
     date?: number | string;
     sender: string;
-    isSending: boolean;
   }[];
 }
 
@@ -141,8 +140,8 @@ export const retrieveMessages = async (indexx?: number) => {
     if (!deleted)
       messages[col.receiver].messages[indexx || 0].push({
         ...dx,
-        isSending: false,
         messId: col.messId,
+        sender: col.sender,
         index,
         date: date.getTime(),
       });
@@ -254,6 +253,7 @@ export const retrieveGroupChats = async () => {
 
   const groupChats: any = [];
 
+
   groups.forEach((val: any) => {
         
       const { groupname } = val;
@@ -307,15 +307,13 @@ export const roomData = async (id: number) => {
 
 export const createRoom = async (name: string) => {
 
-
   const { data: response } = await axios.post(
-    "/create-room",
+    "https://iriko.testing.huddle01.com/api/v1/create-room",
     {
       title: name,
       hostWallets: [lq[3]],
     },
     {
-      baseURL: "https://iriko.testing.huddle01.com/api/v1",
       headers: {
         "Content-Type": "application/json",
         "x-api-key": process.env.NEXT_PUBLIC_HUDDLE_APPKEY as string,
