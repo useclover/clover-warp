@@ -28,6 +28,7 @@ export default function handler(
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
+              "X-App-Key": process.env.APP_KEY || "",
             },
           }
         );

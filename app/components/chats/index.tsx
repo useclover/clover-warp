@@ -30,14 +30,16 @@ import { GenContext } from "../extras/contexts/genContext";
 import {
   beginStorageProvider,
   lq,
+  notifications,
+} from "../extras/storage/init";
+import {
   retrieveMessages,
   saveMessages,
-  notifications,
   deleteMessages,
   deleteMessagesAll,
   findMessId,
   updateMessages,
-} from "../extras/storage/init";
+} from "../extras/chat/functions";
 import { CContext } from "../extras/contexts/CContext";
 import Text from "./texts";
 import Loader from "../loader";
@@ -46,18 +48,17 @@ import { BiSend, BiX } from "react-icons/bi";
 import EmojiPicker from "emoji-picker-react";
 
 const Chats = () => {
-
   const [loginData, setLoginData] = useState<any>({});
 
   const { address, isConnected } = useAccount();
 
   const goDown = () => {
-     const chatArea = document.querySelector(".chat-area");
+    const chatArea = document.querySelector(".chat-area");
 
-     if (chatArea !== null) {
-       chatArea.scrollTop = chatArea.scrollHeight + 100;
-     }
-  }
+    if (chatArea !== null) {
+      chatArea.scrollTop = chatArea.scrollHeight + 100;
+    }
+  };
 
   useEffect(() => {
     if (localStorage.getItem("cloverlog") === null) {
@@ -69,28 +70,28 @@ const Chats = () => {
 
       setLoginData(data);
     }
-
   }, []);
 
   const { name, contract, data: main, participants, creator } = loginData;
 
   const emojiModal = () => {
-      const emojiElem = document.querySelector('.EmojiPickerReact') as HTMLDivElement;
+    const emojiElem = document.querySelector(
+      ".EmojiPickerReact"
+    ) as HTMLDivElement;
 
-      const inputElem = document.querySelector(".textbox") as HTMLDivElement;
+    const inputElem = document.querySelector(".textbox") as HTMLDivElement;
 
-      if (emojiElem == null) return;
-    
-      if (inputElem == null) return;
+    if (emojiElem == null) return;
 
-      const hx = inputElem.clientHeight + 13;
+    if (inputElem == null) return;
 
-      emojiElem.style.bottom = `${hx}px`;
+    const hx = inputElem.clientHeight + 13;
 
-      emojiElem.style.height = `${emojiElem.clientHeight - (58 - hx)}px`
+    emojiElem.style.bottom = `${hx}px`;
 
-  }
-  
+    emojiElem.style.height = `${emojiElem.clientHeight - (58 - hx)}px`;
+  };
+
   document.querySelectorAll("textArea, .emoji-scroll-wrapper").forEach((e) => {
     e.classList.add("cusscroller");
   });
@@ -103,9 +104,9 @@ const Chats = () => {
 
   const messUpd = useRef<any>();
 
-  const [chDate, setChDate] = useState<string>('');
+  const [chDate, setChDate] = useState<string>("");
 
-  const [edit, setEdit] = useState<string>('');
+  const [edit, setEdit] = useState<string>("");
 
   const rContext = useContext(CContext);
 
@@ -140,9 +141,7 @@ const Chats = () => {
     [index: string]: { [index: string]: any[] };
   }>({});
 
-  
   const upd = async () => {
-
     const mess = await retrieveMessages();
 
     if (!Boolean(mess[name]?.["messages"])) {
@@ -172,11 +171,8 @@ const Chats = () => {
     messUpd.current = setTimeout(() => upd(), 3000);
   };
 
-
   useEffect(() => {
-
     async function init() {
-
       setChDate("");
 
       await beginStorageProvider({
@@ -192,7 +188,6 @@ const Chats = () => {
         if (mess[name] === undefined) mess[name] = {};
 
         mess[name]["messages"] = [];
-
       }
 
       if (group === undefined) {
@@ -206,7 +201,6 @@ const Chats = () => {
       setBegin(true);
 
       setLoader(false);
-    
     }
 
     if (name != undefined) {
@@ -222,19 +216,14 @@ const Chats = () => {
     address,
     participants,
     group,
-    rContext
+    rContext,
   ]);
 
-
   useEffect(() => {
-
     if (!onceUpdate.current && beginChecks) {
-      
-      onceUpdate.current = true;      
+      onceUpdate.current = true;
 
       upd();
-
-
     }
   }, [beginChecks]);
 
@@ -248,15 +237,12 @@ const Chats = () => {
     enlargen: boolean,
     type: "mess" | "vote" = "mess"
   ) => {
-
     if (messageText.length) {
-
       if (Boolean(edit)) {
-
-       const { content } = findMessId(
-         messData[group || ""]["messages"],
-         extrasId
-       );
+        const { content } = findMessId(
+          messData[group || ""]["messages"],
+          extrasId
+        );
 
         content[0][0] = messageText;
 
@@ -269,8 +255,8 @@ const Chats = () => {
 
       if (!Boolean(messData[group || ""]?.["messages"][0])) {
         messData[group || ""] = {
-          messages: [[]]
-        }       
+          messages: [[]],
+        };
       }
 
       const newMess: any = {
@@ -290,11 +276,10 @@ const Chats = () => {
       messData[group || ""]["messages"][0].push(newMess);
 
       try {
-
         // const serverData = { ...messData };
 
         // serverData[group || ""]["messages"][index]["server"] = true;
-        
+
         clearTimeout(messUpd.current);
 
         notifications({
@@ -308,10 +293,12 @@ const Chats = () => {
 
         setMessageSend(!messageSend);
 
-        await saveMessages({data: JSON.stringify(newMess), receiver: group || ""});
+        await saveMessages({
+          data: JSON.stringify(newMess),
+          receiver: group || "",
+        });
 
         upd();
-
       } catch (err) {
         console.log(err);
       }
@@ -319,25 +306,22 @@ const Chats = () => {
   };
 
   const onEClick = (eObject: any, event: any) => {
-
     setEnlargen(enlargen + 1);
     setMessageText(messageText + eObject.emoji);
-
   };
-
 
   const [conDelete, setConDelete] = useState<boolean>(false);
 
   const deleteMessageMe = async () => {
-      if (extrasId) {
-         const status = await deleteMessagesAll(extrasId);
-      }
-  }
+    if (extrasId) {
+      const status = await deleteMessagesAll(extrasId);
+    }
+  };
 
   const deleteMessageEvryone = async () => {
-      if (extrasId) {
-         const status = await deleteMessages(extrasId);
-      }
+    if (extrasId) {
+      const status = await deleteMessages(extrasId);
+    }
   };
 
   return (
@@ -460,7 +444,7 @@ const Chats = () => {
                       setPrevMessLoading(true);
 
                       const dataMess = await retrieveMessages(
-                        messData[group || ""]?.["messages"]?.length || 0,
+                        messData[group || ""]?.["messages"]?.length || 0
                       );
 
                       if (Object.values(dataMess).length) {
@@ -542,7 +526,6 @@ const Chats = () => {
                         {messData[group || ""]["messages"]
                           .reverse()
                           .map((v: any, ii: number) => {
-                            
                             return v.map(
                               (
                                 {
@@ -686,11 +669,10 @@ const Chats = () => {
                           <FiX
                             size={24}
                             onClick={() => {
-                             
-                                rContext.update?.({
-                                  content: undefined,
-                                  sender: undefined,
-                                });
+                              rContext.update?.({
+                                content: undefined,
+                                sender: undefined,
+                              });
                             }}
                           />
                         </div>
