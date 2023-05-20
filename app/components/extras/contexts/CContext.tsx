@@ -32,7 +32,6 @@ export const CCprovider = ({ children }: { children: JSX.Element }) => {
         group,
         update: (rep: reply) => {
 
-          console.log(rep, 's')
 
           setContent(rep.content);
 

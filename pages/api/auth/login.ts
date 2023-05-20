@@ -30,7 +30,7 @@ export default function handler(
           
           const { data } = await axios.get("/daos", {
             baseURL: process.env.NEXT_PUBLIC_APP_URL || "",
-            headers: { "X-App-Key": process.env.NEXT_PUBLIC_APP_KEY || "" },
+            headers: { "X-App-Key": process.env.APP_KEY || "" },
           });
 
 
@@ -104,7 +104,7 @@ export default function handler(
             },
             {
               baseURL: process.env.NEXT_PUBLIC_APP_URL || '', 
-              headers: { "X-App-Key": process.env.NEXT_PUBLIC_APP_KEY || "" },
+              headers: { "X-App-Key": process.env.APP_KEY || "" },
             }
           );
 

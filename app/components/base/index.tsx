@@ -210,7 +210,6 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
       
       if (pathname[pathname.length - 1] == "dashboard"){
         document.querySelector(".msg.active")?.scrollIntoView();
-        console.log('dddd')
       }
 
     }

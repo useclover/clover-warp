@@ -34,7 +34,7 @@ export default function handler(
           {
             baseURL: process.env.NEXT_PUBLIC_APP_URL || "",
             headers: {
-              "X-App-Key": process.env.NEXT_PUBLIC_APP_KEY || "",
+              "X-App-Key": process.env.APP_KEY || "",
             },
           }
         );
