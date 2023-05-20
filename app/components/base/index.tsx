@@ -109,6 +109,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
   useEffect(() => {
 
+
     document
       .querySelectorAll("textArea, .emoji-scroll-wrapper")
       .forEach((e) => {
@@ -158,7 +159,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
   const { group } = rContext;
 
-  const [groupChat, setGroupChat] = useState<string[]>([]);
+  const [groupChat, setGroupChat] = useState<{ name: string, lastchat: any }[]>([]);
 
   const updateGroupChat =  async () => {
 
@@ -206,6 +207,11 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
       updateGroupChat();
 
       setLoader(false);
+      
+      if (pathname[pathname.length - 1] == "dashboard"){
+        document.querySelector(".msg.active")?.scrollIntoView();
+        console.log('dddd')
+      }
 
     }
 
@@ -413,7 +419,6 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                 setLoader(true);
 
                                 try {
-
                                   if (messData[nname] !== undefined) {
                                     setFailMessage(
                                       "Discussion name already exists"
@@ -767,14 +772,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                 </div>
               </div>
 
-              {groupChat.map((gps, i) => {
-
-                console.log(gps, messData[gps], 'chatlist')
-
-                const clst = messData[gps] !== undefined ?
-                  messData[gps]?.["messages"]?.[0]?.[
-                    messData[gps]["messages"]?.[0]?.length - 1
-                  ] : undefined;
+              {groupChat.map(({ name: gps, lastchat: clst }, i) => {
 
                 return (
                   <Chatlist
