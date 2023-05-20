@@ -38,7 +38,7 @@ const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras,
   return (
     <div
       style={{
-        // opacity: sent ? 1 : 0.3,
+        opacity: sent ? 1 : 0.3,
         backgroundColor: selected ? "#f1f2f6e1" : undefined,
       }}
       id={messId}

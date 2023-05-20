@@ -51,11 +51,21 @@ const Chats = () => {
 
   const { address, isConnected } = useAccount();
 
+  const goDown = () => {
+     const chatArea = document.querySelector(".chat-area");
+
+     if (chatArea !== null) {
+       chatArea.scrollTop = chatArea.scrollHeight + 100;
+     }
+  }
+
   useEffect(() => {
     if (localStorage.getItem("cloverlog") === null) {
       Router.push("/");
     } else {
       const data = JSON.parse(localStorage.getItem("cloverlog") || "{}");
+
+      goDown();
 
       setLoginData(data);
     }
@@ -88,6 +98,10 @@ const Chats = () => {
   const [showEmoji, setShowEmoji] = useState(false);
 
   const [messageText, setMessageText] = useState("");
+
+  const [messageSend, setMessageSend] = useState<boolean>(false);
+
+  const messUpd = useRef<any>();
 
   const [chDate, setChDate] = useState<string>('');
 
@@ -126,6 +140,38 @@ const Chats = () => {
     [index: string]: { [index: string]: any[] };
   }>({});
 
+  
+  const upd = async () => {
+
+    const mess = await retrieveMessages();
+
+    if (!Boolean(mess[name]?.["messages"])) {
+      if (mess[name] === undefined) mess[name] = {};
+
+      mess[name]["messages"] = [];
+    }
+
+    // sync old and new data
+
+    const old = messData[name]["messages"];
+
+    const neww = mess[name]["messages"];
+
+    // old.forEach((mess: any, i: number) => {
+    //   mess.forEach((main: any, j: number) => {
+    //     if (!main.sent) {
+    //       neww[i].push(main);
+
+    //       neww[i] = neww[i].sort((a: any, b: any) => a.date - b.date);
+    //     }
+    //   });
+    // });
+
+    updateMessData(mess);
+
+    messUpd.current = setTimeout(() => upd(), 3000);
+  };
+
 
   useEffect(() => {
 
@@ -155,6 +201,8 @@ const Chats = () => {
 
       updateMessData(mess);
 
+      // goDown();
+
       setBegin(true);
 
       setLoader(false);
@@ -179,45 +227,20 @@ const Chats = () => {
 
 
   useEffect(() => {
+
     if (!onceUpdate.current && beginChecks) {
       
-      onceUpdate.current = true;
-
-      const upd = async () => {
-        const mess = await retrieveMessages();
-
-        if (!Boolean(mess[name]?.["messages"])) {
-          if (mess[name] === undefined) mess[name] = {};
-
-          mess[name]["messages"] = [];
-        }
-
-        // sync old and new data
-
-       const old = messData[name]["messages"];
-
-       const neww = mess[name]['messages'];            
-
-        // old.forEach((mess: any, i: number) => {
-
-        //   if (neww[i] ) {
-
-        //   }
-
-        // });        
-
-        updateMessData(mess);
-
-        setTimeout(() => upd(), 3000);
-        
-      }
-      
+      onceUpdate.current = true;      
 
       upd();
 
 
     }
   }, [beginChecks]);
+
+  useEffect(() => {
+    goDown();
+  }, [messageSend, group]);
 
   const [enlargen, setEnlargen] = useState<number>(0);
 
@@ -271,6 +294,8 @@ const Chats = () => {
         // const serverData = { ...messData };
 
         // serverData[group || ""]["messages"][index]["server"] = true;
+        
+        clearTimeout(messUpd.current);
 
         notifications({
           title: `Message from ${address}`,
@@ -279,16 +304,13 @@ const Chats = () => {
           exclude: address || "",
         });
 
-        await saveMessages({data: JSON.stringify(newMess), receiver: group || ""});
-
-
         updateMessData(messData);
 
-        const chatArea = document.querySelector(".chat-area");
+        setMessageSend(!messageSend);
 
-        if (chatArea !== null) {
-          chatArea.scrollTop = chatArea.scrollHeight;
-        }
+        await saveMessages({data: JSON.stringify(newMess), receiver: group || ""});
+
+        upd();
 
       } catch (err) {
         console.log(err);

@@ -95,6 +95,7 @@ export const retrieveMessages = async (indexx?: number) => {
   const messages: any = {};
 
   chatdata.data.forEach((col: any) => {
+
     if (messages[col.receiver] === undefined) {
       messages[col.receiver] = { messages: [] };
       messages[col.receiver]["messages"][indexx || 0] = [];
@@ -213,6 +214,7 @@ export const updateMessages = async (id: string, update: any) => {
 
 export const saveMessages = async (updateNew: any) => {
   try {
+
     await axios.post(`/dao/${lq[0]}/chats`, updateNew, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
@@ -220,6 +222,7 @@ export const saveMessages = async (updateNew: any) => {
     });
 
     return true;
+
   } catch (err) {
     console.log(err);
 
@@ -253,12 +256,26 @@ export const retrieveGroupChats = async () => {
 
   const groupChats: any = [];
 
-
   groups.forEach((val: any) => {
         
-      const { groupname } = val;
+      const { groupname, chat } = val;
   
-      groupChats.push(groupname);
+      const { data, messId, sender, index, created_at: udate } = chat;
+
+      const ddata = JSON.parse(data);
+
+      const date = new Date(udate);
+
+      groupChats.push({
+        name: groupname,
+        lastchat: {
+          ...ddata,
+          messId,
+          sender,
+          index,
+          date: date.getTime(),
+        },
+      });
 
   })
 
