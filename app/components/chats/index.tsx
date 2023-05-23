@@ -39,6 +39,7 @@ import {
   deleteMessagesAll,
   findMessId,
   updateMessages,
+  encrypt,
 } from "../extras/chat/functions";
 import { CContext } from "../extras/contexts/CContext";
 import Text from "./texts";
@@ -110,7 +111,7 @@ const Chats = () => {
 
   const rContext = useContext(CContext);
 
-  const { group } = rContext;
+  const { group, chatkeys } = rContext;
 
   const [currentDir, setCurrentDir] = useState<string[]>(["main"]);
 
@@ -149,22 +150,6 @@ const Chats = () => {
 
       mess[name]["messages"] = [];
     }
-
-    // sync old and new data
-
-    const old = messData[name]["messages"];
-
-    const neww = mess[name]["messages"];
-
-    // old.forEach((mess: any, i: number) => {
-    //   mess.forEach((main: any, j: number) => {
-    //     if (!main.sent) {
-    //       neww[i].push(main);
-
-    //       neww[i] = neww[i].sort((a: any, b: any) => a.date - b.date);
-    //     }
-    //   });
-    // });
 
     updateMessData(mess);
 
@@ -237,6 +222,7 @@ const Chats = () => {
     enlargen: boolean,
     type: "mess" | "vote" = "mess"
   ) => {
+
     if (messageText.length) {
       if (Boolean(edit)) {
         const { content } = findMessId(
@@ -259,26 +245,30 @@ const Chats = () => {
         };
       }
 
+      const encMessage = await encrypt(messageText, rContext?.chatkeys);
+
       const newMess: any = {
-        content: [[messageText]],
+        content: [[encMessage.message]],
         sent: false,
         type,
+        iv: encMessage.iv,
         enlargen,
         sender: address,
         date: new Date().getTime(),
       };
 
+      
       if (rContext?.sender !== undefined) {
+
         newMess["reply"] = rContext.sender;
         newMess["content"][0].push(rContext.content || "");
+
       }
 
       messData[group || ""]["messages"][0].push(newMess);
 
       try {
-        // const serverData = { ...messData };
 
-        // serverData[group || ""]["messages"][index]["server"] = true;
 
         clearTimeout(messUpd.current);
 
@@ -299,6 +289,7 @@ const Chats = () => {
         });
 
         upd();
+
       } catch (err) {
         console.log(err);
       }
@@ -430,6 +421,8 @@ const Chats = () => {
                   onScroll={async (e: any) => {
                     const label = document.querySelectorAll(".dateSeperate");
 
+                    if (group == undefined) return;
+
                     label.forEach((element) => {
                       const elem = element as HTMLDivElement;
 
@@ -439,6 +432,7 @@ const Chats = () => {
                     });
 
                     if (e.target.scrollTop <= 20 && preloadMess) {
+
                       if (prevMessLoading) return;
 
                       setPrevMessLoading(true);
@@ -448,9 +442,12 @@ const Chats = () => {
                       );
 
                       if (Object.values(dataMess).length) {
+                        
+
                         messData[group || ""]["messages"].push(dataMess);
 
                         setPrevMessLoading(false);
+                                            
                       } else {
                         setPrevMessLoading(false);
                       }
@@ -536,7 +533,7 @@ const Chats = () => {
                                   index,
                                   type,
                                   messId,
-                                  server,
+                                  iv,
                                   sent,
                                   enlargen,
                                 }: any,
@@ -574,6 +571,7 @@ const Chats = () => {
                                       replyDisabled={Boolean(edit)}
                                       sender={sender}
                                       date={date}
+                                      iv={iv}
                                       selected={extrasId == messId}
                                       setExtras={setExtras}
                                       setEditable={setEditableMess}
@@ -590,6 +588,7 @@ const Chats = () => {
                           })}
                       </>
                     )}
+
                     {!Boolean(messData[group || ""]?.["messages"]?.length) && (
                       <div
                         className="empty"

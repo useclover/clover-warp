@@ -1,5 +1,8 @@
 import axios from 'axios';
 import { lq } from '../storage/init';
+import { contractAddress } from '../../../../pages';
+import Cryptr from 'cryptr';
+import crypto from 'crypto';
 
 export interface mess {
   [index: string]: {
@@ -10,68 +13,150 @@ export interface mess {
   }[];
 }
 
-export const encrypt = async (text: string) => {
-
-    const Authorization = 'Bearer ' + localStorage.getItem('clover-x');
-
-    try {
-
-    const { data: { result } } = await axios.post('/e2ee', {
-        text, action: 'encrypt'
-    }, {
-        headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-            Authorization
-        },
-        baseURL: window.origin
-    })
-
-    return result;
-
-    } catch (err) {
-        console.log(err);
-
-        return false;
-
-    }   
+export const decryptCache: { [index: string]: string } = {
 
 }
 
+export const encrypt = async (text: string, keys: string) => {
 
-export const decrypt  = async (text: string) => {
-    const Authorization = "Bearer " + localStorage.getItem("clover-x");
+    const { private: privateKey, public: publicKey } = JSON.parse(keys);
 
-    try {
-
-    const {
-      data: { result },
-    } = await axios.post(
-      "/e2ee",
+    const receiverPublicKey = await window.crypto.subtle.importKey(
+      "jwk",
+      publicKey,
       {
-        text,
-        action: "decrypt",
+        name: "ECDH",
+        namedCurve: "P-256",
       },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization,
-        },
-        baseURL: window.origin,
-      }
+      true,
+      []
     );
 
-    return result;
+    const senderPrivateKey = await window.crypto.subtle.importKey(
+      "jwk",
+      privateKey,
+      {
+        name: "ECDH",
+        namedCurve: "P-256",
+      },
+      true,
+      ["deriveKey", "deriveBits"]
+    );
 
-    } catch (err) {
-        console.log(err);
+    const deriveKey = await window.crypto.subtle.deriveKey(
+      {
+        name: "ECDH",
+        public: receiverPublicKey,
+      },
+      senderPrivateKey,
+      {
+        name: "AES-GCM",
+        length: 256,
+      },
+      true,
+      ["encrypt", "decrypt"]
+    );
 
-        return false;
-    }
+
+    const encodedText = new TextEncoder().encode(text);
+    const encodedIv = window.crypto.getRandomValues(new Uint8Array(12));
+
+    const encryptedData = await window.crypto.subtle.encrypt(
+      {
+        name: "AES-GCM",
+        iv: encodedIv,
+      },
+      deriveKey,
+      encodedText
+    );
+
+    const encryptedMessage = new Uint8Array(encryptedData);
+
+    const encryptedHex = Buffer.from(encryptedMessage).toString("hex");
+
+    const encryptedIv = Buffer.from(encodedIv).toString("hex");
+
+
+    return { message: encryptedHex, iv: encryptedIv }; 
+
 }
 
-export const retrieveGroupChats = async () => {
+
+export const decrypt  = async (encryptedText: { message: string, iv: string }, keys: string) => {
+
+  
+    if (decryptCache[Object.values(encryptedText).join('')] !== undefined) {
+        return decryptCache[Object.values(encryptedText).join("")];
+    }
+
+    try {
+    
+    const { private: privateKey, public: publicKey } = JSON.parse(keys);
+
+    const receiverPrivateKey = await window.crypto.subtle.importKey(
+      "jwk",
+      privateKey,
+      {
+        name: "ECDH",
+        namedCurve: "P-256",
+      },
+      true,
+      ["deriveKey", "deriveBits"]
+    );
+
+    const senderPublicKey = await window.crypto.subtle.importKey(
+      "jwk",
+      publicKey,
+      {
+        name: "ECDH",
+        namedCurve: "P-256",
+      },
+      true,
+      []
+    );
+
+    const deriveKey = await window.crypto.subtle.deriveKey(
+      {
+        name: "ECDH",
+        public: senderPublicKey,
+      },
+      receiverPrivateKey,
+      {
+        name: "AES-GCM",
+        length: 256,
+      },
+      true,
+      ["encrypt", "decrypt"]
+    );
+
+    const encryptedMessage = Buffer.from(encryptedText.message, "hex");
+    const encryptedIv = Buffer.from(encryptedText.iv, "hex");
+
+    const decryptedData = await window.crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv: encryptedIv,
+      },
+      deriveKey,
+      encryptedMessage
+    );
+
+    const decryptedMessage = new Uint8Array(decryptedData);
+
+    const decryptedText = new TextDecoder().decode(decryptedMessage);
+
+    decryptCache[Object.values(encryptedText).join("")] = decryptedText;
+
+    return decryptedText;
+
+  } catch(err) {
+    return "";
+}
+    
+}
+
+// retrieve group chats from server
+export const retrieveGroupChats = async (decryptHash: boolean) => {
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
   const {
@@ -85,7 +170,13 @@ export const retrieveGroupChats = async () => {
   const groupChats: any = [];
 
   groups.forEach((val: any) => {
-    const { groupname, chat } = val;
+
+
+    const { groupname, chat, hash: eData } = val;
+
+    let lastchat = undefined;
+
+    if(chat.data !== undefined){
 
     const { data, messId, sender, index, created_at: udate } = chat;
 
@@ -93,15 +184,37 @@ export const retrieveGroupChats = async () => {
 
     const date = new Date(udate);
 
+    lastchat = {
+      ...ddata,
+      messId,
+      sender,
+      index,
+      date: date.getTime(),
+    };
+
+    }
+    const { key: encryptedHash, init } = eData;
+
+    const { contract, hash } =
+      JSON.parse(localStorage.getItem("cloverlog") || '{"contract":""}')
+        ;
+
+    let decryptedKeys;
+
+    if(decryptHash){
+
+      let key = init ? hash : contract;
+
+      const enc = new Cryptr(key);
+
+      decryptedKeys = enc.decrypt(encryptedHash);
+
+    }
+
     groupChats.push({
       name: groupname,
-      lastchat: {
-        ...ddata,
-        messId,
-        sender,
-        index,
-        date: date.getTime(),
-      },
+      lastchat,
+      groupKeys: decryptedKeys
     });
   });
 
@@ -247,6 +360,7 @@ export const saveMessages = async (updateNew: any) => {
 };
 
 export const createGroupChat = async (groupname: string) => {
+
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
   const {

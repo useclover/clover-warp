@@ -151,14 +151,34 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
   const { group } = rContext;
 
-  const [groupChat, setGroupChat] = useState<{ name: string; lastchat: any }[]>(
-    []
-  );
+  const [groupChat, setGroupChat] = useState<
+    { name: string; lastchat: any; groupKeys: string }[]
+  >([]);
+
+  const keyOnce = useRef<boolean>(true);
 
   const updateGroupChat = async () => {
-    setGroupChat(await retrieveGroupChats());
+
+    const gc = await retrieveGroupChats(keyOnce.current);
+
+    setGroupChat(gc);
+
+    if (keyOnce.current) {
+
+      keyOnce.current = false;
+
+    gc.forEach(({ name: gname, groupKeys }: any) => {
+      if (gname == name) { 
+
+        rContext.update?.({
+          chatkeys: groupKeys
+        })
+      }
+    })
+  }
 
     setTimeout(updateGroupChat, 3000);
+
   };
 
   useEffect(() => {
@@ -187,6 +207,8 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
         mess[name]["messages"] = {};
       }
+
+
 
       if (group === undefined) {
         rContext.update?.({ group: name });
@@ -224,6 +246,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
     setLoader(true);
 
     await router.push(`/dashboard/${path}`);
+
   };
 
   const [addNew, setAddNew] = useState<boolean>(false);
@@ -755,13 +778,16 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                 </div>
               </div>
 
-              {groupChat.map(({ name: gps, lastchat: clst }, i) => {
+              {groupChat.map(({ name: gps, lastchat: clst, groupKeys }, i) => {
+                
                 return (
                   <Chatlist
                     key={i}
                     onClick={async () => {
+
                       rContext.update?.({
                         group: gps,
+                        chatkeys: groupKeys,
                       });
 
                       if (pathname[pathname.length - 1] != "dashboard") {
@@ -776,6 +802,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                       pathname[pathname.length - 1] == "dashboard" &&
                       gps == group
                     }
+                    iv={clst?.['iv']}
                     lastMsg={clst !== undefined ? clst["content"] : ""}
                     name={`${gps} ${!i ? "(Main)" : ""}`}
                   />

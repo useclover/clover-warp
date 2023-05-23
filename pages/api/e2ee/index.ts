@@ -6,7 +6,7 @@ const Cryptr = require("cryptr");
 type Data = {
   error: boolean;
   message: string;
-  result?: string;
+  result?: string[];
 };
 
 export default function handler(
@@ -16,12 +16,25 @@ export default function handler(
   
   if (req.method == "POST") {
 
-    const { Authorization } = req.headers;
 
-    const { text, action } = req.body;
+    const { authorization } = req.headers;
+
+    const { text: stext, action } = req.body;
+
+    const text = JSON.parse(stext);
+
+    if (typeof text !== 'object') {
+      return res.status(400).json({ message: "text is required", error: true });
+    }
+
+    if (action != 'encrypt' && action != 'decrypt') {
+      return res.status(400).json({ message: "action is required", error: true });
+    }
+
 
     (async () => {
       try {
+
         const {
           data: { key },
         } = await axios.get("/e2ee/key", {
@@ -29,19 +42,22 @@ export default function handler(
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
-            Authorization,
+            Authorization: authorization || "",
+            "X-App-Key": process.env.APP_KEY || ""
           },
         });
 
         const enc = new Cryptr(key);
 
-        let result = "";
+        let result: string[] = [];
 
-        if (action == "encrypt") {
-          result = enc.encrypt(text);
-        } else if (action == "decrypt") {
-          result = enc.decrypt(text);
-        }
+        text.forEach((mt: string) => {
+             if (action == "encrypt") {
+               result.push(enc.encrypt(mt));
+             } else if (action == "decrypt") {
+               result.push(enc.decrypt(mt));
+             }
+        })
 
         res
           .status(200)

@@ -1,7 +1,44 @@
 import Image from 'next/image';
 import cicon from "../../../../public/images/icon.png";
+import { useContext, useEffect, useState } from 'react';
+import { decrypt, decryptCache } from '../../extras/chat/functions';
+import { CContext } from '../../extras/contexts/CContext';
 
-const Chatlist = ({name, img, lastMsg, time, selected, onClick}: {name: string, img?: string, lastMsg: string, time?: string | number, selected: boolean, onClick: () => void}) => {
+const Chatlist = ({name, img, lastMsg, time, selected, iv, onClick}: {name: string, img?: string, lastMsg: string, time?: string | number, selected: boolean, onClick: () => void, iv?: string}) => {
+
+    const mCon = useContext(CContext);
+
+    const Msg = () => {
+
+        const [txt, setTxt] = useState<string>('');
+
+        useEffect(() => {
+
+            (async () => {
+
+              if (iv !== undefined) {
+
+                setTxt(await decrypt({ message: lastMsg, iv }, mCon.chatkeys) as string);
+
+              } else {
+
+                setTxt(lastMsg);
+
+              }
+
+            })()
+
+        }, [])
+
+        return (
+          <span className="msg-message">
+            {decryptCache[lastMsg + iv] === undefined
+              ? txt !== undefined && txt
+              : decryptCache[lastMsg + iv]}
+          </span>
+        );
+
+    }
 
     const getx = (t: number) => {
         const ec:number = Number((new Date().getTime() / 1000).toFixed(0));
@@ -24,8 +61,9 @@ const Chatlist = ({name, img, lastMsg, time, selected, onClick}: {name: string, 
             const xx = parseInt((delay / 60).toString()); 
             
             return xx+'min'+(xx > 1 ? 's' : '')
+
         }else{
-            return delay + 's';
+            return 'now';
         }
 
     }
@@ -45,7 +83,7 @@ const Chatlist = ({name, img, lastMsg, time, selected, onClick}: {name: string, 
       <div className="msg-detail w-fit">
         <div className="msg-username capitalize">{name}</div>
         <div className="msg-content">
-          <span className="msg-message">{lastMsg}</span>
+          <Msg />
           {time !== undefined && (
             <span className="msg-date">{getx(Number(time))}</span>
           )}
