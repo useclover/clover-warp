@@ -82,9 +82,8 @@ export const encrypt = async (text: string, keys: string) => {
 }
 
 
-export const decrypt  = async (encryptedText: { message: string, iv: string }, keys: string) => {
+export const decrypt = async (encryptedText: { message: string, iv: string }, keys: string) => {
 
-  
     if (decryptCache[Object.values(encryptedText).join('')] !== undefined) {
         return decryptCache[Object.values(encryptedText).join("")];
     }
@@ -150,8 +149,9 @@ export const decrypt  = async (encryptedText: { message: string, iv: string }, k
     return decryptedText;
 
   } catch(err) {
-    return "";
-}
+    // console.log(err, 'dmc')
+    return "pending...";
+  }
     
 }
 
@@ -170,7 +170,6 @@ export const retrieveGroupChats = async (decryptHash: boolean) => {
   const groupChats: any = [];
 
   groups.forEach((val: any) => {
-
 
     const { groupname, chat, hash: eData } = val;
 

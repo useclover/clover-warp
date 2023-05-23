@@ -63,11 +63,11 @@ export default function handler(
 
           const enc = new Cryptr(key);
 
-          const decryptedKeys = enc.decrypt(encryptedKeys);
-         
+          const decryptedKeys = enc.decrypt(encryptedKeys);         
+
           const enc_new = new Cryptr(hash);
 
-          encryptedData = enc_new.encrypt(JSON.stringify(decryptedKeys));
+          encryptedData = enc_new.encrypt(decryptedKeys);
 
         }
 

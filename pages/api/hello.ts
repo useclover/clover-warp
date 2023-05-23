@@ -99,8 +99,7 @@ export default function handler(
 
     const encryptedHex = Buffer.from(encryptedMessage).toString('hex');
 
-    const encryptedIv = Buffer.from(encodedIv).toString('hex');
-    
+    const encryptedIv = Buffer.from(encodedIv).toString('hex');    
 
     // hex to uit8array
 
