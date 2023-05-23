@@ -38,16 +38,18 @@ import {
   beginStorageProvider,
   lq,
   retrieveFiles,
+  notifications,
+} from "../extras/storage/init";
+import {
   retrieveMessages,
   saveMessages,
-  notifications,
   deleteMessages,
   deleteMessagesAll,
   findMessId,
   updateMessages,
   retrieveGroupChats,
   createGroupChat,
-} from "../extras/storage/init";
+} from "../extras/chat/functions";
 import { FaCloud } from "react-icons/fa";
 import { CContext } from "../extras/contexts/CContext";
 import Chatlist from "./sidebar/chatlist";
@@ -56,60 +58,49 @@ import { useAccount } from "wagmi";
 import { BiSend, BiX } from "react-icons/bi";
 import EmojiPicker from "emoji-picker-react";
 
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+  className?: string;
+  padding?: number;
+}
 
-    interface TabPanelProps {
-      children?: React.ReactNode;
-      index: number;
-      value: number;
-      className?: string;
-      padding?: number;
-    }
+const TabPanel = (props: TabPanelProps) => {
+  const { children, padding, value, index, className = "", ...other } = props;
 
-    const TabPanel = (props: TabPanelProps) => {
-      const {
-        children,
-        padding,
-        value,
-        index,
-        className = "",
-        ...other
-      } = props;
+  const pc = {
+    p: padding,
+    py: padding !== undefined ? undefined : 2,
+  };
 
-      const pc = {
-        p: padding,
-        py: padding !== undefined ? undefined : 2,
-      };
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box className={className} sx={pc}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+};
 
-      return (
-        <div
-          role="tabpanel"
-          hidden={value !== index}
-          id={`simple-tabpanel-${index}`}
-          aria-labelledby={`simple-tab-${index}`}
-          {...other}
-        >
-          {value === index && (
-            <Box className={className} sx={pc}>
-              {children}
-            </Box>
-          )}
-        </div>
-      );
-    };
-
-const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {  
-
+const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
   const [loginData, setLoginData] = useState<any>({});
 
   const router = useRouter();
 
-  const pathname = (router.pathname).split('/');
+  const pathname = router.pathname.split("/");
 
   const { address, isConnected } = useAccount();
 
   useEffect(() => {
-
-
     document
       .querySelectorAll("textArea, .emoji-scroll-wrapper")
       .forEach((e) => {
@@ -126,7 +117,6 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
   }, []);
 
   const { name, contract, data: main, participants, creator } = loginData;
-
 
   const [currentDir, setCurrentDir] = useState<string[]>(["main"]);
 
@@ -151,7 +141,9 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
   const [failMessage, setFailMessage] = useState<string>("");
 
-  const [messData, updateMessData] = useState<{[index: string]: { [index: string]: any[] }}>({});
+  const [messData, updateMessData] = useState<{
+    [index: string]: { [index: string]: any[] };
+  }>({});
 
   const [filelist, setFilelist] = useState<number | undefined>();
 
@@ -159,15 +151,35 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
   const { group } = rContext;
 
-  const [groupChat, setGroupChat] = useState<{ name: string, lastchat: any }[]>([]);
+  const [groupChat, setGroupChat] = useState<
+    { name: string; lastchat: any; groupKeys: string }[]
+  >([]);
 
-  const updateGroupChat =  async () => {
+  const keyOnce = useRef<boolean>(true);
 
-    setGroupChat(await retrieveGroupChats());
+  const updateGroupChat = async () => {
 
-    setTimeout(updateGroupChat, 3000)
+    const gc = await retrieveGroupChats(keyOnce.current);
 
+    setGroupChat(gc);
+
+    if (keyOnce.current) {
+
+      keyOnce.current = false;
+
+    gc.forEach(({ name: gname, groupKeys }: any) => {
+      if (gname == name) { 
+
+        rContext.update?.({
+          chatkeys: groupKeys
+        })
+      }
+    })
   }
+
+    setTimeout(updateGroupChat, 3000);
+
+  };
 
   useEffect(() => {
     async function init() {
@@ -182,7 +194,6 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
       const flist = await retrieveFiles();
 
-
       let tSize = 0;
 
       flist.forEach((e: any) => {
@@ -195,11 +206,12 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
         if (mess[name] === undefined) mess[name] = {};
 
         mess[name]["messages"] = {};
-
       }
 
+
+
       if (group === undefined) {
-        rContext.update?.({group: name});
+        rContext.update?.({ group: name });
       }
 
       updateMessData(mess);
@@ -207,12 +219,10 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
       updateGroupChat();
 
       setLoader(false);
-      
-      if (pathname[pathname.length - 1] == "dashboard"){
-        document.querySelector(".msg.active")?.scrollIntoView();
-        console.log('dddd')
-      }
 
+      if (pathname[pathname.length - 1] == "dashboard") {
+        document.querySelector(".msg.active")?.scrollIntoView();
+      }
     }
 
     if (name != undefined) {
@@ -228,22 +238,18 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
     address,
     participants,
     group,
-  ]);  
-
-  
+  ]);
 
   const route = async (path: string) => {
+    if (pathname.includes(path)) return;
 
-      if (pathname.includes(path)) return;
+    setLoader(true);
 
-      setLoader(true);
+    await router.push(`/dashboard/${path}`);
 
-      await router.push(`/dashboard/${path}`);
-
-  }
+  };
 
   const [addNew, setAddNew] = useState<boolean>(false);
-
 
   return (
     <>
@@ -772,14 +778,16 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                 </div>
               </div>
 
-              {groupChat.map(({ name: gps, lastchat: clst }, i) => {
-
+              {groupChat.map(({ name: gps, lastchat: clst, groupKeys }, i) => {
+                
                 return (
                   <Chatlist
                     key={i}
                     onClick={async () => {
+
                       rContext.update?.({
                         group: gps,
+                        chatkeys: groupKeys,
                       });
 
                       if (pathname[pathname.length - 1] != "dashboard") {
@@ -794,6 +802,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                       pathname[pathname.length - 1] == "dashboard" &&
                       gps == group
                     }
+                    iv={clst?.['iv']}
                     lastMsg={clst !== undefined ? clst["content"] : ""}
                     name={`${gps} ${!i ? "(Main)" : ""}`}
                   />
@@ -810,6 +819,5 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
     </>
   );
 };
-
 
 export default Base;

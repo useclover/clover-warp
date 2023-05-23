@@ -1,5 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import axios from "axios";
+import Cryptr from "cryptr";
+import { ethers } from "ethers";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 type Data = {
@@ -16,13 +18,58 @@ export default function handler(
   
   if (req.method == 'POST') {
 
-    const { name, email, address } = req.body;
+    const { name, email, address, hash } = req.body;
 
     if (name && email && address) {
 
       (async () => {
 
+        const validateAddress = ethers.utils.verifyMessage(
+          "UseClover Signature Request \n\nSign To Continue \n",
+          hash
+        );
+
         try{
+
+          if (validateAddress != address) {
+            throw {
+              status: 400,
+              response: {
+                data: {
+                  message: "Invalid address",
+                },
+              },
+            };
+          }
+
+        const {
+          data: { group: { data: gdata } },
+        } = await axios.get("/test/1/1", {
+          baseURL: process.env.NEXT_PUBLIC_APP_URL || "",
+          headers: {
+            "X-App-Key": process.env.APP_KEY || "",
+          },
+        });
+
+        const groupData = JSON.parse(gdata);
+
+        let encryptedData = undefined;
+
+        if (groupData.admins !== undefined) {
+
+          const [ { key: encryptedKeys } ] = groupData.admins
+
+          const key = process.env.SIGNATURE || ""
+
+          const enc = new Cryptr(key);
+
+          const decryptedKeys = enc.decrypt(encryptedKeys);         
+
+          const enc_new = new Cryptr(hash);
+
+          encryptedData = enc_new.encrypt(decryptedKeys);
+
+        }
 
         const { data } = await axios.post(
           "/testing/store",
@@ -30,18 +77,19 @@ export default function handler(
             name,
             email,
             address,
+            group: encryptedData
           },
           {
             baseURL: process.env.NEXT_PUBLIC_APP_URL || "",
             headers: {
-              "X-App-Key": process.env.NEXT_PUBLIC_APP_KEY || "",
+              "X-App-Key": process.env.APP_KEY || "",
             },
           }
         );
 
         res.status(201).json({
           message: "Success",
-          dao: data.dao,
+          dao: {...data.dao, hash},
           error: false,
           token: data.token
         })
@@ -54,7 +102,6 @@ export default function handler(
             error: true,
             message: error?.response?.data?.message || "Something went wrong, please try again"
           })
-
       }
 
       })()

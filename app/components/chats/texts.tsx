@@ -1,9 +1,10 @@
-import { useContext } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import userx from "../../../public/images/user.svg";
 import { CContext } from "../extras/contexts/CContext";
 import { useAccount } from "wagmi";
 import Image from "next/image";
 import { ethers } from "ethers";
+import { decrypt, decryptCache } from "../extras/chat/functions";
 
 
 interface Textm {
@@ -11,6 +12,7 @@ interface Textm {
   sender: string;
   date: string | number;
   reply?: string;
+  iv?: string;
   selected: boolean;
   messId: string;
   enlargen: boolean;
@@ -20,8 +22,9 @@ interface Textm {
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras, selected, replyDisabled, setEditable }: Textm) => {
+const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras, selected, replyDisabled, setEditable, iv }: Textm) => {
 
+  const [text, setText] = useState<string>();
   
   const { address, isConnected } = useAccount();
 
@@ -34,7 +37,96 @@ const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras,
   const ddate = `${exp.getHours() % 12 || exp.getHours()}.${
             min > 9 ? min : `0${min}`
         }${exp.getHours() > 12 ? "pm" : "am"}`;
+ 
+  const tDecrypt = async (txt: string) => {
 
+    if (iv !== undefined) {
+
+      return await decrypt({ message: txt, iv }, mCon.chatkeys);
+
+    }else{
+
+     return txt;
+
+    }
+  }
+
+  const MainText = () => {
+
+    const [text, setText] = useState<{ main:string, rep: string }[]>([]);
+
+    useEffect(() => {
+
+      (async () => { 
+
+        content.forEach(async (txt: string[], i: number) => {
+
+          if (text[i] === undefined) {
+
+            const main = await tDecrypt(txt[0])
+
+            const rep = txt[1] !== undefined ? await tDecrypt(txt[1]) : ""
+
+            setText([...text, { main, rep }]);
+
+          }
+      })
+
+        
+    })()
+
+    }, []);
+
+    return (
+      <div className="chat-msg-content">
+        {content.map((txt: string[], i: number) => (
+          <div key={i}>
+            {Boolean(txt[1]) && (
+              <div className="chat-msg-text reply">
+                <span>{`Replied to ${
+                  reply == address
+                    ? "self"
+                    : `${sender.substring(0, 6)}....${sender.substring(38, 42)}`
+                }`}</span>
+
+                <span>
+                  {decryptCache[txt[1] + iv] === undefined
+                    ? text[i] !== undefined && text[i].rep
+                    : decryptCache[txt[1] + iv]}
+                </span>
+              </div>
+            )}
+
+            <div
+              key={i}
+              onClick={async (e: any) => {
+                if (replyDisabled) return;
+
+                if (!(e.detail % 2)) {
+                  if (mCon.update !== undefined) {
+                    mCon.update({
+                      content: await tDecrypt(txt[0]),
+                      sender,
+                    });
+                  }
+                }
+              }}
+              style={{
+                fontSize: enlargen ? "50px" : undefined,
+                padding: enlargen ? "5px" : undefined,
+              }}
+              className="chat-msg-text"
+            >
+              {decryptCache[txt[0] + iv] === undefined
+                ? text[i] !== undefined && text[i].main
+                : decryptCache[txt[0] + iv]}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+  
   return (
     <div
       style={{
@@ -71,46 +163,7 @@ const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras,
           <span>{ddate}</span>
         </div>
       </div>
-      <div className="chat-msg-content">
-        {content.map((txt: string[], i: number) => (
-          <div key={i}>
-            {Boolean(txt[1]) && (
-              <div className="chat-msg-text reply">
-                <span>{`Replied to ${
-                  reply == address
-                    ? "self"
-                    : `${sender.substring(0, 6)}....${sender.substring(38, 42)}`
-                }`}</span>
-                <span>{txt[1]}</span>
-              </div>
-            )}
-
-            <div
-              key={i}
-              onClick={(e: any) => {
-                
-                if (replyDisabled) return;
-
-                if (!(e.detail % 2)) {
-                  if (mCon.update !== undefined) {
-                    mCon.update({
-                      content: txt[0],
-                      sender,
-                    });
-                  }
-                }
-              }}
-              style={{
-                fontSize: enlargen ? "50px" : undefined,
-                padding: enlargen ? "5px" : undefined,
-              }}
-              className="chat-msg-text"
-            >
-              {txt[0]}
-            </div>
-          </div>
-        ))}
-      </div>
+      <MainText />
     </div>
   );
 };

@@ -43,7 +43,7 @@ import { BsList, BsPatchPlusFill, BsPlusCircle, BsPlusCircleFill } from "react-i
 import { MdClose, MdPersonAddAlt } from "react-icons/md";
 
 // 0x74367351f1a6809ced9cc70654c6bf8c2d1913c9;
-const contractAddress: string = "0xaCDFc5338390Ce4eC5AD61E3dC255c9F2560D797";
+export const contractAddress: string = "0xaCDFc5338390Ce4eC5AD61E3dC255c9F2560D797";
 const abi: any = contract.abi;
 
 const Home: NextPage = () => {
@@ -63,14 +63,18 @@ const Home: NextPage = () => {
   const [loginError, setLoginError] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
   const [isLoading, setLoading] = useState<boolean>(false);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false)
+    console.log('clicked clos')
+  };
   const [failMessage, setFailMessage] = useState<string>("");
 
   const [userAddress, setUserAddress] = useState<string>("");
 
   const [testName, setTestName] = useState<string>("");
   const [testEmail, setTestEmail] = useState<string>("");
-  const [testAdd, setTestAdd] = useState<string>("");
+
+  const [signature, setSignature] = useState<string>("");
 
   const [improve, setImprove] = useState<boolean>(false);
 
@@ -124,6 +128,7 @@ const Home: NextPage = () => {
     owner: string,
     desc?: string
   ) => {
+
     const nfx = makeNFTClient(process.env.NEXT_PUBLIC_NFT_KEY || "");
 
     const date = new Date();
@@ -202,28 +207,31 @@ const Home: NextPage = () => {
         return;
       }
 
-      if (!ethers.utils.isAddress(testAdd)) {
-        setTestErr("Address is required");
-        setLoading(false);
-        return;
-      }
-
+      
       if (!isConnected) {
         await connectAsync({ connector: connectors[0] });
       }
 
+      const signedHash = await signMessageAsync({
+        message: "UseClover Signature Request \n\nSign To Continue \n",
+      });
+
+
+      const userAddress: string = address as `0x${string}`;
+
       const metadata = await generateNftData(
         "useClover",
-        testAdd,
+        userAddress,
         "useClover App test"
       );
 
-      await mintNFT(metadata, testAdd);
+      await mintNFT(metadata, userAddress);
 
       const { data } = await axios.post("/api/auth/test", {
         name: testName,
         email: testEmail,
-        address: testAdd,
+        address: userAddress,
+        hash: signedHash
       }, {
         baseURL: window.origin
       });
@@ -259,7 +267,14 @@ const Home: NextPage = () => {
       await connectAsync({ connector: connectors[0] });
     }
 
+    const signedHash = await signMessageAsync({
+      message: "UseClover Signature Request \n\nSign To Continue \n",
+    });    
+
+    setSignature(signedHash);
+
     try {
+      
       const userAddress: string = address as `0x${string}`;
 
       if (!name.length) {
@@ -281,7 +296,9 @@ const Home: NextPage = () => {
         
         setBigLoader(false);
         return;
+
       } else if (daoType == "default") {
+
         if (participants.length) {
           participants.forEach(async (v) => {
             if (!ethers.utils.isAddress(v)) {
@@ -301,6 +318,7 @@ const Home: NextPage = () => {
 
         // send nft to dao
       } else {
+
         const provider = new ethers.providers.JsonRpcProvider(
           "https://api.hyperspace.node.glif.io/rpc/v1"
         );
@@ -320,14 +338,16 @@ const Home: NextPage = () => {
         send = true;
       }
 
-      const nftown: string[] = participants;
+      const nftown: string[] = [...participants];
 
       try {
+
         // const { data: { daos: dbData } } = await axios.get('/api/auth/addDao', {
         //   baseURL: window.origin
         // });
 
         const payload: any = {
+          hash: signedHash,
           contract:
             daoType == "default"
               ? contractAddress
@@ -335,9 +355,12 @@ const Home: NextPage = () => {
           joined: JSON.stringify(participants),
           desc: des || "",
           name,
+          metadata: userAddress,
+          defCon: daoType == "default",
         };
 
         if (daoType == "default") {
+
           nftown.push(userAddress);
 
           const metadata = await generateNftData(
@@ -357,7 +380,9 @@ const Home: NextPage = () => {
               token,
               data: { id },
             },
-          } = await axios.post("/daos/store", payload);
+          } = await axios.post("/api/auth/addDao", payload, {
+            baseURL: window.origin
+          });
 
           localStorage.setItem("clover-x", token);
 
@@ -366,6 +391,7 @@ const Home: NextPage = () => {
             JSON.stringify({
               name,
               creator: userAddress,
+              hash: signedHash,
               contract: contractAddress,
               data: id,
               participants,
@@ -378,13 +404,17 @@ const Home: NextPage = () => {
             exclude: userAddress,
             receivers: participants,
           });
+
         } else {
+
           const {
             data: {
               token,
               data: { id },
             },
-          } = await axios.post("/daos/store", payload);
+          } = await axios.post("/api/auth/addDao", payload, {
+            baseURL: window.origin,
+          });
 
           localStorage.setItem("clover-x", token);
 
@@ -394,6 +424,7 @@ const Home: NextPage = () => {
               name,
               contract: ethers.utils.getAddress(contractAd),
               creator: address,
+              hash: signedHash,
               data: id,
               participants: [address],
             })
@@ -441,8 +472,10 @@ const Home: NextPage = () => {
       }
 
       const signedHash = await signMessageAsync({
-        message: "Welcome back to clover",
+        message: "UseClover Signature Request \n\nSign To Continue \n",
       });
+
+      setSignature(signedHash)
 
       const userAddress: string = address as `0x${string}`;
 
@@ -468,6 +501,7 @@ const Home: NextPage = () => {
 
           setBigLoader(false);
         } else {
+
           const vv: any = daos;
 
           const name: string = vv.name;
@@ -482,12 +516,17 @@ const Home: NextPage = () => {
               creator: vv.metadata,
               contract,
               data,
-              participants: typeof vv.joined == "string" ? JSON.parse(vv.joined) : vv.joined,
+              hash: signedHash,
+              participants:
+                typeof vv.joined == "string"
+                  ? JSON.parse(vv.joined)
+                  : vv.joined,
             })
           );
 
           Router.push("/dashboard");
         }
+
       } catch (err) {
         const error = err as any;
 
@@ -556,8 +595,7 @@ const Home: NextPage = () => {
           </div>
         </div>
       </Modal>
-
-     
+ 
 
       <Modal
         sx={{
@@ -599,7 +637,7 @@ const Home: NextPage = () => {
                 </span>
               </div>
 
-              <IconButton size={"medium"} onClick={handleClose}>
+              <IconButton size={"medium"} onClick={closeStart}>
                 <MdClose
                   size={20}
                   color={"rgb(32,33,36)"}
@@ -699,6 +737,7 @@ const Home: NextPage = () => {
                           id: vv.id,
                           creator: vv.metadata,
                           name,
+                          hash: signature,
                           contract,
                           data,
                           participants:
@@ -1075,25 +1114,7 @@ const Home: NextPage = () => {
                         }}
                       />
                     </div>
-                    <div className="mt-3">
-                      <TextField
-                        fullWidth
-                        id="outlined-basic"
-                        label="Ethereum address"
-                        variant="outlined"
-                        value={testAdd}
-                        onChange={(
-                          e: React.ChangeEvent<
-                            HTMLInputElement | HTMLTextAreaElement
-                          >
-                        ) => {
-                          setTestErr("");
-                          const val = e.target.value;
-
-                          setTestAdd(val);
-                        }}
-                      />
-                    </div>
+                   
                     <div className="my-3">
                       <TextField
                         fullWidth
@@ -1227,22 +1248,6 @@ const Home: NextPage = () => {
                         setTestErr("");
 
                         setTestName(e.target.value);
-                      }}
-                    />
-                  </div>
-
-                  <div className="py-2 mb-[7px] w-full">
-                    <label className="text-white mb-3 block">
-                      Ethereum Address
-                    </label>
-
-                    <TextField
-                      fullWidth
-                      sx={testText}
-                      value={testAdd}
-                      onChange={(e: any) => {
-                        setTestErr("");
-                        setTestAdd(e.target.value);
                       }}
                     />
                   </div>
