@@ -150,13 +150,14 @@ export const decrypt = async (encryptedText: { message: string, iv: string }, ke
 
   } catch(err) {
     // console.log(err, 'dmc')
-    return "pending...";
+    return "...";
   }
     
 }
 
 // retrieve group chats from server
 export const retrieveGroupChats = async (decryptHash: boolean) => {
+  
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
   const {
@@ -355,18 +356,50 @@ export const saveMessages = async (updateNew: any) => {
     console.log(err);
 
     return false;
+
   }
 };
 
 export const createGroupChat = async (groupname: string) => {
-
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
+
+  const keypair = await window.crypto.subtle.generateKey(
+    {
+      name: "ECDH",
+      namedCurve: "P-256",
+    },
+    true,
+    ["deriveKey", "deriveBits"]
+  );
+
+  const publicKey = await window.crypto.subtle.exportKey(
+    "jwk",
+    keypair.publicKey
+  );
+
+  const privateKey = await window.crypto.subtle.exportKey(
+    "jwk",
+    keypair.privateKey
+  );
+
+  const { hash = "", contract = "" } = JSON.parse(
+    localStorage.getItem("cloverlog") || '{"contract":""}'
+  );
+  const enc = new Cryptr(hash);
+
+  const enc_init = new Cryptr(contract);
+
+  const rawKeys = JSON.stringify({ public: publicKey, private: privateKey });
+
+  const group_keys = enc.encrypt(rawKeys);
+
+  const group_keys_init = enc_init.encrypt(rawKeys);
 
   const {
     data: { group },
   } = await axios.post(
     `/dao/${lq[0]}/group`,
-    { groupname },
+    { name: groupname, group_keys, group_keys_init },
     {
       headers: {
         Authorization: token,
@@ -375,4 +408,5 @@ export const createGroupChat = async (groupname: string) => {
   );
 
   return group;
+
 };

@@ -36,16 +36,15 @@ export const CCprovider = ({ children }: { children: JSX.Element }) => {
         chatkeys,
         update: (rep: reply) => {
 
-          setContent(rep.content);
+          setContent(rep.content ? rep.content : content);
 
-          setSender(rep.sender);
+          setSender(rep.sender ? rep.sender : sender);
 
-          setGroup(rep.group);
+          setGroup(rep.group ? rep.group : group);
 
-          setLoading(rep?.loading == undefined ? isLoading : rep.loading);
+          setLoading(rep.loading ? rep.loading : isLoading);
 
-          setChatKeys(rep.chatkeys == undefined ? chatkeys : rep.chatkeys);
-
+          setChatKeys(rep.chatkeys ? rep.chatkeys : chatkeys);
 
         },
       }}

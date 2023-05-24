@@ -40,6 +40,7 @@ import {
   findMessId,
   updateMessages,
   encrypt,
+  decrypt,
 } from "../extras/chat/functions";
 import { CContext } from "../extras/contexts/CContext";
 import Text from "./texts";
@@ -136,6 +137,8 @@ const Chats = () => {
 
   const onceUpdate = useRef<boolean>(false);
 
+  const loadOnce = useRef<boolean>(true)
+
   const [beginChecks, setBegin] = useState<boolean>(false);
 
   const [messData, updateMessData] = useState<{
@@ -153,10 +156,18 @@ const Chats = () => {
 
     updateMessData(mess);
 
+    if (loadOnce.current) {
+      loadOnce.current = false
+
+      setLoader(false)
+
+    }
+
     messUpd.current = setTimeout(() => upd(), 3000);
   };
 
   useEffect(() => {
+
     async function init() {
       setChDate("");
 
@@ -185,7 +196,8 @@ const Chats = () => {
 
       setBegin(true);
 
-      setLoader(false);
+      // setLoader(false);
+
     }
 
     if (name != undefined) {
@@ -224,17 +236,20 @@ const Chats = () => {
   ) => {
 
     if (messageText.length) {
+
+      const encMessage = await encrypt(messageText, chatkeys);
+
       if (Boolean(edit)) {
         const { content } = findMessId(
           messData[group || ""]["messages"],
           extrasId
         );
 
-        content[0][0] = messageText;
+        content[0][0] = encMessage.message;
 
         setEdit("");
 
-        await updateMessages(extrasId, { content });
+        await updateMessages(extrasId, { content, iv: encMessage.iv });
 
         return;
       }
@@ -244,8 +259,6 @@ const Chats = () => {
           messages: [[]],
         };
       }
-
-      const encMessage = await encrypt(messageText, rContext?.chatkeys);
 
       const newMess: any = {
         content: [[encMessage.message]],
@@ -421,7 +434,11 @@ const Chats = () => {
                   onScroll={async (e: any) => {
                     const label = document.querySelectorAll(".dateSeperate");
 
-                    if (group == undefined) return;
+                    if (
+                      (group == undefined || e.target.scrollHeight <=
+                      e.target.clientHeight + 60)
+                    ) return;
+
 
                     label.forEach((element) => {
                       const elem = element as HTMLDivElement;
@@ -488,17 +505,28 @@ const Chats = () => {
 
                         {editableMess && (
                           <IconButton
-                            onClick={() => {
-                              const { content } = findMessId(
+                            onClick={async () => {
+                              const { content, iv } = findMessId(
                                 messData[group || ""]["messages"],
                                 extrasId
                               );
 
                               if (!content?.[0]?.[0]) return;
 
-                              setEdit(content[0][0]);
+                              if (iv == undefined) {
+                                  setEdit(content[0][0]);
 
-                              setMessageText(content[0][0]);
+                                  setMessageText(content[0][0]);
+
+                                  return;
+                              }
+
+                              const decryptText = await decrypt({ iv, message: content[0][0] }, chatkeys);
+
+                              setEdit(decryptText);
+
+                              setMessageText(decryptText);
+                            
                             }}
                             size="medium"
                           >

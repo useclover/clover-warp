@@ -31,7 +31,6 @@ import {
   Tab,
   CircularProgress,
 } from "@mui/material";
-import { logout } from "../extras/logout";
 import cicon from "../../../public/images/icon.png";
 import { GenContext } from "../extras/contexts/genContext";
 import {
@@ -167,14 +166,14 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
       keyOnce.current = false;
 
-    gc.forEach(({ name: gname, groupKeys }: any) => {
-      if (gname == name) { 
+      gc.forEach(({ name: gname, groupKeys }: any) => {
+        if (gname == name) { 
 
-        rContext.update?.({
-          chatkeys: groupKeys
-        })
-      }
-    })
+          rContext.update?.({
+            chatkeys: groupKeys
+          })
+        }
+      })
   }
 
     setTimeout(updateGroupChat, 3000);
@@ -257,6 +256,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
       {!isLoading && (
         <div className="app">
+          
           <Modal open={addNew} onClose={() => setAddNew(false)}>
             <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex cusscroller items-center bg-[#ffffffb0]">
               <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
@@ -426,10 +426,10 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
                                 try {
                                   if (messData[nname] !== undefined) {
-                                    setFailMessage(
-                                      "Discussion name already exists"
-                                    );
-                                    return;
+                                      setFailMessage(
+                                        "Discussion name already exists"
+                                      );
+                                      return;
                                   }
 
                                   await createGroupChat(nname);
@@ -447,6 +447,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
                                     setLoader(false);
                                   }
+
                                 } catch (err: any) {
                                   setLoader(false);
 
@@ -694,7 +695,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
               </div>
               <div className="settings w-[22px] h-[22px] text-[#c1c7cd] flex-shrink-0">
                 <FiLogOut
-                  onClick={logout}
+                  onClick={() => router.push('/logout')}
                   className="hover:stroke-[#ff5100] transition-all delay-[400]"
                   size={24}
                 />
