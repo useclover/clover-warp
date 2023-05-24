@@ -160,6 +160,8 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
     const gc = await retrieveGroupChats(keyOnce.current);
 
+    console.log(gc, 'ss')
+
     setGroupChat(gc);
 
     if (keyOnce.current) {
@@ -256,6 +258,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
       {!isLoading && (
         <div className="app">
+          
           <Modal open={addNew} onClose={() => setAddNew(false)}>
             <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex cusscroller items-center bg-[#ffffffb0]">
               <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
@@ -425,10 +428,10 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
                                 try {
                                   if (messData[nname] !== undefined) {
-                                    setFailMessage(
-                                      "Discussion name already exists"
-                                    );
-                                    return;
+                                      setFailMessage(
+                                        "Discussion name already exists"
+                                      );
+                                      return;
                                   }
 
                                   await createGroupChat(nname);
@@ -446,6 +449,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
                                     setLoader(false);
                                   }
+
                                 } catch (err: any) {
                                   setLoader(false);
 
