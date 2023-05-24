@@ -31,7 +31,6 @@ import {
   Tab,
   CircularProgress,
 } from "@mui/material";
-import { logout } from "../extras/logout";
 import cicon from "../../../public/images/icon.png";
 import { GenContext } from "../extras/contexts/genContext";
 import {
@@ -694,7 +693,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
               </div>
               <div className="settings w-[22px] h-[22px] text-[#c1c7cd] flex-shrink-0">
                 <FiLogOut
-                  onClick={logout}
+                  onClick={() => router.push('/logout')}
                   className="hover:stroke-[#ff5100] transition-all delay-[400]"
                   size={24}
                 />
