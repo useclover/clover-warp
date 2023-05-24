@@ -160,22 +160,20 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
     const gc = await retrieveGroupChats(keyOnce.current);
 
-    console.log(gc, 'ss')
-
     setGroupChat(gc);
 
     if (keyOnce.current) {
 
       keyOnce.current = false;
 
-    gc.forEach(({ name: gname, groupKeys }: any) => {
-      if (gname == name) { 
+      gc.forEach(({ name: gname, groupKeys }: any) => {
+        if (gname == name) { 
 
-        rContext.update?.({
-          chatkeys: groupKeys
-        })
-      }
-    })
+          rContext.update?.({
+            chatkeys: groupKeys
+          })
+        }
+      })
   }
 
     setTimeout(updateGroupChat, 3000);

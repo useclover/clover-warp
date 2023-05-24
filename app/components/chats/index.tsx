@@ -137,6 +137,8 @@ const Chats = () => {
 
   const onceUpdate = useRef<boolean>(false);
 
+  const loadOnce = useRef<boolean>(true)
+
   const [beginChecks, setBegin] = useState<boolean>(false);
 
   const [messData, updateMessData] = useState<{
@@ -154,10 +156,18 @@ const Chats = () => {
 
     updateMessData(mess);
 
+    if (loadOnce.current) {
+      loadOnce.current = false
+
+      setLoader(false)
+
+    }
+
     messUpd.current = setTimeout(() => upd(), 3000);
   };
 
   useEffect(() => {
+
     async function init() {
       setChDate("");
 
@@ -186,7 +196,8 @@ const Chats = () => {
 
       setBegin(true);
 
-      setLoader(false);
+      // setLoader(false);
+
     }
 
     if (name != undefined) {
