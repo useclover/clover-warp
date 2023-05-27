@@ -68,7 +68,7 @@ const Chatlist = ({name, img, lastMsg, time, selected, iv, onClick}: {name: stri
             setTick('now');
         }
 
-        // setTimeout(() => getx(t), 3000);
+        setTimeout(() => getx(t), 3000);
 
     }
 

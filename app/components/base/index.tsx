@@ -608,19 +608,20 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                           <Button
                             onClick={async () => {
                               if (nname.length) {
+
                                 setLoader(true);
 
                                 try {
                                   if (messData?.[nname] !== undefined) {
                                     setFailMessage(
-                                      "Discussion name already exists"
+                                      "Discussion Name is not available"
                                     );
                                     return;
                                   }
 
-                                  await createGroupChat(nname);
+                                  await createGroupChat(nname, [...disparts].filter((v: string | undefined) => v !== undefined));
 
-                                  socket.emit("add_group");
+                                  socket?.emit?.("add_group");
 
                                   rContext.update?.({ group: nname });
 

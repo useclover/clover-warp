@@ -366,7 +366,7 @@ export const saveMessages = async (updateNew: any) => {
   }
 };
 
-export const createGroupChat = async (groupname: string) => {
+export const createGroupChat = async (groupname: string, members?: (string | undefined)[]) => {
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
   const keypair = await window.crypto.subtle.generateKey(
@@ -401,11 +401,17 @@ export const createGroupChat = async (groupname: string) => {
 
   const group_keys_init = enc_init.encrypt(rawKeys);
 
+  const payload: any = {
+     name: groupname, group_keys, group_keys_init 
+  }
+
+  if (members?.length) payload["members"] = JSON.stringify(members);
+  
   const {
     data: { group },
   } = await axios.post(
     `/dao/${lq[0]}/group`,
-    { name: groupname, group_keys, group_keys_init },
+    payload,
     {
       headers: {
         Authorization: token,
