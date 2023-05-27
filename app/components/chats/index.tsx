@@ -2,6 +2,7 @@ import Image from "next/image";
 import { useEffect, useState, useContext, useRef } from "react";
 import Router from "next/router";
 import { BsFolder, BsList, BsTrash } from "react-icons/bs";
+import io from "socket.io-client"
 import {
   FiImage,
   FiSettings,
@@ -41,6 +42,7 @@ import {
   updateMessages,
   encrypt,
   decrypt,
+  retrieveGroupChats,
 } from "../extras/chat/functions";
 import { CContext } from "../extras/contexts/CContext";
 import Text from "./texts";
@@ -48,6 +50,9 @@ import Loader from "../loader";
 import { useAccount } from "wagmi";
 import { BiSend, BiX } from "react-icons/bi";
 import EmojiPicker from "emoji-picker-react";
+import { ChatObject, ChatObjectType, MessageType } from "../types";
+
+let socket: any;
 
 const Chats = () => {
   const [loginData, setLoginData] = useState<any>({});
@@ -55,6 +60,7 @@ const Chats = () => {
   const { address, isConnected } = useAccount();
 
   const goDown = () => {
+
     const chatArea = document.querySelector(".chat-area");
 
     if (chatArea !== null) {
@@ -77,6 +83,7 @@ const Chats = () => {
   const { name, contract, data: main, participants, creator } = loginData;
 
   const emojiModal = () => {
+
     const emojiElem = document.querySelector(
       ".EmojiPickerReact"
     ) as HTMLDivElement;
@@ -104,20 +111,22 @@ const Chats = () => {
 
   const [messageSend, setMessageSend] = useState<boolean>(false);
 
-  const messUpd = useRef<any>();
-
   const [chDate, setChDate] = useState<string>("");
 
   const [edit, setEdit] = useState<string>("");
 
   const rContext = useContext(CContext);
 
-  const { group, chatkeys } = rContext;
+  const { group, chatkeys, messages: messData } = rContext;
 
-  const [currentDir, setCurrentDir] = useState<string[]>(["main"]);
+
+  const updateMessData = (data: MessageType) => {
+    rContext.update?.({ messages: data });
+  }; 
+  
+
 
   /* upload */
-  const uploadData = useContext(GenContext);
 
   const [update, setUpdate] = useState<boolean>(false);
 
@@ -135,36 +144,79 @@ const Chats = () => {
 
   const [extrasId, setExtras] = useState<string>("");
 
-  const onceUpdate = useRef<boolean>(false);
-
   const loadOnce = useRef<boolean>(true)
 
-  const [beginChecks, setBegin] = useState<boolean>(false);
-
-  const [messData, updateMessData] = useState<{
-    [index: string]: { [index: string]: any[] };
-  }>({});
+  const socketIsInit = useRef<boolean>(false);
 
   const upd = async () => {
+
     const mess = await retrieveMessages();
 
     if (!Boolean(mess[name]?.["messages"])) {
       if (mess[name] === undefined) mess[name] = {};
 
       mess[name]["messages"] = [];
+    
     }
 
     updateMessData(mess);
 
-    if (loadOnce.current) {
-      loadOnce.current = false
 
-      setLoader(false)
+    const gps = await retrieveGroupChats();  
 
+    rContext.update?.({ groupData: gps });    
+  
+  };
+
+
+  const socketInit = async () => {
+
+      await fetch(`/api/messages?lq=${main}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
+        },
+      });
+
+      socket = io()
+
+      socket.on("connect", () => {
+
+          socket.emit("join", name);
+
+          socketIsInit.current = true;
+
+      });
+
+      const update = async (data: any) => {
+          await upd();
+      }
+
+      socket.on("new_incoming_message", update);
+
+      socket.on("edit_msg", update);
+
+      socket.on("del_msg", update);
+
+  }
+
+
+  useEffect(() => {
+      if (loadOnce.current && main) {
+        loadOnce.current = false;
+
+        socketInit();
+
+      }      
+  }, [main])
+
+  useEffect(() => {
+    if (socketIsInit.current) {
+      socket?.emit?.("join", group);
     }
 
-    messUpd.current = setTimeout(() => upd(), 3000);
-  };
+    console.log('group change', group)
+
+  }, [group])
 
   useEffect(() => {
 
@@ -178,25 +230,12 @@ const Chats = () => {
         participants,
       });
 
-      const mess = await retrieveMessages();
-
-      if (!Boolean(mess[name]?.["messages"])) {
-        if (mess[name] === undefined) mess[name] = {};
-
-        mess[name]["messages"] = [];
-      }
-
+     
       if (group === undefined) {
         rContext.update?.({ group: name });
       }
 
-      updateMessData(mess);
-
-      // goDown();
-
-      setBegin(true);
-
-      // setLoader(false);
+      setLoader(false);
 
     }
 
@@ -205,8 +244,6 @@ const Chats = () => {
     }
   }, [
     main,
-    currentDir,
-    uploadData,
     update,
     contract,
     name,
@@ -217,14 +254,6 @@ const Chats = () => {
   ]);
 
   useEffect(() => {
-    if (!onceUpdate.current && beginChecks) {
-      onceUpdate.current = true;
-
-      upd();
-    }
-  }, [beginChecks]);
-
-  useEffect(() => {
     goDown();
   }, [messageSend, group]);
 
@@ -232,7 +261,7 @@ const Chats = () => {
 
   const moveMessage = async (
     enlargen: boolean,
-    type: "mess" | "vote" = "mess"
+    type: ChatObjectType = "mess"
   ) => {
 
     if (messageText.length) {
@@ -241,7 +270,7 @@ const Chats = () => {
 
       if (Boolean(edit)) {
         const { content } = findMessId(
-          messData[group || ""]["messages"],
+          messData?.[group || ""]["messages"] || [],
           extrasId
         );
 
@@ -249,18 +278,23 @@ const Chats = () => {
 
         setEdit("");
 
-        await updateMessages(extrasId, { content, iv: encMessage.iv });
+        // await updateMessages(extrasId, { content, iv: encMessage.iv });
+
+        await socket.emit("edit_message", { id: extrasId, update: { content, iv: encMessage.iv }});
+
+        upd();
 
         return;
+
       }
 
-      if (!Boolean(messData[group || ""]?.["messages"][0])) {
-        messData[group || ""] = {
+      if (!Boolean(messData?.[group || ""]?.["messages"][0])) {
+        (messData || { group: {} })[group || ""] = {
           messages: [[]],
         };
       }
 
-      const newMess: any = {
+      const newMess: ChatObject = {
         content: [[encMessage.message]],
         sent: false,
         type,
@@ -278,12 +312,9 @@ const Chats = () => {
 
       }
 
-      messData[group || ""]["messages"][0].push(newMess);
+      messData?.[group || ""]["messages"][0].push(newMess);
 
       try {
-
-
-        clearTimeout(messUpd.current);
 
         notifications({
           title: `Message from ${address}`,
@@ -292,11 +323,16 @@ const Chats = () => {
           exclude: address || "",
         });
 
-        updateMessData(messData);
+        updateMessData(messData || {});
 
         setMessageSend(!messageSend);
 
-        await saveMessages({
+        // await saveMessages({
+        //   data: JSON.stringify(newMess),
+        //   receiver: group || "",
+        // });
+
+        await socket.emit("send_message", {
           data: JSON.stringify(newMess),
           receiver: group || "",
         });
@@ -304,7 +340,9 @@ const Chats = () => {
         upd();
 
       } catch (err) {
+      
         console.log(err);
+      
       }
     }
   };
@@ -317,14 +355,26 @@ const Chats = () => {
   const [conDelete, setConDelete] = useState<boolean>(false);
 
   const deleteMessageMe = async () => {
+
     if (extrasId) {
-      const status = await deleteMessagesAll(extrasId);
+      // const status = await deleteMessagesAll(extrasId);
+
+      await socket.emit("delete_message", extrasId);
+
+      upd();
+
     }
   };
 
   const deleteMessageEvryone = async () => {
     if (extrasId) {
-      const status = await deleteMessages(extrasId);
+
+      // const status = await deleteMessages(extrasId);
+
+      await socket.emit("delete_message_all", extrasId);
+
+      upd();
+
     }
   };
 
@@ -455,13 +505,13 @@ const Chats = () => {
                       setPrevMessLoading(true);
 
                       const dataMess = await retrieveMessages(
-                        messData[group || ""]?.["messages"]?.length || 0
+                        messData?.[group || ""]?.["messages"]?.length || 0
                       );
 
                       if (Object.values(dataMess).length) {
                         
 
-                        messData[group || ""]["messages"].push(dataMess);
+                        messData?.[group || ""]["messages"].push(dataMess);
 
                         setPrevMessLoading(false);
                                             
@@ -507,7 +557,7 @@ const Chats = () => {
                           <IconButton
                             onClick={async () => {
                               const { content, iv } = findMessId(
-                                messData[group || ""]["messages"],
+                                messData?.[group || ""]["messages"] || [],
                                 extrasId
                               );
 
@@ -546,9 +596,9 @@ const Chats = () => {
                       </div>
                     )}
 
-                    {Boolean(messData[group || ""]?.["messages"]?.length) && (
+                    {Boolean(messData?.[group || ""]?.["messages"]?.length) && (
                       <>
-                        {messData[group || ""]["messages"]
+                        {messData?.[group || ""]["messages"]
                           .reverse()
                           .map((v: any, ii: number) => {
                             return v.map(
@@ -570,7 +620,7 @@ const Chats = () => {
                                 let addNumb = false;
 
                                 const mess =
-                                  messData[group || ""]["messages"][ii][i - 1];
+                                  messData?.[group || ""]["messages"][ii][i - 1];
 
                                 if (mess !== undefined) {
                                   const { index: prevIndex } = mess;
@@ -617,7 +667,7 @@ const Chats = () => {
                       </>
                     )}
 
-                    {!Boolean(messData[group || ""]?.["messages"]?.length) && (
+                    {!Boolean(messData?.[group || ""]?.["messages"]?.length) && (
                       <div
                         className="empty"
                         style={{

@@ -3,6 +3,7 @@ import { useEffect, useState, useContext, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import logo from "../../../public/images/logo.png";
+import io from 'socket.io-client';
 import Select from "react-select";
 import { BsFolder, BsList, BsPlusLg, BsTrash } from "react-icons/bs";
 import {
@@ -56,6 +57,7 @@ import Loader from "../loader";
 import { useAccount } from "wagmi";
 import { BiSend, BiX } from "react-icons/bi";
 import EmojiPicker from "emoji-picker-react";
+import { GroupChatType, MessageType } from "../types";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -89,6 +91,8 @@ const TabPanel = (props: TabPanelProps) => {
     </div>
   );
 };
+
+let socket: any;
 
 const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
   const [loginData, setLoginData] = useState<any>({});
@@ -140,48 +144,70 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
   const [failMessage, setFailMessage] = useState<string>("");
 
-  const [messData, updateMessData] = useState<{
-    [index: string]: { [index: string]: any[] };
-  }>({});
 
   const [filelist, setFilelist] = useState<number | undefined>();
 
   const rContext = useContext(CContext);
 
-  const { group } = rContext;
+  const { group, groupData: groupChat, messages: messData } = rContext;
 
-  const [groupChat, setGroupChat] = useState<
-    { name: string; lastchat: any; groupKeys: string }[]
-  >([]);
+  const updateMessData = (data: MessageType) => {
+    rContext.update?.({
+      messages: data,
+    });
+  };
 
-  const keyOnce = useRef<boolean>(true);
+  const setGroupChat = (data: GroupChatType) =>
+    rContext.update?.({
+      groupData: data,
+    });
 
-  const updateGroupChat = async () => {
+  const ranOnce = useRef<boolean>(false);
 
-    const gc = await retrieveGroupChats(keyOnce.current);
+  const initSocket = async () => {
 
-    setGroupChat(gc);
-
-    if (keyOnce.current) {
-
-      keyOnce.current = false;
-
-      gc.forEach(({ name: gname, groupKeys }: any) => {
-        if (gname == name) { 
-
-          rContext.update?.({
-            chatkeys: groupKeys
-          })
+      await fetch(`/api/groups?lq=${main}`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
         }
-      })
+      });
+
+      socket = io();
+  
+      socket.on("connect", () => {
+        console.log("connected successfully");
+      });
+
+      const update = async (data: any) => {
+
+        if (data.error) {
+          return;
+        }
+
+        const gc = await retrieveGroupChats(data);
+
+        setGroupChat(gc);
+
+      };
+
+      socket.on("add_grp", update);
+
   }
 
-    setTimeout(updateGroupChat, 3000);
+  useEffect(() => {
+      if (!ranOnce.current && main) {
 
-  };
+        ranOnce.current = true;
+
+        initSocket();
+        
+      }
+  }, [main]);
+
 
   useEffect(() => {
     async function init() {
+
       await beginStorageProvider({
         user: address || "",
         contract,
@@ -192,6 +218,20 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
       const mess = await retrieveMessages();
 
       const flist = await retrieveFiles();
+
+      const rgroups = await retrieveGroupChats();
+
+      setGroupChat(rgroups);  
+
+      rgroups.forEach(({ name: gname, groupKeys }: any) => {
+        if (gname == name) {
+
+          rContext.update?.({
+            chatkeys: groupKeys,
+          });
+        
+        }
+      });
 
       let tSize = 0;
 
@@ -205,8 +245,8 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
         if (mess[name] === undefined) mess[name] = {};
 
         mess[name]["messages"] = {};
-      }
 
+      }
 
 
       if (group === undefined) {
@@ -214,8 +254,6 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
       }
 
       updateMessData(mess);
-
-      updateGroupChat();
 
       setLoader(false);
 
@@ -425,7 +463,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                 setLoader(true);
 
                                 try {
-                                  if (messData[nname] !== undefined) {
+                                  if (messData?.[nname] !== undefined) {
                                       setFailMessage(
                                         "Discussion name already exists"
                                       );
@@ -433,6 +471,8 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                   }
 
                                   await createGroupChat(nname);
+
+                                  socket.emit("add_group");
 
                                   rContext.update?.({ group: nname });
 
@@ -516,7 +556,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                               onChange={(e: any) => setDiscussion(e)}
                               name="Channels"
                               placeholder={"Channels..."}
-                              options={Object.keys(messData)}
+                              options={Object.keys(messData || {})}
                               styles={{
                                 option: (provided: any, state: any) => {
                                   return {
@@ -625,7 +665,9 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                     setAddNew(false);
 
                                     setLoader(false);
+                                    
                                   } else {
+
                                     setLoader(false);
 
                                     setFailMessage(
@@ -779,7 +821,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                 </div>
               </div>
 
-              {groupChat.map(({ name: gps, lastchat: clst, groupKeys }, i) => {
+              {groupChat?.map(({ name: gps, lastchat: clst, groupKeys }, i) => {
                 
                 return (
                   <Chatlist
