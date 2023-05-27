@@ -148,7 +148,7 @@ export const decrypt = async (encryptedText: { message: string, iv: string }, ke
     return decryptedText;
 
   } catch(err) {
-    // console.log(err, 'dmc')
+    // console.log(err, encryptedText, keys, 'dmc')
     return "...";
   }
     

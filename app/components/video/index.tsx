@@ -46,7 +46,7 @@ import {
 import { logout } from "../../components/extras/logout";
 import Dash from "../dash";
 import { useAccount } from "wagmi";
-import { MdLink, MdMeetingRoom } from "react-icons/md";
+import { MdClose, MdLink, MdMeetingRoom } from "react-icons/md";
 
 const Rooms = () => {
 
@@ -138,34 +138,72 @@ const Rooms = () => {
         <>
       <Dash />
 
-      <Modal open={addNew} onClose={() => setAddNew(false)}>
-        <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex cusscroller items-center bg-[#ffffffb0]">
-          <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
-            <div className="rounded-lg bg-white shadow-lg shadow-[#cccccc]">
-              <div className="border-b flex justify-between py-[14px] px-[17px] text-xl font-bold">
-                Create New Room
-                <FiX
-                  size={20}
-                  className="cursor-pointer"
-                  onClick={() => setAddNew(false)}
-                />
-              </div>
-              <div className="form relative">
-                <Box sx={{ width: "100%" }}>
-                  {Boolean(failMessage.length) && (
-                    <div className="rounded-md w-[95%] font-bold mt-2 mx-auto p-3 bg-[#ff8f33] text-white">
-                      {failMessage}
-                    </div>
-                  )}
+      <Modal
+        open={addNew}
+        sx={{
+          "&& .MuiBackdrop-root": {
+            backdropFilter: "blur(5px)",
+            width: "calc(100% - 8px)",
+          },
+        }}
+        onClose={() => setAddNew(false)}
+        className="overflow-y-scroll overflow-x-hidden cusscroller flex justify-center"
+        aria-labelledby="Add a new meeting room"
+        aria-describedby="Add room to DAO"
+      >
 
-                  <FormControl
-                    fullWidth
-                    sx={{
-                      px: 5,
-                      py: 3,
-                    }}
-                  >
-                    <div>
+        <Box
+          className="sm:!w-full 3md:!px-1 h-fit 3mdd:px-[2px]"
+          sx={{
+            minWidth: 300,
+            width: "70%",
+            maxWidth: 800,
+            borderRadius: 6,
+            outline: "none",
+            p: 1,
+            position: "relative",
+            margin: "auto",
+          }}
+        >
+          <div className="py-4 px-6 bg-white -mb-[1px] rounded-t-[.9rem]">
+            
+            
+            <div className="mb-2 flex items-start justify-between">
+              <div>
+                <h2 className="font-[500] text-[rgb(32,33,36)] text-[1.55rem] 3md:text-[1.2rem]">
+                  Create New Room
+                </h2>
+                <span className="text-[rgb(69,70,73)] font-[500] text-[14px]">
+                  Rooms enable DAOs hold meetings and discussions
+                </span>
+              </div>
+
+              <IconButton size={"medium"} onClick={() => setAddNew(false)}>
+                <MdClose
+                  size={20}
+                  color={"rgb(32,33,36)"}
+                  className="cursor-pointer"
+                />
+              </IconButton>
+            </div>
+
+            <div className="form relative pt-4">
+              <Box sx={{ width: "100%" }}>
+                {Boolean(failMessage.length) && (
+                  <div className="rounded-md w-[95%] font-bold mt-2 mx-auto p-3 bg-[#ff8f33] text-white">
+                    {failMessage}
+                  </div>
+                )}
+
+                <FormControl
+                  fullWidth
+                  sx={{
+                    px: 2,
+                    py: 3,
+                  }}
+                >
+
+                  <div>
                       <TextField
                         fullWidth
                         id="outlined-basic"
@@ -181,15 +219,17 @@ const Rooms = () => {
                           setFailMessage("");
                         }}
                       />
-                    </div>
+                    </div>                  
 
-                    <Button
-                      variant="contained"
-                      className="!bg-[#1891fe] !mt-4 !py-[13px] !font-medium !capitalize"
-                      style={{
-                        fontFamily: "inherit",
-                      }}
-                      onClick={async () => {
+                </FormControl>
+              </Box>
+            </div>
+          </div>
+
+          <div className="bg-[#efefef] flex justify-center items-center rounded-b-[.9rem] px-6 py-4">
+            <div className="flex items-center">
+              <Button
+                onClick={async () => {
                         if (nname.length) {
 
                           setLoader(true);
@@ -216,17 +256,21 @@ const Rooms = () => {
                           setFailMessage("Name of channel is required");
                         }
                       }}
-                      fullWidth
-                    >
-                      Create
-                    </Button>
-                  </FormControl>
-                </Box>
-              </div>
+                className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#1891fe] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+              >
+                <MdMeetingRoom
+                  color={"inherit"}
+                  className={"mr-2 !fill-white"}
+                  size={20}
+                />{" "}
+                Create
+              </Button>
             </div>
           </div>
-        </div>
+        </Box>          
       </Modal>
+
+      
 
      
           <div className="w-full flex items-start justify-between filedrop min-h-screen">

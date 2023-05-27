@@ -5,7 +5,9 @@ import { useRouter } from "next/router";
 import logo from "../../../public/images/logo.png";
 import io from 'socket.io-client';
 import Select from "react-select";
-import { BsFolder, BsList, BsPlusLg, BsTrash } from "react-icons/bs";
+import { RiGroupFill } from "react-icons/ri";
+import { BsFolder, BsList, BsPatchPlusFill, BsPlusLg, BsTrash } from "react-icons/bs";
+import { AiOutlineUserAdd } from "react-icons/ai";
 import {
   FiImage,
   FiSettings,
@@ -18,7 +20,7 @@ import {
   FiEdit3,
 } from "react-icons/fi";
 import Storage from "../storage";
-import { MdMeetingRoom, MdOutlineEmojiEmotions } from "react-icons/md";
+import { MdClose, MdMeetingRoom, MdOutlineEmojiEmotions } from "react-icons/md";
 import {
   LinearProgress,
   TextField,
@@ -50,7 +52,7 @@ import {
   retrieveGroupChats,
   createGroupChat,
 } from "../extras/chat/functions";
-import { FaCloud } from "react-icons/fa";
+import { FaCloud, FaVoteYea } from "react-icons/fa";
 import { CContext } from "../extras/contexts/CContext";
 import Chatlist from "./sidebar/chatlist";
 import Loader from "../loader";
@@ -294,180 +296,326 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
       {!isLoading && (
         <div className="app">
-          
-          <Modal open={addNew} onClose={() => setAddNew(false)}>
-            <div className="w-screen overflow-y-scroll overflow-x-hidden absolute h-screen flex cusscroller items-center bg-[#ffffffb0]">
-              <div className="2usm:px-0 mx-auto max-w-[900px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
-                <div className="rounded-lg bg-white shadow-lg shadow-[#cccccc]">
-                  <div
-                    className="border-b flex justify-be
-                  tween py-[14px] px-[17px] text-xl font-bold"
-                  >
-                    Create New
-                    <FiX
-                      size={20}
-                      className="cursor-pointer"
-                      onClick={() => setAddNew(false)}
-                    />
+          <Modal
+            open={addNew}
+            sx={{
+              "&& .MuiBackdrop-root": {
+                backdropFilter: "blur(5px)",
+                width: "calc(100% - 8px)",
+              },
+            }}
+            onClose={() => setAddNew(false)}
+            className="overflow-y-scroll overflow-x-hidden cusscroller flex justify-center"
+            aria-labelledby="Add New to your DAO on Clover"
+            aria-describedby="Add New Participants, Discussions, Votes, and more to your DAO on Clover"
+          >
+            <Box
+              className="sm:!w-full 3md:!px-1 h-fit 3mdd:px-[2px]"
+              sx={{
+                minWidth: 300,
+                width: "70%",
+                maxWidth: 800,
+                borderRadius: 6,
+                outline: "none",
+                p: 1,
+                position: "relative",
+                margin: "auto",
+              }}
+            >
+              <div className="py-4 px-6 bg-white -mb-[1px] rounded-t-[.9rem]">
+                <div className="mb-2 flex items-start justify-between">
+                  <div>
+                    <h2 className="font-[500] text-[rgb(32,33,36)] text-[1.55rem] 3md:text-[1.2rem]">
+                      Add New
+                    </h2>
+                    <span className="text-[rgb(69,70,73)] font-[500] text-[14px]">
+                      Add New Participants, Discussions, Votes, and more to your
+                      DAO on Clover
+                    </span>
                   </div>
-                  <div className="form relative">
-                    <Box sx={{ width: "100%" }}>
-                      {Boolean(failMessage.length) && (
-                        <div className="rounded-md w-[95%] font-bold mt-2 mx-auto p-3 bg-[#ff8f33] text-white">
-                          {failMessage}
-                        </div>
-                      )}
 
-                      <FormControl
-                        fullWidth
-                        sx={{
-                          px: 5,
-                          py: 3,
-                        }}
-                      >
-                        <div>
-                          <ToggleButtonGroup
-                            value={toggle}
-                            className="cusscroller"
+                  <IconButton size={"medium"} onClick={() => setAddNew(false)}>
+                    <MdClose
+                      size={20}
+                      color={"rgb(32,33,36)"}
+                      className="cursor-pointer"
+                    />
+                  </IconButton>
+                </div>
+
+                <div className="form relative pt-4">
+                  <Box sx={{ width: "100%" }}>
+                    {Boolean(failMessage.length) && (
+                      <div className="rounded-md w-[95%] font-bold mt-2 mx-auto p-3 bg-[#ff8f33] text-white">
+                        {failMessage}
+                      </div>
+                    )}
+
+                    <FormControl
+                      fullWidth
+                      sx={{
+                        px: 2,
+                        py: 3,
+                      }}
+                    >
+                      <div>
+                        <ToggleButtonGroup
+                          value={toggle}
+                          sx={{
+                            justifyContent: "space-between",
+                            marginBottom: "15px !important",
+                            width: "100%",
+                            "& .Mui-selected": {
+                              backgroundColor: `rgba(24, 145, 254, 0.8) !important`,
+                              color: `#fff !important`,
+                            },
+                            "& .MuiButtonBase-root:first-of-type": {
+                              marginRight: "0px !important",
+                              marginLeft: "0px !important",
+                            },
+                            "& .MuiButtonBase-root": {
+                              padding: "10px 15px !important",
+                            },
+                            "& .MuiToggleButtonGroup-grouped": {
+                              borderRadius: "4px !important",
+                              minWidth: 55,
+                              marginLeft: 3,
+                              backgroundColor: "#1212121a",
+                              border: "none",
+                            },
+                          }}
+                          exclusive
+                          className="w-full cusscroller overflow-y-hidden !justify-around mb-4 pb-1"
+                          onChange={(e: any) => {
+                            if (
+                              e.target.value &&
+                              e.target.value != "2" &&
+                              e.target.value != "1"
+                            ) {
+                              setToggle(e.target.value);
+                            }
+                          }}
+                        >
+                          <ToggleButton
                             sx={{
-                              width: "100%",
-                              padding: "0px 10px",
-                              margin: "10px 0px 20px",
-                              "& .Mui-selected": {
-                                backgroundColor: `#1890FF !important`,
-                                color: `#fff !important`,
-                              },
-                              "& .MuiToggleButtonGroup-grouped": {
-                                borderRadius: "4rem !important",
-                                minWidth: 55,
-                                fontFamily: "Poppins, sans-serif",
-                                paddingTop: "4px",
-                                margin: "0px 10px",
-                                paddingBottom: "4px",
-                                border:
-                                  "1px solid rgba(0, 0, 0, 0.12) !important",
-                              },
+                              textTransform: "capitalize",
+                              fontWeight: "500",
                             }}
-                            exclusive
-                            onChange={(e: any) => {
-                              if (e.target.value != "2") {
-                                setToggle(e.target.value);
-                              }
-                            }}
+                            value={"0"}
                           >
+                            <RiGroupFill className="mr-2" size={20} />
+                            Discussion Channel
+                          </ToggleButton>
+                          <ToggleButton
+                            sx={{
+                              textTransform: "capitalize",
+                              fontWeight: "500",
+                            }}
+                            value={"1"}
+                          >
+                            <FaVoteYea className="mr-2" size={20} />A new voting
+                            campaign
+                          </ToggleButton>
+                          {contract.toLowerCase() ==
+                            "0xacdfc5338390ce4ec5ad61e3dc255c9f2560d797" && (
                             <ToggleButton
                               sx={{
                                 textTransform: "capitalize",
                                 fontWeight: "500",
                               }}
-                              value={"0"}
+                              value={"2"}
                             >
-                              Discussion Channel
+                              <AiOutlineUserAdd className="mr-2" size={20} />A New
+                              Participant
                             </ToggleButton>
-                            <ToggleButton
-                              sx={{
-                                textTransform: "capitalize",
-                                fontWeight: "500",
-                              }}
-                              value={"1"}
-                            >
-                              A new voting campaign
-                            </ToggleButton>
-                            {contract.toLowerCase() ==
-                              "0xacdfc5338390ce4ec5ad61e3dc255c9f2560d797" && (
-                              <ToggleButton
-                                sx={{
-                                  textTransform: "capitalize",
-                                  fontWeight: "500",
-                                }}
-                                value={"2"}
+                          )}
+                        </ToggleButtonGroup>
+                      </div>
+
+                      <TabPanel padding={0} value={Number(toggle)} index={0}>
+                        <div>
+                          <TextField
+                            fullWidth
+                            id="outlined-basic"
+                            label="Name of discussion channel"
+                            variant="outlined"
+                            value={nname}
+                            onChange={(
+                              e: React.ChangeEvent<
+                                HTMLInputElement | HTMLTextAreaElement
                               >
-                                A New Participant
-                              </ToggleButton>
-                            )}
-                          </ToggleButtonGroup>
+                            ) => {
+                              setNname(e.target.value);
+                              setFailMessage("");
+                            }}
+                          />
                         </div>
 
-                        <TabPanel padding={0} value={Number(toggle)} index={0}>
-                          <div>
-                            <TextField
-                              fullWidth
-                              id="outlined-basic"
-                              label="Name of discussion channel"
-                              variant="outlined"
-                              value={nname}
-                              onChange={(
-                                e: React.ChangeEvent<
-                                  HTMLInputElement | HTMLTextAreaElement
-                                >
-                              ) => {
-                                setNname(e.target.value);
-                                setFailMessage("");
-                              }}
-                            />
-                          </div>
+                        <div className="mt-4">
+                          <label className="text-[#808080] mb-2 block">
+                            Add members, click on registered members to add
+                          </label>
 
-                          <div className="mt-4">
-                            <label className="text-[#808080] mb-2 block">
-                              Add members, click on registered members to add
-                            </label>
+                          <div className="flex w-full items-center cusscroller flex-nowrap overflow-y-hidden overflow-x-scroll">
+                            {participants.map(
+                              (v: string, i: number) =>
+                                v.toLowerCase() != address?.toLowerCase() && (
+                                  <div
+                                    onClick={() => {
+                                      const selected = [...disparts];
 
-                            <div className="flex w-full items-center cusscroller flex-nowrap overflow-y-hidden overflow-x-scroll">
-                              {participants.map(
-                                (v: string, i: number) =>
-                                  v.toLowerCase() != address?.toLowerCase() && (
-                                    <div
-                                      onClick={() => {
-                                        const selected = [...disparts];
+                                      if (selected[i] !== undefined) {
+                                        selected[i] = undefined;
 
-                                        if (selected[i] !== undefined) {
-                                          selected[i] = undefined;
+                                        setDisparts(selected);
+                                      } else {
+                                        selected[i] = v;
 
-                                          setDisparts(selected);
-                                        } else {
-                                          selected[i] = v;
-
-                                          setDisparts(selected);
-                                        }
-                                      }}
-                                      style={
-                                        disparts[i] !== undefined
-                                          ? {
-                                              color: "#fff",
-                                              backgroundColor:
-                                                "rgb(24, 144, 255)",
-                                            }
-                                          : {}
+                                        setDisparts(selected);
                                       }
-                                      className="truncate cursor-pointer rounded-[4rem] max-w-[200px] hover:max-w-[450px] py-1 px-[10px] font-[500] text-[#444444] delay-500 transition-all border border-solid border-[rgba(0,0,0,0.12)] mx-[3px]"
-                                      key={i}
-                                    >
-                                      {v}
-                                    </div>
-                                  )
-                              )}
-                            </div>
-                            <span className="text-[14px] block mt-1 text-[#b6b6b6]">
-                              Not selecting any item, selects every item
-                            </span>
+                                    }}
+                                    style={
+                                      disparts[i] !== undefined
+                                        ? {
+                                            color: "#fff",
+                                            backgroundColor:
+                                              "rgb(24, 144, 255)",
+                                          }
+                                        : {}
+                                    }
+                                    className="truncate cursor-pointer rounded-[4rem] max-w-[200px] hover:max-w-[450px] py-1 px-[10px] font-[500] text-[#444444] delay-500 transition-all border border-solid border-[rgba(0,0,0,0.12)] mx-[3px]"
+                                    key={i}
+                                  >
+                                    {v}
+                                  </div>
+                                )
+                            )}
                           </div>
+                          <span className="text-[14px] block mt-1 text-[#b6b6b6]">
+                            Not selecting any item, selects every item
+                          </span>
+                        </div>
+                      </TabPanel>
 
-                          <Button
-                            variant="contained"
-                            className="!bg-[#1891fe] !mt-4 !py-[13px] !font-medium !capitalize"
-                            style={{
-                              fontFamily: "inherit",
+                      <TabPanel padding={0} value={Number(toggle)} index={1}>
+                        <div className="mb-4">
+                          <TextField
+                            fullWidth
+                            id="outlined-basic"
+                            label="Name"
+                            variant="outlined"
+                            value={nname}
+                            onChange={(
+                              e: React.ChangeEvent<
+                                HTMLInputElement | HTMLTextAreaElement
+                              >
+                            ) => {
+                              setNname(e.target.value);
+                              setFailMessage("");
                             }}
+                          />
+                        </div>
+
+                        <div className="mb-4">
+                          <TextField
+                            fullWidth
+                            id="outlined-basic"
+                            label="Description"
+                            multiline
+                            variant="outlined"
+                            value={voteDesc}
+                            onChange={(
+                              e: React.ChangeEvent<
+                                HTMLInputElement | HTMLTextAreaElement
+                              >
+                            ) => {
+                              setVoteDesc(e.target.value);
+                              setFailMessage("");
+                            }}
+                          />
+                        </div>
+
+                        <div className="mb-5">
+                          <label className="text-[#808080] mb-2 block">
+                            Select Discussion Channel participants can vote on
+                          </label>
+
+                          <Select
+                            isClearable={false}
+                            value={discussions}
+                            onChange={(e: any) => setDiscussion(e)}
+                            name="Channels"
+                            placeholder={"Channels..."}
+                            options={Object.keys(messData || {})}
+                            styles={{
+                              option: (provided: any, state: any) => {
+                                return {
+                                  ...provided,
+                                  backgroundColor: state.isSelected
+                                    ? "#dfdfdf"
+                                    : "transparent",
+                                  cursor: "pointer",
+                                  "&:active": {
+                                    backgroundColor: "#dfdfdf",
+
+                                    color: "#121212 !important",
+                                  },
+                                  "&:hover": {
+                                    backgroundColor: state.isSelected
+                                      ? undefined
+                                      : `#dfdfdff2`,
+                                  },
+                                };
+                              },
+                              container: (provided: any, state: any) => ({
+                                ...provided,
+                                "& .select__control": {
+                                  borderWidth: "0px",
+                                  borderRadius: "0px",
+                                  backgroundColor: "transparent",
+                                  borderBottomWidth: "1px",
+                                },
+                                "& .select__value-container": {
+                                  paddingLeft: "0px",
+                                },
+                                "& .select__control:hover": {
+                                  borderBottomWidth: "2px",
+                                  borderBottomColor: "#121212",
+                                },
+                                "& .select__control--is-focused": {
+                                  borderWidth: "0px",
+                                  borderBottomWidth: "2px",
+                                  borderBottomColor: `#1891fe !important`,
+                                  boxShadow: "none",
+                                },
+                              }),
+                            }}
+                            classNamePrefix="select"
+                          />
+                        </div>
+                      </TabPanel>
+                    </FormControl>
+                  </Box>
+                </div>
+              </div>
+
+              <div className="bg-[#efefef] flex justify-center items-center rounded-b-[.9rem] px-6 py-4">
+                <div className="flex items-center">
+                  {(() => {
+                    switch (Number(toggle)) {
+                      case 0:
+                        return (
+                          <Button
                             onClick={async () => {
                               if (nname.length) {
                                 setLoader(true);
 
                                 try {
                                   if (messData?.[nname] !== undefined) {
-                                      setFailMessage(
-                                        "Discussion name already exists"
-                                      );
-                                      return;
+                                    setFailMessage(
+                                      "Discussion name already exists"
+                                    );
+                                    return;
                                   }
 
                                   await createGroupChat(nname);
@@ -487,7 +635,6 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
                                     setLoader(false);
                                   }
-
                                 } catch (err: any) {
                                   setLoader(false);
 
@@ -501,115 +648,20 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                 setFailMessage("Name of channel is required");
                               }
                             }}
-                            fullWidth
+                            className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#1891fe] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
                           >
+                            <BsPatchPlusFill
+                              color={"inherit"}
+                              className={"mr-2 !fill-white"}
+                              size={20}
+                            />{" "}
                             Create
                           </Button>
-                        </TabPanel>
+                        );
 
-                        <TabPanel padding={0} value={Number(toggle)} index={1}>
-                          <div className="mb-4">
-                            <TextField
-                              fullWidth
-                              id="outlined-basic"
-                              label="Name"
-                              variant="outlined"
-                              value={nname}
-                              onChange={(
-                                e: React.ChangeEvent<
-                                  HTMLInputElement | HTMLTextAreaElement
-                                >
-                              ) => {
-                                setNname(e.target.value);
-                                setFailMessage("");
-                              }}
-                            />
-                          </div>
-
-                          <div className="mb-4">
-                            <TextField
-                              fullWidth
-                              id="outlined-basic"
-                              label="Description"
-                              multiline
-                              variant="outlined"
-                              value={voteDesc}
-                              onChange={(
-                                e: React.ChangeEvent<
-                                  HTMLInputElement | HTMLTextAreaElement
-                                >
-                              ) => {
-                                setVoteDesc(e.target.value);
-                                setFailMessage("");
-                              }}
-                            />
-                          </div>
-
-                          <div className="mb-5">
-                            <label className="text-[#808080] mb-2 block">
-                              Select Discussion Channel participants can vote on
-                            </label>
-
-                            <Select
-                              isClearable={false}
-                              value={discussions}
-                              onChange={(e: any) => setDiscussion(e)}
-                              name="Channels"
-                              placeholder={"Channels..."}
-                              options={Object.keys(messData || {})}
-                              styles={{
-                                option: (provided: any, state: any) => {
-                                  return {
-                                    ...provided,
-                                    backgroundColor: state.isSelected
-                                      ? "#dfdfdf"
-                                      : "transparent",
-                                    cursor: "pointer",
-                                    "&:active": {
-                                      backgroundColor: "#dfdfdf",
-
-                                      color: "#121212 !important",
-                                    },
-                                    "&:hover": {
-                                      backgroundColor: state.isSelected
-                                        ? undefined
-                                        : `#dfdfdff2`,
-                                    },
-                                  };
-                                },
-                                container: (provided: any, state: any) => ({
-                                  ...provided,
-                                  "& .select__control": {
-                                    borderWidth: "0px",
-                                    borderRadius: "0px",
-                                    backgroundColor: "transparent",
-                                    borderBottomWidth: "1px",
-                                  },
-                                  "& .select__value-container": {
-                                    paddingLeft: "0px",
-                                  },
-                                  "& .select__control:hover": {
-                                    borderBottomWidth: "2px",
-                                    borderBottomColor: "#121212",
-                                  },
-                                  "& .select__control--is-focused": {
-                                    borderWidth: "0px",
-                                    borderBottomWidth: "2px",
-                                    borderBottomColor: `#1891fe !important`,
-                                    boxShadow: "none",
-                                  },
-                                }),
-                              }}
-                              classNamePrefix="select"
-                            />
-                          </div>
-
+                      case 1:
+                        return (
                           <Button
-                            variant="contained"
-                            className="!bg-[#1891fe] !mt-4 !py-[13px] !font-medium !capitalize"
-                            style={{
-                              fontFamily: "inherit",
-                            }}
                             onClick={async () => {
                               if (
                                 nname.length &&
@@ -665,9 +717,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                     setAddNew(false);
 
                                     setLoader(false);
-                                    
                                   } else {
-
                                     setLoader(false);
 
                                     setFailMessage(
@@ -687,17 +737,21 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                 );
                               }
                             }}
-                            fullWidth
+                            className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#1891fe] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
                           >
+                            <BsPatchPlusFill
+                              color={"inherit"}
+                              className={"mr-2 !fill-white"}
+                              size={20}
+                            />{" "}
                             Create
                           </Button>
-                        </TabPanel>
-                      </FormControl>
-                    </Box>
-                  </div>
+                        );
+                    }
+                  })()}
                 </div>
               </div>
-            </div>
+            </Box>
           </Modal>
 
           <div className="header border-b-[#eef2f4] h-[80px] w-full border-b-solid border-b flex items-center py-0 px-5">
@@ -737,7 +791,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
               </div>
               <div className="settings w-[22px] h-[22px] text-[#c1c7cd] flex-shrink-0">
                 <FiLogOut
-                  onClick={() => router.push('/logout')}
+                  onClick={() => router.push("/logout")}
                   className="hover:stroke-[#ff5100] transition-all delay-[400]"
                   size={24}
                 />
@@ -822,12 +876,10 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
               </div>
 
               {groupChat?.map(({ name: gps, lastchat: clst, groupKeys }, i) => {
-                
                 return (
                   <Chatlist
                     key={i}
                     onClick={async () => {
-
                       rContext.update?.({
                         group: gps,
                         chatkeys: groupKeys,
@@ -845,7 +897,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                       pathname[pathname.length - 1] == "dashboard" &&
                       gps == group
                     }
-                    iv={clst?.['iv']}
+                    iv={clst?.["iv"]}
                     lastMsg={clst !== undefined ? clst["content"] : ""}
                     name={`${gps} ${!i ? "(Main)" : ""}`}
                   />
