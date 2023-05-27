@@ -378,14 +378,14 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                             },
                             "& .MuiToggleButtonGroup-grouped": {
                               borderRadius: "4px !important",
-                              minWidth: 55,
-                              marginLeft: 3,
+                              minWidth: 241,
+                              marginLeft: '5px !important',
                               backgroundColor: "#1212121a",
                               border: "none",
                             },
                           }}
                           exclusive
-                          className="w-full cusscroller overflow-y-hidden !justify-around mb-4 pb-1"
+                          className="w-full cusscroller overflow-y-hidden  mb-4 pb-1"
                           onChange={(e: any) => {
                             if (
                               e.target.value &&
@@ -898,7 +898,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                       gps == group
                     }
                     iv={clst?.["iv"]}
-                    lastMsg={clst !== undefined ? clst["content"] : ""}
+                    lastMsg={clst !== undefined ? clst["content"][0] : ""}
                     name={`${gps} ${!i ? "(Main)" : ""}`}
                   />
                 );

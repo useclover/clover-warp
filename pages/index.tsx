@@ -789,6 +789,291 @@ const Home: NextPage = () => {
           </Modal>
 
           <Modal
+            open={open}
+            sx={{
+              "&& .MuiBackdrop-root": {
+                backdropFilter: "blur(5px)",
+                width: "calc(100% - 8px)",
+              },
+            }}
+            onClose={handleClose}
+            className="overflow-y-scroll overflow-x-hidden cusscroller flex justify-center"
+            aria-labelledby="Register DAO on Clover"
+            aria-describedby="Register DAO"
+          >
+            <Box
+              className="sm:!w-full 3md:!px-1 h-fit 3mdd:px-[2px]"
+              sx={{
+                minWidth: 300,
+                width: "70%",
+                maxWidth: 800,
+                borderRadius: 6,
+                outline: "none",
+                p: 1,
+                position: "relative",
+                margin: "auto",
+              }}
+            >
+              <div className="py-4 px-6 bg-white -mb-[1px] rounded-t-[.9rem]">
+                <div className="mb-2 flex items-start justify-between">
+                  <div>
+                    <h2 className="font-[500] text-[rgb(32,33,36)] text-[1.55rem] 3md:text-[1.2rem]">
+                      Register DAO
+                    </h2>
+                    <span className="text-[rgb(69,70,73)] font-[500] text-[14px]">
+                      Create a DAO or Add existing DAOs to our service
+                    </span>
+                  </div>
+
+                  <IconButton size={"medium"} onClick={handleClose}>
+                    <MdClose
+                      size={20}
+                      color={"rgb(32,33,36)"}
+                      className="cursor-pointer"
+                    />
+                  </IconButton>
+                </div>
+
+                <div className="form relative pt-4">
+                  <Box sx={{ width: "100%" }}>
+                    {Boolean(failMessage.length) && (
+                      <div className="rounded-md w-[95%] font-bold mt-2 mx-auto p-3 bg-[#ff8f33] text-white">
+                        {failMessage}
+                      </div>
+                    )}
+
+                    <FormControl
+                      fullWidth
+                      sx={{
+                        px: 2,
+                        py: 3,
+                      }}
+                    >
+                      <ToggleButtonGroup
+                        value={daoType}
+                        sx={{
+                          justifyContent: "space-between",
+                          marginBottom: "15px !important",
+                          width: "100%",
+                          "& .Mui-selected": {
+                            backgroundColor: `rgba(24, 145, 254, 0.8) !important`,
+                            color: `#fff !important`,
+                          },
+                          "& .MuiButtonBase-root:first-of-type": {
+                            marginRight: "0px !important",
+                            marginLeft: "0px !important",
+                          },
+                          "& .MuiButtonBase-root": {
+                            padding: "10px 15px !important",
+                          },
+                          "& .MuiToggleButtonGroup-grouped": {
+                            borderRadius: "4px !important",
+                            minWidth: 55,
+                            marginLeft: 3,
+                            backgroundColor: "#1212121a",
+                            border: "none",
+                          },
+                        }}
+                        exclusive
+                        className="w-full cusscroller overflow-y-hidden !justify-around mb-4 pb-1"
+                        onChange={(e: any) => {
+                          setDaoType(e.target.value);
+                        }}
+                      >
+                        <ToggleButton
+                          sx={{
+                            textTransform: "capitalize",
+                            fontWeight: "bold",
+                          }}
+                          value={"default"}
+                        >
+                          <MdPersonAddAlt className="mr-2" size={20} /> Create
+                          New
+                        </ToggleButton>
+                        <ToggleButton
+                          sx={{
+                            textTransform: "capitalize",
+                            fontWeight: "bold",
+                          }}
+                          value={"exist"}
+                        >
+                          <AiOutlineAppstoreAdd className="mr-2" size={20} />{" "}
+                          Add Existing
+                        </ToggleButton>
+                      </ToggleButtonGroup>
+
+                      <div>
+                        <TextField
+                          fullWidth
+                          id="outlined-basic"
+                          label="Name of DAO"
+                          variant="outlined"
+                          value={name}
+                          onChange={(
+                            e: React.ChangeEvent<
+                              HTMLInputElement | HTMLTextAreaElement
+                            >
+                          ) => {
+                            setName(e.target.value);
+                          }}
+                        />
+                      </div>
+                      <div className="mt-6">
+                        <TextField
+                          fullWidth
+                          id="outlined-basic"
+                          label="Description of DAO"
+                          variant="outlined"
+                          helperText="Short Description Of DAO, Can be left empty - max 300 characters"
+                          value={des}
+                          onChange={(
+                            e: React.ChangeEvent<
+                              HTMLInputElement | HTMLTextAreaElement
+                            >
+                          ) => {
+                            const val = e.target.value;
+
+                            setDes(val.substring(0, 300));
+                          }}
+                        />
+                      </div>
+                      {daoType == "exist" && (
+                        <div className="my-6">
+                          <TextField
+                            fullWidth
+                            id="outlined-basic"
+                            label="Contract Address"
+                            variant="outlined"
+                            helperText="Contract address of the token that would allow users into the DAO"
+                            value={contractAd}
+                            onChange={(
+                              e: React.ChangeEvent<
+                                HTMLInputElement | HTMLTextAreaElement
+                              >
+                            ) => {
+                              setContractAd(e.target.value);
+                            }}
+                          />
+                        </div>
+                      )}
+
+                      {daoType == "default" && (
+                        <>
+                          <label className="mt-5">Participants</label>
+                          <div className="flex w-full my-2 cusscroller overflow-hidden overflow-x-scroll items-center">
+                            {participants.map((e, i: number) => (
+                              <div
+                                className="border text-[#777] border-solid ml-[2px] rounded p-2 flex items-center justify-between"
+                                key={i}
+                              >
+                                <span>
+                                  {e.substring(0, 5) +
+                                    "...." +
+                                    e.substring(e.length - 5, e.length)}
+                                </span>
+                                <MdClose
+                                  size={15}
+                                  className={
+                                    "ml-1 cursor-pointer hover:text-[#121212]"
+                                  }
+                                  onClick={() => {
+                                    const partx: string[] = [...participants];
+                                    partx.splice(i, 1);
+                                    setParticipants(partx);
+                                  }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+
+                          <TextField
+                            fullWidth
+                            id="outlined-basic"
+                            helperText="if left empty, only you would have access to the newly created DAO"
+                            variant="outlined"
+                            value={part}
+                            placeholder="click enter to add address"
+                            onChange={(e: any) => {
+                              setPart(e.target.value);
+                            }}
+                            onKeyUp={(e: any) => {
+                              setPart(e.target.value);
+
+                              if (e.keyCode == 13 || e.which === 13) {
+                                if (part.length) {
+                                  if (
+                                    !ethers.utils.isAddress(part) ||
+                                    (participants.includes(
+                                      ethers.utils.getAddress(part)
+                                    ) &&
+                                      ethers.utils.isAddress(part))
+                                  ) {
+                                    setPart("");
+                                    return;
+                                  }
+
+                                  const partx: string[] = [...participants];
+                                  partx.push(ethers.utils.getAddress(part));
+
+                                  setParticipants(partx);
+
+                                  setPart("");
+                                }
+                              }
+                            }}
+                            onBlur={(e: any) => {
+                              setPart(e.target.value);
+
+                              if (part.length) {
+                                if (
+                                  !ethers.utils.isAddress(part) ||
+                                  (participants.includes(
+                                    ethers.utils.getAddress(part)
+                                  ) &&
+                                    ethers.utils.isAddress(part))
+                                ) {
+                                  setPart("");
+                                  return;
+                                }
+
+                                const partx: string[] = [...participants];
+                                partx.push(ethers.utils.getAddress(part));
+
+                                setParticipants(partx);
+
+                                setPart("");
+                              }
+                            }}
+                          />
+                        </>
+                      )}
+                    </FormControl>
+                  </Box>
+                </div>
+              </div>
+
+              <div className="bg-[#efefef] flex justify-center items-center rounded-b-[.9rem] px-6 py-4">
+                <div className="flex items-center">
+                  <Button
+                    onClick={() => {
+                      setFailMessage("");
+                      sumitDeets();
+                    }}
+                    className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#1891fe] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+                  >
+                    <BsPatchPlusFill
+                      color={"inherit"}
+                      className={"mr-2 !fill-white"}
+                      size={20}
+                    />{" "}
+                    Register
+                  </Button>
+                </div>
+              </div>
+            </Box>
+          </Modal>
+
+          <Modal
             open={improve}
             sx={{
               "&& .MuiBackdrop-root": {
