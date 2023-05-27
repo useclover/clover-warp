@@ -47,8 +47,6 @@ const SocketHandler = (req: NextApiRequest, res: SocketApiResponse) => {
 
       socket.on("add_group", () => {
 
-        
-
         socket.to(lq).emit("add_grp", async () => await update());
       });
 
