@@ -8,6 +8,8 @@ const Chatlist = ({name, img, lastMsg, time, selected, iv, onClick}: {name: stri
 
     const mCon = useContext(CContext);
 
+    const [tick, setTick] = useState<number | string>('');
+
     const Msg = () => {
 
         const [txt, setTxt] = useState<string>('');
@@ -18,7 +20,7 @@ const Chatlist = ({name, img, lastMsg, time, selected, iv, onClick}: {name: stri
 
               if (iv !== undefined) {
 
-                setTxt(await decrypt({ message: lastMsg, iv }, mCon.chatkeys) as string);
+                setTxt(await decrypt({ message: lastMsg[0], iv }, mCon.chatkeys) as string);
 
               } else {
 
@@ -49,24 +51,33 @@ const Chatlist = ({name, img, lastMsg, time, selected, iv, onClick}: {name: stri
             //daily
             const xd = new Date(t);
 
-            return `${xd.getFullYear()}/${xd.getMonth() + 1}/${xd.getDate()}`
+            setTick(`${xd.getFullYear()}/${xd.getMonth() + 1}/${xd.getDate()}`);
 
         }else if (delay > 3600) {
             //hourly
             const xh = parseInt((delay / 3600).toString());
 
-            return xh + "hr" + (xh > 1 ? "s " : " ");
+            setTick(xh + "hr" + (xh > 1 ? "s " : " "));
 
         }else if(delay > 60){
             const xx = parseInt((delay / 60).toString()); 
             
-            return xx+'min'+(xx > 1 ? 's' : '')
+            setTick(xx+'min'+(xx > 1 ? 's' : ''))
 
         }else{
-            return 'now';
+            setTick('now');
         }
 
+        setTimeout(() => getx(t), 3000);
+
     }
+
+    useEffect(() => {
+
+      getx(Number(time));
+
+    }, [])
+  
 
   return (
     <div onClick={onClick} className={`msg ${selected ? "active" : ""}`}>
@@ -85,7 +96,7 @@ const Chatlist = ({name, img, lastMsg, time, selected, iv, onClick}: {name: stri
         <div className="msg-content">
           <Msg />
           {time !== undefined && (
-            <span className="msg-date">{getx(Number(time))}</span>
+            <span className="msg-date">{tick}</span>
           )}
         </div>
       </div>
