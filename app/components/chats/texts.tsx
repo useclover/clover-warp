@@ -5,22 +5,8 @@ import { useAccount } from "wagmi";
 import Image from "next/image";
 import { ethers } from "ethers";
 import { decrypt, decryptCache } from "../extras/chat/functions";
+import { Textm } from "../types";
 
-
-interface Textm {
-  content: string[][];
-  sender: string;
-  date: string | number;
-  reply?: string;
-  iv?: string;
-  selected: boolean;
-  messId: string;
-  enlargen: boolean;
-  sent: boolean;
-  replyDisabled: boolean;
-  setExtras: React.Dispatch<React.SetStateAction<string>>;
-  setEditable: React.Dispatch<React.SetStateAction<boolean>>;
-}
 
 const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras, selected, replyDisabled, setEditable, iv }: Textm) => {
 
@@ -86,7 +72,7 @@ const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras,
                 <span>{`Replied to ${
                   reply == address
                     ? "self"
-                    : `${sender.substring(0, 6)}....${sender.substring(38, 42)}`
+                    : `${sender?.substring(0, 6)}....${sender?.substring(38, 42)}`
                 }`}</span>
 
                 <span>
@@ -140,7 +126,7 @@ const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras,
         
         const add = address ? ethers.utils.getAddress(address) : '';
 
-        const add2 = ethers.utils.getAddress(sender);
+        const add2 = sender ? ethers.utils.getAddress(sender) : '';
 
         setEditable(add == add2);
 

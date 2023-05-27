@@ -2,7 +2,6 @@ import axios from 'axios';
 import { lq } from '../storage/init';
 import { contractAddress } from '../../../../pages';
 import Cryptr from 'cryptr';
-import crypto from 'crypto';
 
 export interface mess {
   [index: string]: {
@@ -156,72 +155,79 @@ export const decrypt = async (encryptedText: { message: string, iv: string }, ke
 }
 
 // retrieve group chats from server
-export const retrieveGroupChats = async (decryptHash: boolean) => {
+export const retrieveGroupChats = async (groups?: any) => {
   
-  const token = `Bearer ${localStorage.getItem("clover-x")}`;
-
-  const {
-    data: { groups },
-  } = await axios.get(`/dao/${lq[0]}/group`, {
-    headers: {
-      Authorization: token,
-    },
-  });
-
   const groupChats: any = [];
 
-  groups.forEach((val: any) => {
+  let gps = groups;
 
+  if (gps === undefined) {
+    const token = `Bearer ${localStorage.getItem("clover-x")}`;
+
+    const {
+      data: { groups },
+    } = await axios.get(`/dao/${lq[0]}/group`, {
+      headers: { Authorization: token },
+    });
+
+    gps = groups;
+  }
+
+  gps.forEach((val: any) => {
     const { groupname, chat, hash: eData } = val;
 
     let lastchat = undefined;
 
-    if(chat.data !== undefined){
+    if (chat.data !== undefined) {
+      const { data, messId, sender, index, created_at: udate } = chat;
 
-    const { data, messId, sender, index, created_at: udate } = chat;
+      const ddata = JSON.parse(data);
 
-    const ddata = JSON.parse(data);
+      const date = new Date(udate);
 
-    const date = new Date(udate);
-
-    lastchat = {
-      ...ddata,
-      messId,
-      sender,
-      index,
-      date: date.getTime(),
-    };
-
+      lastchat = {
+        ...ddata,
+        messId,
+        sender,
+        index,
+        date: date.getTime(),
+      };
     }
     const { key: encryptedHash, init } = eData;
 
-    const { contract, hash } =
-      JSON.parse(localStorage.getItem("cloverlog") || '{"contract":""}')
-        ;
+    const { contract, hash } = JSON.parse(
+      localStorage.getItem("cloverlog") || '{"contract":""}'
+    );
+
 
     let decryptedKeys;
 
-    if(decryptHash){
+    if( decryptCache[encryptedHash] !== undefined) {
 
-      let key = init ? hash : contract;
+        decryptedKeys = decryptCache[encryptedHash];
 
-      const enc = new Cryptr(key);
+    }else{
+      
+        let key = init ? hash : contract;
 
-      decryptedKeys = enc.decrypt(encryptedHash);
+        const enc = new Cryptr(key);
 
+        decryptedKeys = enc.decrypt(encryptedHash);
     }
 
     groupChats.push({
       name: groupname,
       lastchat,
-      groupKeys: decryptedKeys
+      groupKeys: decryptedKeys,
     });
+
   });
 
   return groupChats;
 };
 
 export const retrieveMessages = async (indexx?: number) => {
+  
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
   const {

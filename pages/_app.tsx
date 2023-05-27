@@ -4,6 +4,7 @@ import AuthProvider from "../app/components/extras/contexts/AuthContext";
 import "../styles/globals.css";
 import axios from 'axios';
 import { CCprovider } from "../app/components/extras/contexts/CContext";
+import '../app/components/types.d.ts';
 
 function MyApp({ Component, pageProps }: AppProps) {
 
