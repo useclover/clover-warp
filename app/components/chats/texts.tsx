@@ -70,6 +70,7 @@ const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras,
             }            
 
           })()
+          
       }, [])
 
       return userImg ? (

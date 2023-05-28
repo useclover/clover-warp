@@ -19,6 +19,7 @@ module.exports = {
       "mmst": { max: "1230px" },
       "sst": {max: "780px"},
       "st": { max: "750px" },
+      "mmdd": { max: "630px" },
       "mmd": {max: "640px"},
       "md": { max: "427px" },
       "2usm": { max: "505px" },

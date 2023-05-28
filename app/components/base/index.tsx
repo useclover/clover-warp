@@ -51,6 +51,7 @@ import {
   updateMessages,
   retrieveGroupChats,
   createGroupChat,
+  groupImgCache,
 } from "../extras/chat/functions";
 import { FaCloud, FaVoteYea } from "react-icons/fa";
 import { CContext } from "../extras/contexts/CContext";
@@ -875,7 +876,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                       value={((filelist || 0) / 50) * 100}
                     />
 
-                    <span className="msg-date font-bold text-[13px] min-w-fit ml-[3px]">
+                    <span className="msg-date text-[13px] min-w-fit ml-[3px]">
                       {filelist?.toFixed(2)}/50GB
                     </span>
                   </div>
@@ -883,6 +884,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
               </div>
 
               {groupChat?.map(({ name: gps, lastchat: clst, groupKeys }, i) => {
+
                 return (
                   <Chatlist
                     key={i}
@@ -899,7 +901,9 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                       }
                     }}
                     time={clst !== undefined ? clst["date"] : undefined}
-                    img={cicon.src}
+                    img={
+                      groupImgCache[gps]
+                    }
                     selected={
                       pathname[pathname.length - 1] == "dashboard" &&
                       gps == group

@@ -10,6 +10,7 @@ const Chatlist = ({name, img, lastMsg, time, selected, iv, onClick}: {name: stri
 
     const [tick, setTick] = useState<number | string>('');
 
+
     const Msg = () => {
 
         const [txt, setTxt] = useState<string>('');
@@ -85,8 +86,8 @@ const Chatlist = ({name, img, lastMsg, time, selected, iv, onClick}: {name: stri
         <Image
           className="msg-profile "
           src={img === undefined ? cicon.src : img}
-          height={25}
-          width={25}
+          height={img ? 44 : 25}
+          width={img ? 44 : 25}
           alt={name}
         />
       </div>
@@ -96,9 +97,7 @@ const Chatlist = ({name, img, lastMsg, time, selected, iv, onClick}: {name: stri
         <div className="msg-content">
           <Msg />
 
-          {time !== undefined && (
-            <span className="msg-date">{tick}</span>
-          )}
+          {time !== undefined && <span className="msg-date">{tick}</span>}
         </div>
       </div>
     </div>

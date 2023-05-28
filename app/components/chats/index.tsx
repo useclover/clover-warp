@@ -43,6 +43,7 @@ import {
   encrypt,
   decrypt,
   retrieveGroupChats,
+  groupImgCache,
 } from "../extras/chat/functions";
 import { CContext } from "../extras/contexts/CContext";
 import Text from "./texts";
@@ -848,7 +849,7 @@ const Chats = () => {
                   <div className="detail-area-header">
                     <div className="msg-profile group">
                       <Image
-                        src={cicon.src}
+                        src={groupImgCache[group || ''] || cicon.src}
                         width={66}
                         height={66}
                         alt={group}

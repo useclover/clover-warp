@@ -154,6 +154,8 @@ export const decrypt = async (encryptedText: { message: string, iv: string }, ke
     
 }
 
+export const groupImgCache: { [index: string]: string } = {}
+
 // retrieve group chats from server
 export const retrieveGroupChats = async (groups?: any) => {
   
@@ -174,7 +176,12 @@ export const retrieveGroupChats = async (groups?: any) => {
   }
 
   gps.forEach((val: any) => {
-    const { groupname, chat, hash: eData } = val;
+    const { groupname, id, img, chat, hash: eData } = val;
+
+    if (img)
+    groupImgCache[
+      groupname
+    ] = `${process.env.NEXT_PUBLIC_APP_URL}/avatars/${img}`;
 
     let lastchat = undefined;
 
