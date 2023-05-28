@@ -6,7 +6,8 @@ import Image from "next/image";
 import { ethers } from "ethers";
 import { decrypt, decryptCache } from "../extras/chat/functions";
 import { Textm } from "../types";
-
+import { RandomAvatar } from "react-random-avatars";
+import axios from "axios";
 
 const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras, selected, replyDisabled, setEditable, iv }: Textm) => {
 
@@ -36,6 +37,52 @@ const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras,
      return txt;
 
     }
+  }
+
+  const imgCache: { [index: string]: string } = {};
+
+  const Img = () => {
+
+      const [userImg, setUserImg] = useState<string>('');
+
+      useEffect(() => {
+          (async () => {
+
+              if (imgCache[sender || ""] === undefined) {
+
+              const { data: { image } } = await axios.get(`/user/img/${sender}`, {
+                  headers: {
+                      "Content-Type": "application/json",
+                      "Accept": "application/json",
+                      Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
+                  }
+              });
+
+              if (image) {
+
+                  imgCache[sender || ""] = image;
+
+                  setUserImg(image);
+
+              };
+            }else{
+                setUserImg(imgCache[sender || ""]); 
+            }            
+
+          })()
+      }, [])
+
+      return userImg ? (
+        <Image
+          className="chat-msg-img"
+          height={40}
+          width={40}
+          src={userImg}
+          alt={sender}
+        />
+      ) : (
+        <RandomAvatar size={40} name={sender} />
+      );
   }
 
   const MainText = () => {
@@ -122,31 +169,24 @@ const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras,
       }}
       id={messId}
       onClick={() => {
-        
-        setExtras(selected ? "" : messId)
-        
-        const add = address ? ethers.utils.getAddress(address) : '';
+        setExtras(selected ? "" : messId);
 
-        const add2 = sender ? ethers.utils.getAddress(sender) : '';
+        const add = address ? ethers.utils.getAddress(address) : "";
+
+        const add2 = sender ? ethers.utils.getAddress(sender) : "";
 
         setEditable(add == add2);
-
       }}
       className={`chat-msg transition-all relative z-[1001] delay-[400] ${
         address == sender ? "owner" : ""
       }`}
     >
       <div className="chat-msg-profile relative">
-        <Image
-          className="chat-msg-img"
-          height={40}
-          width={40}
-          src={userx.src}
-          alt={sender}
-        />
+        <Img />
 
         <div className="chat-msg-date">
-          {Boolean(sender) && `${sender?.substring(0, 6)}...${sender?.substring(38, 42)}`}{" "}
+          {Boolean(sender) &&
+            `${sender?.substring(0, 6)}...${sender?.substring(38, 42)}`}{" "}
           <span>{ddate}</span>
         </div>
       </div>

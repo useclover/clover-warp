@@ -95,6 +95,7 @@ const Chatlist = ({name, img, lastMsg, time, selected, iv, onClick}: {name: stri
         <div className="msg-username capitalize">{name}</div>
         <div className="msg-content">
           <Msg />
+
           {time !== undefined && (
             <span className="msg-date">{tick}</span>
           )}

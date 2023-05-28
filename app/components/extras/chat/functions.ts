@@ -367,6 +367,7 @@ export const saveMessages = async (updateNew: any) => {
 };
 
 export const createGroupChat = async (groupname: string, members?: (string | undefined)[]) => {
+
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
   const keypair = await window.crypto.subtle.generateKey(
@@ -406,6 +407,10 @@ export const createGroupChat = async (groupname: string, members?: (string | und
   }
 
   if (members?.length) payload["members"] = JSON.stringify(members);
+
+  // console.log('i finished')
+
+  // return;
   
   const {
     data: { group },

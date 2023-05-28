@@ -219,9 +219,15 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
       const mess = await retrieveMessages();
 
+      console.log('retrieve messages')
+
       const flist = await retrieveFiles();
 
+      console.log('retrieve files')
+
       const rgroups = await retrieveGroupChats();
+
+      console.log('retrieve group chats')
 
       setGroupChat(rgroups);  
 

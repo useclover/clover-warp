@@ -11132,6 +11132,11 @@ react-qr-code@^2.0.7:
     prop-types "^15.7.2"
     qr.js "0.0.0"
 
+react-random-avatars@^1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/react-random-avatars/-/react-random-avatars-1.3.1.tgz#cfea11dd80262939656e4134438fa76eb2d95371"
+  integrity sha512-HyMGoWniK2D5CRthoA1he4c6LVFIX/yBjp4qarEXN/DsgJ+1R6M5gJwYhTBoATO+3itrGCAGnKZNqimG1sDjAA==
+
 react-select@^5.7.0:
   version "5.7.0"
   resolved "https://registry.yarnpkg.com/react-select/-/react-select-5.7.0.tgz#82921b38f1fcf1471a0b62304da01f2896cd8ce6"
