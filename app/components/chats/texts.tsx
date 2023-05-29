@@ -29,8 +29,7 @@ const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras,
 
     if (iv !== undefined) {
       
-
-      return await decrypt({ message: txt, iv }, mCon.chatkeys);
+      return await decrypt({ message: txt, iv }, mCon.chatkeys[mCon.group || '']);
 
     }else{
 
@@ -70,7 +69,7 @@ const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras,
             }            
 
           })()
-          
+
       }, [])
 
       return userImg ? (

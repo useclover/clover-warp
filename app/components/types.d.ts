@@ -2,7 +2,7 @@ import type { NextApiResponse } from "next";
 import type { Server } from "socket.io";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 
-export type GroupChatType = { name: string; lastchat: any; groupKeys: string }[]
+export type GroupChatType = { name: string; lastchat: any; groupKeys: string; key: string }[]
 
 export type ChatObjectType = "mess" | "vote"
 
@@ -53,6 +53,12 @@ export type SocketApiResponse = NextApiResponse & {
   socket: {
     server: any;
   };
+};
+
+export type TextAPIData = {
+  message: string;
+  error: boolean;
+  result?: string;
 };
 
 export {}

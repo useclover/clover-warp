@@ -12,7 +12,7 @@ export const CCprovider = ({ children }: { children: JSX.Element }) => {
   const [group, setGroup] = useState<string | undefined>();
 
   const [groupData, setGroupData] = useState<
-    { name: string; lastchat: any; groupKeys: string }[]
+    { name: string; lastchat: any; groupKeys: string; key: string }[]
   >([]);
 
   const [content, setContent] = useState<string | undefined>();
@@ -25,7 +25,7 @@ export const CCprovider = ({ children }: { children: JSX.Element }) => {
     [index: string]: { [index: string]: any[] };
   }>({});
 
-  const [chatkeys, setChatKeys] = useState<any>();
+  const [chatkeys, setChatKeys] = useState<any>({});
 
   return (
     <CContext.Provider

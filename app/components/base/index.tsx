@@ -52,6 +52,7 @@ import {
   retrieveGroupChats,
   createGroupChat,
   groupImgCache,
+  decryptCache,
 } from "../extras/chat/functions";
 import { FaCloud, FaVoteYea } from "react-icons/fa";
 import { CContext } from "../extras/contexts/CContext";
@@ -60,7 +61,9 @@ import Loader from "../loader";
 import { useAccount } from "wagmi";
 import { BiSend, BiX } from "react-icons/bi";
 import EmojiPicker from "emoji-picker-react";
-import { GroupChatType, MessageType } from "../types";
+import { GroupChatType, MessageType, TextAPIData } from "../types";
+import Cryptr from "cryptr";
+import axios from "axios";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -220,27 +223,15 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
       const mess = await retrieveMessages();
 
-      console.log('retrieve messages')
 
       const flist = await retrieveFiles();
 
-      console.log('retrieve files')
 
       const rgroups = await retrieveGroupChats();
 
-      console.log('retrieve group chats')
 
       setGroupChat(rgroups);  
-
-      rgroups.forEach(({ name: gname, groupKeys }: any) => {
-        if (gname == name) {
-
-          rContext.update?.({
-            chatkeys: groupKeys,
-          });
-        
-        }
-      });
+      
 
       let tSize = 0;
 
@@ -257,6 +248,10 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
       }
 
+      if (pathname[pathname.length - 1] == "dashboard") {
+        document.querySelector(".msg.active")?.scrollIntoView();
+      }
+
 
       if (group === undefined) {
         rContext.update?.({ group: name });
@@ -266,9 +261,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
       setLoader(false);
 
-      if (pathname[pathname.length - 1] == "dashboard") {
-        document.querySelector(".msg.active")?.scrollIntoView();
-      }
+      
     }
 
     if (name != undefined) {
@@ -285,6 +278,55 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
     participants,
     group,
   ]);
+
+
+
+  useEffect(() => {
+
+      if (groupChat !== undefined && groupChat.length > 0) {
+
+      const store: any = {};
+
+      for (let i = 0; i < groupChat.length; i++) {
+        const { name: gname, groupKeys, key } = groupChat[i];
+
+        if (!decryptCache?.[key]) {
+          (async () => {
+
+            const { data }: { data: TextAPIData } = await axios.get(
+              "/api/text/decrypt",
+              {
+                params: {
+                  text: groupKeys,
+                  key,
+                },
+                baseURL: window.origin,
+              }
+            );
+
+            store[gname] = data["result"];
+
+            decryptCache[key] = data["result"] || "";
+
+            rContext.update?.({
+              chatkeys: { ...store },
+            });
+
+          })()
+          
+        } else {
+          store[gname] = decryptCache[key];
+        
+          rContext.update?.({
+            chatkeys: { ...store },
+          });
+
+        }
+      
+      }
+    }
+
+  }, [groupChat])
 
   const route = async (path: string) => {
     if (pathname.includes(path)) return;
@@ -883,22 +925,23 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                 </div>
               </div>
 
-              {groupChat?.map(({ name: gps, lastchat: clst, groupKeys }, i) => {
+              {groupChat?.map(({ name: gps, lastchat: clst, groupKeys, key }, i) => {
 
                 return (
                   <Chatlist
                     key={i}
                     onClick={async () => {
+                
                       rContext.update?.({
                         group: gps,
-                        chatkeys: groupKeys,
                       });
 
                       if (pathname[pathname.length - 1] != "dashboard") {
-                        setLoader(true);
+                         setLoader(true);
 
                         await router.push("/dashboard");
                       }
+                
                     }}
                     time={clst !== undefined ? clst["date"] : undefined}
                     img={
@@ -911,6 +954,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                     iv={clst?.["iv"]}
                     lastMsg={clst !== undefined ? clst["content"][0] : ""}
                     name={`${gps} ${!i ? "(Main)" : ""}`}
+                    index={gps}
                   />
                 );
               })}
