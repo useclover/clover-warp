@@ -4,11 +4,12 @@ import { useContext, useEffect, useState } from 'react';
 import { decrypt, decryptCache } from '../../extras/chat/functions';
 import { CContext } from '../../extras/contexts/CContext';
 
-const Chatlist = ({name, img, lastMsg, time, selected, iv, onClick}: {name: string, img?: string, lastMsg: string, time?: string | number, selected: boolean, onClick: () => void, iv?: string}) => {
+const Chatlist = ({name, index, img, lastMsg, time, selected, iv, onClick}: {name: string, index: string, img?: string, lastMsg: string, time?: string | number, selected: boolean, onClick: () => void, iv?: string}) => {
 
     const mCon = useContext(CContext);
 
     const [tick, setTick] = useState<number | string>('');
+
 
     const Msg = () => {
 
@@ -20,7 +21,7 @@ const Chatlist = ({name, img, lastMsg, time, selected, iv, onClick}: {name: stri
 
               if (iv !== undefined) {
 
-                setTxt(await decrypt({ message: lastMsg[0], iv }, mCon.chatkeys) as string);
+                setTxt(await decrypt({ message: lastMsg[0], iv }, mCon.chatkeys[index]) as string);
 
               } else {
 
@@ -43,6 +44,8 @@ const Chatlist = ({name, img, lastMsg, time, selected, iv, onClick}: {name: stri
     }
 
     const getx = (t: number) => {
+        if (!t) return;
+
         const ec:number = Number((new Date().getTime() / 1000).toFixed(0));
         const et:number = Number((t / 1000).toFixed(0));
         const delay:number = ec - et;
@@ -85,8 +88,8 @@ const Chatlist = ({name, img, lastMsg, time, selected, iv, onClick}: {name: stri
         <Image
           className="msg-profile "
           src={img === undefined ? cicon.src : img}
-          height={25}
-          width={25}
+          height={img ? 44 : 25}
+          width={img ? 44 : 25}
           alt={name}
         />
       </div>
@@ -95,9 +98,8 @@ const Chatlist = ({name, img, lastMsg, time, selected, iv, onClick}: {name: stri
         <div className="msg-username capitalize">{name}</div>
         <div className="msg-content">
           <Msg />
-          {time !== undefined && (
-            <span className="msg-date">{tick}</span>
-          )}
+
+          {time !== undefined && <span className="msg-date">{tick}</span>}
         </div>
       </div>
     </div>

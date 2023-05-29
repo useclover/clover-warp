@@ -43,6 +43,7 @@ import {
   encrypt,
   decrypt,
   retrieveGroupChats,
+  groupImgCache,
 } from "../extras/chat/functions";
 import { CContext } from "../extras/contexts/CContext";
 import Text from "./texts";
@@ -214,7 +215,6 @@ const Chats = () => {
       socket?.emit?.("join", group);
     }
 
-    console.log('group change', group)
 
   }, [group])
 
@@ -266,7 +266,7 @@ const Chats = () => {
 
     if (messageText.length) {
 
-      const encMessage = await encrypt(messageText, chatkeys);
+      const encMessage = await encrypt(messageText, chatkeys[group || ""]);
 
       if (Boolean(edit)) {
         const { content } = findMessId(
@@ -500,18 +500,26 @@ const Chats = () => {
 
                     if (e.target.scrollTop <= 20 && preloadMess) {
 
-                      if (prevMessLoading) return;
+                      if (
+                        prevMessLoading ||
+                        !messData?.[group || ""]?.["messages"]?.length
+                      )
+                        return;
 
                       setPrevMessLoading(true);
+
+                      
 
                       const dataMess = await retrieveMessages(
                         messData?.[group || ""]?.["messages"]?.length || 0
                       );
 
+
                       if (Object.values(dataMess).length) {
+                      
                         
 
-                        messData?.[group || ""]["messages"].push(dataMess);
+                        messData?.[group || ""]?.["messages"].push(dataMess);
 
                         setPrevMessLoading(false);
                                             
@@ -571,7 +579,7 @@ const Chats = () => {
                                   return;
                               }
 
-                              const decryptText = await decrypt({ iv, message: content[0][0] }, chatkeys);
+                              const decryptText = await decrypt({ iv, message: content[0][0] }, chatkeys[group || ""]);
 
                               setEdit(decryptText);
 
@@ -848,7 +856,7 @@ const Chats = () => {
                   <div className="detail-area-header">
                     <div className="msg-profile group">
                       <Image
-                        src={cicon.src}
+                        src={groupImgCache[group || ''] || cicon.src}
                         width={66}
                         height={66}
                         alt={group}

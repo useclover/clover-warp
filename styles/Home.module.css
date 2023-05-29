@@ -108,6 +108,16 @@
   margin-left: 0.5rem;
 }
 
+.daoOptions {
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+@media (max-width: 418px) {
+  .daoOptions {
+     grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+  }
+}
+
 @media (max-width: 600px) {
   .grid {
     width: 100%;

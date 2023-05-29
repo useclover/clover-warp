@@ -4,6 +4,7 @@ import Image from "next/image";
 import logo from "../public/images/logo.png";
 import styles from "../styles/Home.module.css";
 import bgLogo from "../public/images/logolg.png";
+import cicon from "../public/images/icon.png";
 // import { createAlchemyWeb3 } from "@alch/alchemy-web3";
 import { BiUserPlus, BiX } from "react-icons/bi";
 import { AiOutlineAppstoreAdd } from "react-icons/ai";
@@ -703,7 +704,7 @@ const Home: NextPage = () => {
             aria-describedby="We found multiple DAOs in our account"
           >
             <Box
-              className="sm:!w-full 3md:!px-1 h-fit 3mdd:px-[2px]"
+              className="mmdd:!w-full 3md:!px-1 h-fit 3mdd:px-[2px]"
               sx={{
                 minWidth: 300,
                 width: "70%",
@@ -715,7 +716,7 @@ const Home: NextPage = () => {
                 margin: "auto",
               }}
             >
-              <div className="py-4 px-6 bg-white -mb-[1px] rounded-[.9rem]">
+              <div className="py-4 mmdd:w-full px-6 bg-white -mb-[1px] rounded-[.9rem]">
                 <div className="mb-2 flex items-start justify-between">
                   <div>
                     <h2 className="font-[500] text-[rgb(32,33,36)] text-[1.55rem] 3md:text-[1.2rem]">
@@ -738,11 +739,7 @@ const Home: NextPage = () => {
                 <div className="form relative pt-4">
                   <Box sx={{ width: "100%" }}>
                     <div
-                      style={{
-                        gridTemplateColumns:
-                          "repeat(auto-fill, minmax(320px, 1fr))",
-                      }}
-                      className="relative p-6 grid gap-2 grid-flow-dense"
+                      className={`relative ${styles.daoOptions} 2usm:px-0 p-6 grid gap-2 grid-flow-dense`}
                     >
                       {exec.map((vv: any, i: number) => (
                         <button
@@ -773,11 +770,24 @@ const Home: NextPage = () => {
                             Router.push("/dashboard");
                           }}
                           style={{ fontFamily: "inherit" }}
-                          className="transition-all rounded-md delay-500 hover:border-[#1891fe] hover:text-[#1891fe] items-start text-[16px] flex justify-between border-[1px] 4sm:mr-2 text-[#575757] mb-2 w-full py-4 px-4"
+                          className="transition-all rounded-md delay-500 hover:border-[#1891fe] hover:text-[#1891fe] items-center text-[16px] flex border-[1px] 4sm:mr-2 text-[#575757] mb-2 w-full py-4 px-4"
                         >
+                          <div className="w-[45px] relative rounded-[50%] justify-center bg-[#e7e7e7] mr-4 flex items-center h-[45px]">
+                            <Image
+                              alt={vv.name}
+                              height={vv?.img ? 45 : 30}
+                              width={vv?.img ? 45 : 30}
+                              src={vv?.img || cicon.src}
+                            />
+                          </div>
+
                           <div className="flex flex-col items-start">
-                            <span className="font-bold">{vv.name}</span>
-                            <span className="text-left">{vv.desc}</span>
+                            <span className="font-bold truncate">
+                              {vv.name}
+                            </span>
+                            <span className="text-left truncate">
+                              {vv.desc}
+                            </span>
                           </div>
                         </button>
                       ))}

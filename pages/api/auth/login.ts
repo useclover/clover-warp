@@ -104,8 +104,6 @@ export default function handler(
             }
           }
 
-          
-
           const {
             data: { token = false, user },
           } = await axios.post(

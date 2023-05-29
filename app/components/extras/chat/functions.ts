@@ -12,6 +12,7 @@ export interface mess {
   }[];
 }
 
+
 export const decryptCache: { [index: string]: string } = {
 
 }
@@ -82,6 +83,7 @@ export const encrypt = async (text: string, keys: string) => {
 
 
 export const decrypt = async (encryptedText: { message: string, iv: string }, keys: string) => {
+
 
     if (decryptCache[Object.values(encryptedText).join('')] !== undefined) {
         return decryptCache[Object.values(encryptedText).join("")];
@@ -154,6 +156,8 @@ export const decrypt = async (encryptedText: { message: string, iv: string }, ke
     
 }
 
+export const groupImgCache: { [index: string]: string } = {}
+
 // retrieve group chats from server
 export const retrieveGroupChats = async (groups?: any) => {
   
@@ -174,7 +178,12 @@ export const retrieveGroupChats = async (groups?: any) => {
   }
 
   gps.forEach((val: any) => {
-    const { groupname, chat, hash: eData } = val;
+    const { groupname, img, chat, hash: eData } = val;
+
+    if (img)
+    groupImgCache[
+      groupname
+    ] = `${process.env.NEXT_PUBLIC_APP_URL}/avatars/${img}`;
 
     let lastchat = undefined;
 
@@ -202,23 +211,19 @@ export const retrieveGroupChats = async (groups?: any) => {
 
     let decryptedKeys;
 
+    let key = init ? hash : contract;
+
     if( decryptCache[encryptedHash] !== undefined) {
 
         decryptedKeys = decryptCache[encryptedHash];
 
-    }else{
-      
-        let key = init ? hash : contract;
-
-        const enc = new Cryptr(key);
-
-        decryptedKeys = enc.decrypt(encryptedHash);
     }
 
     groupChats.push({
       name: groupname,
       lastchat,
-      groupKeys: decryptedKeys,
+      groupKeys: encryptedHash,
+      key
     });
 
   });
@@ -367,6 +372,7 @@ export const saveMessages = async (updateNew: any) => {
 };
 
 export const createGroupChat = async (groupname: string, members?: (string | undefined)[]) => {
+
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
   const keypair = await window.crypto.subtle.generateKey(
@@ -391,22 +397,29 @@ export const createGroupChat = async (groupname: string, members?: (string | und
   const { hash = "", contract = "" } = JSON.parse(
     localStorage.getItem("cloverlog") || '{"contract":""}'
   );
-  const enc = new Cryptr(hash);
-
-  const enc_init = new Cryptr(contract);
 
   const rawKeys = JSON.stringify({ public: publicKey, private: privateKey });
 
-  const group_keys = enc.encrypt(rawKeys);
+  const { data: { result: group_keys  } } = await axios.get('/api/text/encrypt', {
+    params: { text: rawKeys, key: hash },
+    baseURL: window.origin
+  });
 
-  const group_keys_init = enc_init.encrypt(rawKeys);
+   const {
+     data: { result: group_keys_init },
+   } = await axios.get("/api/text/encrypt", {
+     params: { text: rawKeys, key: contract },
+     baseURL: window.origin
+   });
+
 
   const payload: any = {
      name: groupname, group_keys, group_keys_init 
   }
 
   if (members?.length) payload["members"] = JSON.stringify(members);
-  
+
+
   const {
     data: { group },
   } = await axios.post(
