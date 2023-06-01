@@ -4,6 +4,7 @@ import Cryptr from "cryptr";
 import axios from "axios";
 import crypto from 'crypto';
 
+
 type Data = {
   message: string;
   token?: string;
@@ -90,10 +91,10 @@ export default function handler(
             desc: desc || "",
             name,
             metadata,
-            group_keys_init, 
-            group_keys
+            group_keys_init,
+            group_keys,
+            defCon,
           };
-
 
           const { data: {
             token, 
@@ -106,7 +107,7 @@ export default function handler(
           });
 
           res.status(200).json({
-            message: "Success",
+            message: "Successful",
             token,
             data,
             error: false

@@ -1,7 +1,7 @@
 import { BsPeople, BsPinAngle } from "react-icons/bs";
 import { getSize } from "../extras/folder";
 import { useContext } from "react";
-import { store, dir } from "../extras/storage";
+import { store, dir } from "../types";
 import { GenContext } from "../extras/contexts/genContext";
 
 const FolderDes = ({ color = "#40A9FF", data, pinned = false, shared = false }: { color?: string, data: {
@@ -20,12 +20,12 @@ const FolderDes = ({ color = "#40A9FF", data, pinned = false, shared = false }: 
   const mainSize = getSize(size);
 
   return (
-    <div onClick={() => {
-       
-    }} className="flex m-auto flex-col w-[186px] h-[199px] py-4 px-2 justify-between items-center cursor-pointer border-[1px] border-solid border-transparent hover:bg-[#8b8b8b24] hover:border-[#e1e1e1] transition-all delay-700 relative">
-
+    <div
+      onClick={() => {}}
+      className="flex m-auto flex-col w-[150px] h-[160px] pb-2 pt-4 px-2 justify-between items-center cursor-pointer border-[1px] border-solid border-transparent hover:bg-[#8b8b8b24] hover:border-[#e1e1e1] transition-all delay-700 relative"
+    >
       <div className="absolute right-[30px] flex items-center top-[7px]">
-        {pinned && <BsPinAngle size={16} color={color} className="mr-1"/>}
+        {pinned && <BsPinAngle size={16} color={color} className="mr-1" />}
 
         {shared && <BsPeople size={16} color={color} />}
       </div>

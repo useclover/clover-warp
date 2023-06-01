@@ -26,10 +26,9 @@ import { TbSearch } from "react-icons/tb";
 
 import FolderDes from "../../components/designs/folder";
 import FileDes from "../../components/designs/file";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { GenContext } from "../../components/extras/contexts/genContext";
 import { makeStorageClient } from "../../components/extras/storage/utoken";
-import { store } from "../../components/extras/storage";
 import Loader from "../../components/loader";
 import {
   lq,
@@ -40,16 +39,26 @@ import {
 import { logout } from "../../components/extras/logout";
 import Dash from "../dash";
 import { useAccount } from "wagmi";
+import { encrypt } from "../extras/chat/functions";
+import { CContext } from "../extras/contexts/CContext";
+import { store } from "../types";
+import io from 'socket.io-client'
+
+
+let socket:any;
 
 const Storage = () => {
 
   const [currentDir, setCurrentDir] = useState<string[]>(["main"]);
+
+  const loadOnce = useRef<boolean>(true)
 
   const { address, isConnected } = useAccount();
 
   /* upload */
   const uploadData = useContext(GenContext);
 
+  const { chatkeys } = useContext(CContext);
 
   const [loginData, setLoginData] = useState<{
     name: string;
@@ -88,6 +97,47 @@ const Storage = () => {
 
   const { name, contract, data, participants } = loginData || { name: '', contract: '', main: '', participants: {} };
 
+  
+  
+    const socketInit = async () => {
+      await fetch(`/api/storage?lq=${data}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
+        },
+      });
+
+      socket = io();
+
+      socket.on("connect", () => {
+        socket.emit("join", name);
+
+      });
+
+      const updateFl = async (data: any) => {
+         const dir: any = await retrieveFiles(currentDir);
+
+         setLoader(false);
+         setFileData(dir);
+
+         uploadData.updateFile?.(dir);
+
+         setUpdate(!update);
+
+      };
+
+      socket.on("add_fle", updateFl);
+
+    };
+
+    useEffect(() => {
+      if (loadOnce.current && data) {
+        loadOnce.current = false;
+
+        socketInit();
+      }
+    }, [data]);
+  
+
 
   useEffect(() => {
 
@@ -100,12 +150,10 @@ const Storage = () => {
       setLoader(false);
       setFileData(dir);
 
-      if (uploadData.updateFile !== undefined) {
-        uploadData.updateFile(dir);
+      uploadData.updateFile?.(dir);
 
-        setUpdate(!update);
-
-      }
+      setUpdate(!update);
+      
     }
 
     if (name !== undefined && Boolean(data)) {
@@ -114,8 +162,6 @@ const Storage = () => {
   }, [
     data,
     currentDir,
-    uploadData,
-    update,
     contract,
     name,
   ]);
@@ -179,17 +225,21 @@ const Storage = () => {
 
       console.log(cid, index);
 
-      const name = files[index].name;
+      const filename = files[index].name;
 
-      const extension = name.split(".").pop();
+      const extension = filename.split(".").pop();
+
+      console.log(chatkeys, name)
+
+      const cidData = JSON.stringify(await encrypt(cid, chatkeys[name]));
 
       addFiles.push({
-        name,
+        name: filename,
         date: files[index].lastModified,
         type: files[index].type,
         size: files[index].size,
         extension,
-        cid: [cid],
+        cid: cidData,
         oname: "",
         file: true,
         tag: "default",
@@ -198,9 +248,12 @@ const Storage = () => {
 
       if (index == files.length - 1) {
 
-
         const newFileData = await storeFiles(addFiles, currentDir);
+
+        socket.emit("add_file", true);
+
         const dir = await retrieveFiles(currentDir);
+
         setFileData(newFileData);
 
         updateLoading(false);
@@ -218,12 +271,12 @@ const Storage = () => {
     let uploaded = 0;
 
     const onStoredChunk = (size: number) => {
+      
       uploaded += size;
 
       const pct: number = (uploaded / totalSize) * 100;
 
       console.log(`Uploading... ${pct.toFixed(2)}% complete`);
-
 
       setUpdate(!update);
 
@@ -415,7 +468,7 @@ const Storage = () => {
                     <div
                       style={{
                         gridTemplateColumns:
-                          "repeat(auto-fill, minmax(186px, 1fr))",
+                          "repeat(auto-fill, minmax(150px, 1fr))",
                       }}
                       className="flist pt-7 grid gap-2 grid-flow-dense"
                     >
@@ -426,7 +479,7 @@ const Storage = () => {
                             data={{
                               name: e["name"],
                               size: e["size"],
-                              key: i,
+                              key: e['fileid'],
                             }}
                             text={e["extension"]}
                           />

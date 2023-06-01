@@ -22,6 +22,7 @@ import {
   IconButton,
   ToggleButtonGroup,
   ToggleButton,
+  Tooltip,
 } from "@mui/material";
 import Loader from "../app/components/loader";
 // import web3 from "web3";
@@ -41,10 +42,11 @@ import { notifications } from "../app/components/extras/storage/init";
 import Link from "next/link";
 import trusted from "../public/images/trust.svg";
 import { BsList, BsPatchPlusFill, BsPlusCircle, BsPlusCircleFill } from "react-icons/bs";
-import { MdClose, MdPersonAddAlt } from "react-icons/md";
+import { MdClose, MdInfo, MdPersonAddAlt } from "react-icons/md";
 
 // 0x74367351f1a6809ced9cc70654c6bf8c2d1913c9;
 export const contractAddress: string = "0xaCDFc5338390Ce4eC5AD61E3dC255c9F2560D797";
+
 const abi: any = contract.abi;
 
 const Home: NextPage = () => {
@@ -83,6 +85,9 @@ const Home: NextPage = () => {
   const [des, setDes] = useState<string>("");
   const [contractAd, setContractAd] = useState<string>("");
   const [daoType, setDaoType] = useState<"default" | "exist">("default");
+
+  const [access, setAccess] = useState("unlist")
+
   const [participants, setParticipants] = useState<string[]>([]);
   const [part, setPart] = useState<string>("");
   const [bigLoader, setBigLoader] = useState<boolean>(false);
@@ -176,21 +181,18 @@ const Home: NextPage = () => {
       console.log(receipt);
 
       return "continue";
+
     } catch (err) {
+
       console.log(err);
+
     }
   };
-
-  const [updatex, setUpdatex] = useState<{
-    name?: string;
-    contract?: string;
-    main?: string;
-    table?: string;
-  }>({});
 
   const [testErr, setTestErr] = useState("");
 
   const submitTest = async () => {
+  
     if (isLoading) return;
 
     setLoading(true);
@@ -203,9 +205,9 @@ const Home: NextPage = () => {
       }
 
       if (!validator.isEmail(testEmail)) {
-        setTestErr("Email is required");
-        setLoading(false);
-        return;
+          setTestErr("Email is required");
+          setLoading(false);
+          return;
       }
 
       
@@ -332,11 +334,12 @@ const Home: NextPage = () => {
 
         if (!active) {
           setBigLoader(false);
-          setFailMessage("Your contract address does not exist in your wallet");
+          setFailMessage("Your contract address does not exist in your address");
           return;
         }
 
         send = true;
+
       }
 
       const nftown: string[] = [...participants];
@@ -375,6 +378,7 @@ const Home: NextPage = () => {
           }
 
           payload["metadata"] = userAddress;
+
 
           const {
             data: {
@@ -887,6 +891,8 @@ const Home: NextPage = () => {
                         exclusive
                         className="w-full cusscroller overflow-y-hidden !justify-around mb-4 pb-1"
                         onChange={(e: any) => {
+                          if (!e?.target?.value) return;
+
                           setDaoType(e.target.value);
                         }}
                       >
@@ -948,7 +954,7 @@ const Home: NextPage = () => {
                         />
                       </div>
                       {daoType == "exist" && (
-                        <div className="my-6">
+                        <><div className="my-6">
                           <TextField
                             fullWidth
                             id="outlined-basic"
@@ -965,11 +971,70 @@ const Home: NextPage = () => {
                             }}
                           />
                         </div>
+                      
+
+                      <div className="">
+                        <Tooltip arrow title="Who would have access to the created DAO, could anyone who has the token or you could list specific people/addresses">
+                        <label className="my-3 cursor-pointer flex items-center w-fit">Who has access? <MdInfo className="ml-2 text-[#2e2e2e]" size={18} /></label></Tooltip>
+
+                        <ToggleButtonGroup
+                          value={access}
+                          sx={{
+                            justifyContent: "space-between",
+                            marginBottom: "15px !important",
+                            width: "100%",
+                            "& .Mui-selected": {
+                              backgroundColor: `rgba(24, 145, 254, 0.66) !important`,
+                              color: `#fff !important`,
+                            },
+                            "& .MuiButtonBase-root:first-of-type": {
+                              marginRight: "0px !important",
+                              marginLeft: "0px !important",
+                            },
+                            "& .MuiButtonBase-root": {
+                              padding: "10px 15px !important",
+                            },
+                            "& .MuiToggleButtonGroup-grouped": {
+                              borderRadius: "2rem !important",
+                              minWidth: 55,
+                              marginLeft: 3,
+                              backgroundColor: "#12121213",
+                              border: "none",
+                            },
+                          }}
+                          exclusive
+                          className="w-full cusscroller overflow-y-hidden !justify-around mb-4 pb-1"
+                          onChange={(e: any) => {
+                            if (!e?.target?.value) return;
+
+                            setAccess(e.target.value);
+                          }}
+                        >
+                          <ToggleButton
+                            sx={{
+                              textTransform: "capitalize",
+                              fontWeight: "bold",
+                            }}
+                            value={"unlist"}
+                          >
+                            Anyone
+                          </ToggleButton>
+                          <ToggleButton
+                            sx={{
+                              textTransform: "capitalize",
+                              fontWeight: "bold",
+                            }}
+                            value={"list"}
+                          >
+                            Listed Addresses
+                          </ToggleButton>
+                        </ToggleButtonGroup>
+                      </div></>
                       )}
 
-                      {daoType == "default" && (
+                      {(daoType == "default" || access == "list") && (
                         <>
-                          <label className="mt-5">Participants</label>
+                          <label className="mt-3">Participants</label>
                           <div className="flex w-full my-2 cusscroller overflow-hidden overflow-x-scroll items-center">
                             {participants.map((e, i: number) => (
                               <div
@@ -999,7 +1064,7 @@ const Home: NextPage = () => {
                           <TextField
                             fullWidth
                             id="outlined-basic"
-                            helperText="if left empty, only you would have access to the newly created DAO"
+                            helperText="if left empty, only you would have access to the newly created DAO, you can always add more people later"
                             variant="outlined"
                             value={part}
                             placeholder="click enter to add address"
@@ -1007,6 +1072,7 @@ const Home: NextPage = () => {
                               setPart(e.target.value);
                             }}
                             onKeyUp={(e: any) => {
+
                               setPart(e.target.value);
 
                               if (e.keyCode == 13 || e.which === 13) {
@@ -1032,6 +1098,7 @@ const Home: NextPage = () => {
                               }
                             }}
                             onBlur={(e: any) => {
+
                               setPart(e.target.value);
 
                               if (part.length) {
@@ -1314,7 +1381,7 @@ const Home: NextPage = () => {
                     <h1 className="font-bold mb-3 mst:text-[40px] text-[50px] cursor-default text-white">
                       {" "}
                       <span className="text-[#ECB22F]">
-                        A digital Suite,{" "}
+                        A Digital Suite,{" "}
                       </span>{" "}
                       perfect for <br className="st:hidden"></br> your DAO.
                     </h1>

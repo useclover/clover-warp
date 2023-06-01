@@ -35,7 +35,7 @@ import FileDes from "../../components/designs/file";
 import { useContext, useState, useEffect } from "react";
 import { GenContext } from "../../components/extras/contexts/genContext";
 import { makeStorageClient } from "../../components/extras/storage/utoken";
-import { store } from "../../components/extras/storage";
+import { store } from "../types";
 import Loader from "../../components/loader";
 import {
   lq,

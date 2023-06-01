@@ -30,6 +30,7 @@
     "@web3auth/web3auth": "^1.1.0",
     "@xmtp/xmtp-js": "^5.1.0",
     "axios": "^1.4.0",
+    "blob-util": "^2.0.2",
     "browserslist": "^4.21.5",
     "cors": "^2.8.5",
     "crypto-js": "^4.1.1",

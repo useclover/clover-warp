@@ -3,6 +3,7 @@ import { getSize } from "../extras/folder";
 import { GenContext } from "../extras/contexts/genContext";
 import { useContext } from "react";
 import Link from 'next/link';
+
 const FileDes = ({
   color = { main: "#b3b3b3", text: "#808080", light: "#ececec" },
   data,
@@ -24,27 +25,15 @@ const FileDes = ({
   pinned?: boolean;
   shared?: boolean;
 }) => {
+
   const { name, size, key } = data;
 
   const mainSize = getSize(size);
 
-  const context = useContext(GenContext);
-
-let lnk: string = "";
-  if (context.fileList !== undefined) {
-    const filex = context.fileList[key];
-
-      if (filex.links === undefined) {
-        lnk = `/${key}/${filex.oname}`;
-      } else {
-        lnk = filex.links[0];
-      } 
-    }
-
 
   return (
 
-    <Link href={lnk}>
+    <Link href={`/file/${key}`}>
     <a
     target="_blank"
       // onClick={(e) => {
@@ -56,7 +45,8 @@ let lnk: string = "";
       //   e.currentTarget.style.backgroundColor = '#8b8b8b24'
                 
       // }}
-      className="flex file m-auto flex-col w-[186px] h-[199px] py-4 px-2 justify-between items-center cursor-pointer border-[1px] border-solid border-transparent hover:bg-[#8b8b8b24] hover:border-[#e1e1e1] transition-all delay-700 relative"
+
+      className="flex file m-auto flex-col w-[150px] h-[160px] pb-2 pt-4 px-2 justify-between items-center cursor-pointer border-[1px] border-solid border-transparent hover:bg-[#8b8b8b24] hover:border-[#e1e1e1] transition-all delay-700 relative"
     >
       <div className="absolute right-[30px] flex items-center top-[7px]">
         {pinned && (
@@ -167,7 +157,7 @@ let lnk: string = "";
         {mainSize}
       </div>
 
-      <div className="h-6"></div>
+      {/* <div className="h-6"></div> */}
     </a>
     </Link>
   );

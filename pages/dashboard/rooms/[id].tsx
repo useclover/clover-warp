@@ -7,7 +7,6 @@ import Loader from "../../../app/components/loader";
 import {
   lq,
   beginStorageProvider,
-  retrieveFiles,
   storeFiles,
   roomData,
 } from "../../../app/components/extras/storage/init";

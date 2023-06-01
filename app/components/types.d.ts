@@ -61,4 +61,33 @@ export type TextAPIData = {
   result?: string;
 };
 
+export type cid = string | { iv: string, data: string }
+
+export type store = {
+  name: string;
+  date?: string | number;
+  tag: "default" | number | string;
+  type: string;
+  oname: string;
+  cid: cid;
+  extension: string | undefined;
+  links?: string[];
+  file: boolean;
+  shared?: string | string[];
+  size: number;
+  deleted: boolean;
+};
+
+export interface dir {
+  name: string;
+  deleted: boolean;
+  file: boolean;
+  links?: string[];
+  tag: string | number | "default";
+}
+
+export interface fstructure extends dir {
+  files: (store | dir)[];
+}
+
 export {}
