@@ -1,4 +1,4 @@
-import { store, dir, getFileList } from ".";
+import { store, dir } from "../../types";
 import * as PushAPI from "@pushprotocol/restapi";
 import { ethers } from "ethers";
 import axios from "axios";
@@ -68,9 +68,24 @@ export const beginStorageProvider = async ({
   randId: any;
   participants: any;
 }) => {
+  
   lq = [randId, contract, participants, user];
+
 };
 
+export const retrieveFile = async (fileid: string) => {
+
+  const token = `Bearer ${localStorage.getItem("clover-x")}`;
+
+      const {
+        data: { file, key },
+      } = await axios.get(`/dao/${lq[0]}/files/${fileid}`, {
+        headers: { Authorization: token },
+      });
+
+      return { ...file, key };
+
+}
 
 export const retrieveFiles = async (folder?: string[]) => {
 
@@ -83,6 +98,7 @@ export const retrieveFiles = async (folder?: string[]) => {
   });
 
   return files.main == undefined ? files : files.main;
+
 };
 
 export const getRooms = async () => {
@@ -150,17 +166,21 @@ export const createRoom = async (name: string) => {
  * **/
 
 export const storeFiles = async (file: store[], dirfolder: string[]) => {
+
   for (let i = 0; i < file.length; i++) {
+    
+    const { name, type, size, cid, extension, tag } = file[i];
+
     await axios.post(
       `/dao/${lq[0]}/files`,
       {
-        name: file[i].name,
-        type: file[i].type,
-        size: file[i].size,
+        name,
+        type,
+        size,
         dir: dirfolder,
-        cid: file[i].cid,
-        extension: file[i].extension,
-        tag: file[i].tag,
+        cid,
+        extension,
+        tag,
       },
       {
         headers: {

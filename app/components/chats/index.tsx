@@ -485,10 +485,10 @@ const Chats = () => {
                     const label = document.querySelectorAll(".dateSeperate");
 
                     if (
-                      (group == undefined || e.target.scrollHeight <=
-                      e.target.clientHeight + 60)
-                    ) return;
-
+                      group == undefined ||
+                      e.target.scrollHeight <= e.target.clientHeight + 60
+                    )
+                      return;
 
                     label.forEach((element) => {
                       const elem = element as HTMLDivElement;
@@ -499,7 +499,6 @@ const Chats = () => {
                     });
 
                     if (e.target.scrollTop <= 20 && preloadMess) {
-
                       if (
                         prevMessLoading ||
                         !messData?.[group || ""]?.["messages"]?.length
@@ -508,21 +507,14 @@ const Chats = () => {
 
                       setPrevMessLoading(true);
 
-                      
-
                       const dataMess = await retrieveMessages(
                         messData?.[group || ""]?.["messages"]?.length || 0
                       );
 
-
                       if (Object.values(dataMess).length) {
-                      
-                        
-
                         messData?.[group || ""]?.["messages"].push(dataMess);
 
                         setPrevMessLoading(false);
-                                            
                       } else {
                         setPrevMessLoading(false);
                       }
@@ -572,19 +564,21 @@ const Chats = () => {
                               if (!content?.[0]?.[0]) return;
 
                               if (iv == undefined) {
-                                  setEdit(content[0][0]);
+                                setEdit(content[0][0]);
 
-                                  setMessageText(content[0][0]);
+                                setMessageText(content[0][0]);
 
-                                  return;
+                                return;
                               }
 
-                              const decryptText = await decrypt({ iv, message: content[0][0] }, chatkeys[group || ""]);
+                              const decryptText = await decrypt(
+                                { iv, message: content[0][0] },
+                                chatkeys[group || ""]
+                              );
 
                               setEdit(decryptText);
 
                               setMessageText(decryptText);
-                            
                             }}
                             size="medium"
                           >
@@ -628,7 +622,9 @@ const Chats = () => {
                                 let addNumb = false;
 
                                 const mess =
-                                  messData?.[group || ""]["messages"][ii][i - 1];
+                                  messData?.[group || ""]["messages"][ii][
+                                    i - 1
+                                  ];
 
                                 if (mess !== undefined) {
                                   const { index: prevIndex } = mess;
@@ -675,7 +671,9 @@ const Chats = () => {
                       </>
                     )}
 
-                    {!Boolean(messData?.[group || ""]?.["messages"]?.length) && (
+                    {!Boolean(
+                      messData?.[group || ""]?.["messages"]?.length
+                    ) && (
                       <div
                         className="empty"
                         style={{
@@ -856,9 +854,9 @@ const Chats = () => {
                   <div className="detail-area-header">
                     <div className="msg-profile group">
                       <Image
-                        src={groupImgCache[group || ''] || cicon.src}
-                        width={66}
-                        height={66}
+                        src={groupImgCache[group || ""] || cicon.src}
+                        width={groupImgCache[group || ""] ? 66 : 33}
+                        height={groupImgCache[group || ""] ? 66 : 33}
                         alt={group}
                       />
                     </div>

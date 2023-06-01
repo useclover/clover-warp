@@ -150,6 +150,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
   const [failMessage, setFailMessage] = useState<string>("");
 
+  const routing = useRef<boolean>(false);
 
   const [filelist, setFilelist] = useState<number | undefined>();
 
@@ -223,15 +224,11 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
       const mess = await retrieveMessages();
 
-
       const flist = await retrieveFiles();
-
 
       const rgroups = await retrieveGroupChats();
 
-
       setGroupChat(rgroups);  
-      
 
       let tSize = 0;
 
@@ -259,8 +256,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
       updateMessData(mess);
 
-      setLoader(false);
-
+      if (!routing.current) setLoader(false);
       
     }
 
@@ -290,9 +286,9 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
       for (let i = 0; i < groupChat.length; i++) {
         const { name: gname, groupKeys, key } = groupChat[i];
 
-        if (!decryptCache?.[key]) {
+        if (!decryptCache?.[groupKeys]) {
+          
           (async () => {
-
             const { data }: { data: TextAPIData } = await axios.get(
               "/api/text/decrypt",
               {
@@ -306,21 +302,18 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
             store[gname] = data["result"];
 
-            decryptCache[key] = data["result"] || "";
+            decryptCache[groupKeys] = data["result"] || "";
 
             rContext.update?.({
               chatkeys: { ...store },
             });
-
-          })()
-          
+          })();
         } else {
-          store[gname] = decryptCache[key];
-        
+          store[gname] = decryptCache[groupKeys];
+
           rContext.update?.({
             chatkeys: { ...store },
           });
-
         }
       
       }
@@ -331,7 +324,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
   const route = async (path: string) => {
     if (pathname.includes(path)) return;
 
-    setLoader(true);
+    // window.location.href = `/dashboard/${path}`;
 
     await router.push(`/dashboard/${path}`);
 
@@ -767,6 +760,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                     setAddNew(false);
 
                                     setLoader(false);
+
                                   } else {
                                     setLoader(false);
 
@@ -877,7 +871,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
               <div
                 className={`msg ${pathname.includes("rooms") ? "active" : ""}`}
                 title="Meeting rooms"
-                onClick={async () => route("rooms")}
+                onClick={async () => await route("rooms")}
               >
                 <div className="w-[44px] min-w-[44px] flex items-center justify-center mr-[15px] rounded-[50%] bg-[#1890FF] h-[44px]">
                   <MdMeetingRoom size={19} color="#fff" />
@@ -896,7 +890,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                 className={`msg ${
                   pathname.includes("storage") ? "active" : ""
                 }`}
-                onClick={async () => route("storage")}
+                onClick={async () => await route("storage")}
               >
                 <div className="w-[44px] min-w-[44px] flex items-center justify-center mr-[15px] rounded-[50%] bg-[#1890FF] h-[44px]">
                   <FaCloud size={26} color="#fff" />
@@ -919,7 +913,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                     />
 
                     <span className="msg-date text-[13px] min-w-fit ml-[3px]">
-                      {filelist?.toFixed(2)}/50GB
+                      {filelist?.toFixed(2)}/50Gb
                     </span>
                   </div>
                 </div>
@@ -927,7 +921,10 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
               {groupChat?.map(({ name: gps, lastchat: clst, groupKeys, key }, i) => {
 
+                // console.log(groupKeys, key)
+
                 return (
+
                   <Chatlist
                     key={i}
                     onClick={async () => {
@@ -939,7 +936,9 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                       if (pathname[pathname.length - 1] != "dashboard") {
                          setLoader(true);
 
-                        await router.push("/dashboard");
+                        //  window.location.href = `/dashboard#${i}`;
+                        router.push(`/dashboard#${i}`);
+
                       }
                 
                     }}
@@ -956,6 +955,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                     name={`${gps} ${!i ? "(Main)" : ""}`}
                     index={gps}
                   />
+
                 );
               })}
 

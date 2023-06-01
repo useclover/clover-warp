@@ -21,6 +21,7 @@ export default function handler(
   if (req.method == "POST") {
 
     (async () => {
+
       const { address, contractAddress, hash } = req.body;
 
       const validateAddress = ethers.utils.verifyMessage(
@@ -96,10 +97,16 @@ export default function handler(
                   console.log(error);
                 }
 
-                if (Number(balance) > 0) {
-                  sdao.push({ ...dao[i] });
-                }
 
+                if (Number(balance) > 0) {
+                
+                    await axios.post(`/dao/${dao[i].id}/user/update`, {
+                      address
+                    });
+
+                    sdao.push({ ...dao[i] });
+                
+                }
               }
             }
           }
@@ -118,6 +125,7 @@ export default function handler(
           );
 
           if (sdao.length && Boolean(token)) {
+
             let keys: { [index: string]: any } = {
               private: user.private,
               public: user.public,
@@ -175,6 +183,7 @@ export default function handler(
             const gpsChange: any = {};
 
             sdao.forEach((dos: any) => {
+
                 if (gps[dos.id] != undefined) {
 
                     const { init, key } = gps[dos.id];
@@ -198,9 +207,9 @@ export default function handler(
                         console.log(err);
                     }
 
-                    }
                 }
-            })
+            }
+        })
 
                await axios.patch(
                  "/update/keys",
@@ -255,6 +264,7 @@ export default function handler(
               "Something went wrong, please try again",
           });
       }
+
     })();
   } else {
     res.status(422).json({

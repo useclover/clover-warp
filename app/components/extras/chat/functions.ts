@@ -19,6 +19,7 @@ export const decryptCache: { [index: string]: string } = {
 
 export const encrypt = async (text: string, keys: string) => {
 
+
     const { private: privateKey, public: publicKey } = JSON.parse(keys);
 
     const receiverPublicKey = await window.crypto.subtle.importKey(
@@ -115,6 +116,7 @@ export const decrypt = async (encryptedText: { message: string, iv: string }, ke
       []
     );
 
+
     const deriveKey = await window.crypto.subtle.deriveKey(
       {
         name: "ECDH",
@@ -128,6 +130,8 @@ export const decrypt = async (encryptedText: { message: string, iv: string }, ke
       true,
       ["encrypt", "decrypt"]
     );
+
+    
 
     const encryptedMessage = Buffer.from(encryptedText.message, "hex");
     const encryptedIv = Buffer.from(encryptedText.iv, "hex");
@@ -150,7 +154,9 @@ export const decrypt = async (encryptedText: { message: string, iv: string }, ke
     return decryptedText;
 
   } catch(err) {
-    // console.log(err, encryptedText, keys, 'dmc')
+    // console.log(err, keys, 'dmc');
+    console.log('pending....');
+
     return "...";
   }
     

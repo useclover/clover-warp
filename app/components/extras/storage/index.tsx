@@ -1,32 +1,6 @@
 import axios from 'axios';
+import { dir, fstructure, store } from '../../types';
 
-
-export type store = {
-    name: string,
-    date?: string | number,
-    tag: "default" | number | string,
-    type: string,
-    oname: string,
-    cid: string[],
-    extension: string | undefined,
-    links?: string[],
-    file: boolean,
-    shared?: string | string[],
-    size: number,
-    deleted: boolean
-}
-
-export interface dir { 
-    name: string,
-    deleted: boolean,
-    file: boolean,
-    links?: string[],
-    tag: string | number | 'default'
-}
-
-export interface fstructure extends dir {
-  files: (store | dir)[];
-}
 
 export const updateSearch = (files: (store | dir)[], newFiles: store[], fileFolder: string[],update: boolean = true, num: number = 1) => {
     if (fileFolder.length > 1) {
@@ -72,7 +46,6 @@ export const toDataUrl = (blob: Blob) => {
         reader.onerror = reject;
         reader.readAsDataURL(blob);
       })
-  
 }
 
 

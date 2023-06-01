@@ -1,5 +1,5 @@
 import { createContext, useState } from "react";
-import { store, dir } from "../storage";
+import { store, dir } from "../../types";
 
 interface Upload {
   error?: {
