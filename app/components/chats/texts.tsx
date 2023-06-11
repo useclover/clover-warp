@@ -21,7 +21,7 @@ const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras,
 
   const min = exp.getMinutes() + 1
 
-  const ddate = `${exp.getHours() % 12 || exp.getHours()}.${
+  const ddate = `${exp.getHours() % 12 ? exp.getHours() % 12 : 12 || exp.getHours()}.${
             min > 9 ? min : `0${min}`
         }${exp.getHours() > 12 ? "pm" : "am"}`;
  

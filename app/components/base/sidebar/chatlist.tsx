@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import cicon from "../../../../public/images/icon.png";
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { decrypt, decryptCache } from '../../extras/chat/functions';
 import { CContext } from '../../extras/contexts/CContext';
 
@@ -10,10 +10,12 @@ const Chatlist = ({name, index, img, lastMsg, time, selected, iv, onClick}: {nam
 
     const [tick, setTick] = useState<number | string>('');
 
+    const timer = useRef<any>();
 
     const Msg = () => {
 
         const [txt, setTxt] = useState<string>('');
+
 
         useEffect(() => {
 
@@ -44,6 +46,9 @@ const Chatlist = ({name, index, img, lastMsg, time, selected, iv, onClick}: {nam
     }
 
     const getx = (t: number) => {
+
+        clearTimeout(timer.current);
+
         if (!t) return;
 
         const ec:number = Number((new Date().getTime() / 1000).toFixed(0));
@@ -63,6 +68,7 @@ const Chatlist = ({name, index, img, lastMsg, time, selected, iv, onClick}: {nam
             setTick(xh + "hr" + (xh > 1 ? "s " : " "));
 
         }else if(delay > 60){
+
             const xx = parseInt((delay / 60).toString()); 
             
             setTick(xx+'min'+(xx > 1 ? 's' : ''))
@@ -71,12 +77,12 @@ const Chatlist = ({name, index, img, lastMsg, time, selected, iv, onClick}: {nam
             setTick('now');
         }
 
-        setTimeout(() => getx(t), 3000);
+       timer.current = setTimeout(() => getx(t), 3000);
 
     }
 
     useEffect(() => {
-
+      
       getx(Number(time));
 
     }, [])

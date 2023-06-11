@@ -24,19 +24,22 @@ const SocketMessageHandler = (req: NextApiRequest, res: SocketApiResponse) => {
     res.socket.server.io[1] = io;
 
     io.on("connection", (socket) => {
-      let gps: string;
 
+      let gps: string;
 
       socket.on("join", (group: string) => {
         gps = `${lq}_${group}`;
 
         socket.join(gps);
+
       });
 
       console.log("Socket connected", socket.id);
 
       socket.on("send_message", async (updateNew) => {
         
+        console.log(updateNew, 'xxx')
+
         await axios.post(`/dao/${lq}/chats`, updateNew, {
           headers: {
             Authorization,
@@ -45,6 +48,7 @@ const SocketMessageHandler = (req: NextApiRequest, res: SocketApiResponse) => {
         });
 
         socket.to(gps).emit("new_incoming_message", updateNew);
+
       });
 
       socket.on("edit_message", async ({ id, update }) => {
