@@ -28,15 +28,20 @@ contract SimpleNFT is ERC721URIStorage{
          totalSupply = totalSupply + add;
       }
 
-      function mintTokens(address forUser, string memory tokenURI) public returns(uint256) {
+      function mintTokens(address[] memory forUser, string memory tokenURI) public returns(bool) {
 
                require(totalSupply >= tokenCounter.current(), "Total Limit Reached");
 
-               uint256 newItemId = tokenCounter.current();
-               _mint(forUser, newItemId);
-               _setTokenURI(newItemId, tokenURI);
+               for (uint256 i = 0; i < forUser.length; i++) {
 
-               tokenCounter.increment();
-               return newItemId;
-      } 
+                  uint256 newItemId = tokenCounter.current();
+                  _mint(forUser[i], newItemId);
+                  _setTokenURI(newItemId, tokenURI);
+
+                  tokenCounter.increment();
+
+               }
+
+               return true;
+         } 
 }

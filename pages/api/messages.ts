@@ -1,10 +1,9 @@
-import { NextApiRequest } from 'next';
-import { Server } from 'socket.io';
-import { SocketApiResponse } from '../../app/components/types';
-import axios from 'axios'
+import { NextApiRequest } from "next";
+import { Server } from "socket.io";
+import { SocketApiResponse } from "../../app/components/types";
+import axios from "axios";
 
 const SocketMessageHandler = (req: NextApiRequest, res: SocketApiResponse) => {
-
   const { authorization: Authorization } = req.headers;
 
   const { lq } = req.query;
@@ -24,31 +23,27 @@ const SocketMessageHandler = (req: NextApiRequest, res: SocketApiResponse) => {
     res.socket.server.io[1] = io;
 
     io.on("connection", (socket) => {
-
       let gps: string;
 
       socket.on("join", (group: string) => {
         gps = `${lq}_${group}`;
 
         socket.join(gps);
-
       });
 
       console.log("Socket connected", socket.id);
 
       socket.on("send_message", async (updateNew) => {
-        
-        console.log(updateNew, 'xxx')
+        // console.log(updateNew, 'xxx')
 
-        await axios.post(`/dao/${lq}/chats`, updateNew, {
-          headers: {
-            Authorization,
-          },
-          baseURL: process.env.NEXT_PUBLIC_APP_URL || "",
-        });
+        // await axios.post(`/dao/${lq}/chats`, updateNew, {
+        //   headers: {
+        //     Authorization,
+        //   },
+        //   baseURL: process.env.NEXT_PUBLIC_APP_URL || "",
+        // });
 
         socket.to(gps).emit("new_incoming_message", updateNew);
-
       });
 
       socket.on("edit_message", async ({ id, update }) => {

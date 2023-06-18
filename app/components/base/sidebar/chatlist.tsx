@@ -82,10 +82,8 @@ const Chatlist = ({name, index, img, lastMsg, time, selected, iv, onClick}: {nam
     }
 
     useEffect(() => {
-      
       getx(Number(time));
-
-    }, [])
+    }, [time]);
   
 
   return (

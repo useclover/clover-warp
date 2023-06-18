@@ -24,34 +24,36 @@ export const notifications = async ({
   const channel = `eip155:5:${process.env.NEXT_PUBLIC_PUBLIC_KEY}`;
 
   try {
-    receivers.forEach(async (val: string) => {
-      if (val.toLowerCase() == exclude.toLowerCase()) {
-        return;
-      }
 
-      const receiver = `eip155:5:${val}`;
+    // receivers.forEach(async (val: string) => {
+    //   if (val.toLowerCase() == exclude.toLowerCase()) {
+    //     return;
+    //   }
 
-      await PushAPI.payloads.sendNotification({
-        signer,
-        type: 3,
-        identityType: 2,
-        notification: {
-          title,
-          body: message,
-        },
-        payload: {
-          title,
-          body: message,
-          cta: "",
-          img: "",
-        },
-        recipients: receiver,
-        channel,
-        env: "staging",
-      });
-    });
+    //   const receiver = `eip155:5:${val}`;
 
-    return true;
+    //   await PushAPI.payloads.sendNotification({
+    //     signer,
+    //     type: 3,
+    //     identityType: 2,
+    //     notification: {
+    //       title,
+    //       body: message,
+    //     },
+    //     payload: {
+    //       title,
+    //       body: message,
+    //       cta: "",
+    //       img: "",
+    //     },
+    //     recipients: receiver,
+    //     channel,
+    //     env: "staging",
+    //   });
+    // });
+
+    // return true;
+
   } catch (err) {
     console.log(err, "err");
   }
@@ -68,7 +70,7 @@ export const beginStorageProvider = async ({
   randId: any;
   participants: any;
 }) => {
-  
+
   lq = [randId, contract, participants, user];
 
 };
@@ -127,10 +129,10 @@ export const roomData = async (id: number) => {
   return room;
 };
 
-export const createRoom = async (name: string) => {
+export const createRoom = async (name: string, desc?: string) => {
 
   const { data: response } = await axios.post(
-    "https://iriko.testing.huddle01.com/api/v1/create-room",
+    "/api/rooms/create",
     {
       title: name,
       hostWallets: [lq[3]],
@@ -138,16 +140,17 @@ export const createRoom = async (name: string) => {
     {
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.NEXT_PUBLIC_HUDDLE_APPKEY as string,
       },
-    }
-  );
+      baseURL: window.origin
+    },
+  ); 
 
-  await axios.post(
+  const { data: { room } } = await axios.post(
     `/dao/${lq[0]}/rooms`,
     {
       name,
       creator: lq[3],
+      desc: desc || "",
       meetId: response.data.roomId,
     },
     {
@@ -157,7 +160,8 @@ export const createRoom = async (name: string) => {
     }
   );
 
-  return `https://app.huddle01.com/${response.data.roomId}`;
+  return `/dashboard/rooms/${room.id}`;
+
 };
 
 /**

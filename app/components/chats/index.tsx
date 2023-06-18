@@ -2,7 +2,7 @@ import Image from "next/image";
 import { useEffect, useState, useContext, useRef } from "react";
 import Router from "next/router";
 import { BsFolder, BsList, BsTrash } from "react-icons/bs";
-import io from "socket.io-client"
+import io from "socket.io-client";
 import {
   FiImage,
   FiSettings,
@@ -49,9 +49,11 @@ import { CContext } from "../extras/contexts/CContext";
 import Text from "./texts";
 import Loader from "../loader";
 import { useAccount } from "wagmi";
-import { BiSend, BiX } from "react-icons/bi";
+import { BiPhoneCall, BiSend, BiX } from "react-icons/bi";
 import EmojiPicker from "emoji-picker-react";
 import { ChatObject, ChatObjectType, MessageType } from "../types";
+import Calls from "./calls";
+import axios from "axios";
 
 let socket: any;
 
@@ -61,7 +63,6 @@ const Chats = () => {
   const { address, isConnected } = useAccount();
 
   const goDown = () => {
-
     const chatArea = document.querySelector(".chat-area");
 
     if (chatArea !== null) {
@@ -84,7 +85,6 @@ const Chats = () => {
   const { name, contract, data: main, participants, creator } = loginData;
 
   const emojiModal = () => {
-
     const emojiElem = document.querySelector(
       ".EmojiPickerReact"
     ) as HTMLDivElement;
@@ -120,12 +120,9 @@ const Chats = () => {
 
   const { group, chatkeys, messages: messData } = rContext;
 
-
   const updateMessData = (data: MessageType) => {
     rContext.update?.({ messages: data });
-  }; 
-  
-
+  };
 
   /* upload */
 
@@ -134,6 +131,10 @@ const Chats = () => {
   const [isLoading, setLoader] = useState(true);
 
   const [prevMessLoading, setPrevMessLoading] = useState<boolean>(false);
+
+  const [phonemodal, setPhoneModal] = useState<boolean>(false);
+
+  const [phoneLoading, setPhoneLoading] = useState<boolean>(false);
 
   const [preloadMess, setPreloadMess] = useState<boolean>(true);
 
@@ -145,82 +146,69 @@ const Chats = () => {
 
   const [extrasId, setExtras] = useState<string>("");
 
-  const loadOnce = useRef<boolean>(true)
+  const loadOnce = useRef<boolean>(true);
 
   const socketIsInit = useRef<boolean>(false);
 
   const upd = async () => {
-
     const mess = await retrieveMessages();
 
     if (!Boolean(mess[name]?.["messages"])) {
       if (mess[name] === undefined) mess[name] = {};
 
       mess[name]["messages"] = [];
-    
     }
 
     updateMessData(mess);
 
+    const gps = await retrieveGroupChats();
 
-    const gps = await retrieveGroupChats();  
-
-    rContext.update?.({ groupData: gps });    
-  
+    rContext.update?.({ groupData: gps });
   };
 
-
   const socketInit = async () => {
+    await fetch(`/api/messages?lq=${main}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
+      },
+    });
 
-      await fetch(`/api/messages?lq=${main}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
-        },
-      });
+    socket = io();
 
-      socket = io()
+    socket.on("connect", () => {
+      socket.emit("join", name);
 
-      socket.on("connect", () => {
+      socketIsInit.current = true;
+    });
 
-          socket.emit("join", name);
+    const update = async (data: any) => {
+      await upd();
+    };
 
-          socketIsInit.current = true;
+    socket.on("new_incoming_message", update);
 
-      });
+    socket.on("edit_msg", update);
 
-      const update = async (data: any) => {
-          await upd();
-      }
-
-      socket.on("new_incoming_message", update);
-
-      socket.on("edit_msg", update);
-
-      socket.on("del_msg", update);
-
-  }
-
+    socket.on("del_msg", update);
+  };
 
   useEffect(() => {
-      if (loadOnce.current && main) {
-        loadOnce.current = false;
+    if (loadOnce.current && main) {
+      loadOnce.current = false;
 
-        socketInit();
-
-      }      
-  }, [main])
+      socketInit();
+    }
+  }, [main]);
 
   useEffect(() => {
     if (socketIsInit.current) {
       socket?.emit?.("join", group);
     }
-
-
-  }, [group])
+  }, [group]);
 
   useEffect(() => {
-
     async function init() {
+      
       setChDate("");
 
       await beginStorageProvider({
@@ -230,32 +218,23 @@ const Chats = () => {
         participants,
       });
 
-     
       if (group === undefined) {
         rContext.update?.({ group: name });
       }
 
       setLoader(false);
-
     }
 
     if (name != undefined) {
       init();
     }
-  }, [
-    main,
-    update,
-    contract,
-    name,
-    address,
-    participants,
-    group,
-    rContext,
-  ]);
+  }, [main, update, contract, name, address, participants, group, rContext]);
 
   useEffect(() => {
     goDown();
   }, [messageSend, group]);
+
+  const [callIdd, setCallId] = useState<string>("");
 
   const [enlargen, setEnlargen] = useState<number>(0);
 
@@ -263,9 +242,7 @@ const Chats = () => {
     enlargen: boolean,
     type: ChatObjectType = "mess"
   ) => {
-
     if (messageText.length) {
-
       const encMessage = await encrypt(messageText, chatkeys[group || ""]);
 
       if (Boolean(edit)) {
@@ -280,12 +257,14 @@ const Chats = () => {
 
         // await updateMessages(extrasId, { content, iv: encMessage.iv });
 
-        await socket.emit("edit_message", { id: extrasId, update: { content, iv: encMessage.iv }});
+        await socket.emit("edit_message", {
+          id: extrasId,
+          update: { content, iv: encMessage.iv },
+        });
 
         upd();
 
         return;
-
       }
 
       if (!Boolean(messData?.[group || ""]?.["messages"][0])) {
@@ -304,18 +283,14 @@ const Chats = () => {
         date: new Date().getTime(),
       };
 
-      
       if (rContext?.sender !== undefined) {
-
         newMess["reply"] = rContext.sender;
         newMess["content"][0].push(rContext.content || "");
-
       }
 
       messData?.[group || ""]["messages"][0].push(newMess);
 
       try {
-
         notifications({
           title: `Message from ${address}`,
           message: messageText,
@@ -327,22 +302,16 @@ const Chats = () => {
 
         setMessageSend(!messageSend);
 
-        // await saveMessages({
-        //   data: JSON.stringify(newMess),
-        //   receiver: group || "",
-        // });
-
-        await socket.emit("send_message", {
+        await saveMessages({
           data: JSON.stringify(newMess),
           receiver: group || "",
         });
 
-        upd();
+        socket.emit("send_message");
 
+        upd();
       } catch (err) {
-      
         console.log(err);
-      
       }
     }
   };
@@ -355,26 +324,22 @@ const Chats = () => {
   const [conDelete, setConDelete] = useState<boolean>(false);
 
   const deleteMessageMe = async () => {
-
     if (extrasId) {
       // const status = await deleteMessagesAll(extrasId);
 
       await socket.emit("delete_message", extrasId);
 
       upd();
-
     }
   };
 
   const deleteMessageEvryone = async () => {
     if (extrasId) {
-
       // const status = await deleteMessages(extrasId);
 
       await socket.emit("delete_message_all", extrasId);
 
       upd();
-
     }
   };
 
@@ -384,6 +349,12 @@ const Chats = () => {
 
       {!isLoading && (
         <>
+          {phonemodal && <Calls
+            open={phonemodal}
+            close={() => setPhoneModal(false)}
+            callId={callIdd}
+          />}
+
           <Modal open={conDelete} onClose={() => setConDelete(false)}>
             <div className="w-screen cusscroller overflow-y-scroll overflow-x-hidden absolute h-screen flex items-center bg-[#ffffffb0]">
               <div className="2usm:px-0 mx-auto max-w-[500px] 2usm:w-full relative w-[85%] usm:m-auto min-w-[340px] px-6 my-8 items-center">
@@ -536,6 +507,94 @@ const Chats = () => {
                       >
                         {chDate}
                       </span>
+
+                      <IconButton
+                        className={`!mx-2 ${
+                          phoneLoading ? "bg-[#f0f0f0]" : ""
+                        }`}
+                        onClick={async () => {
+                          if (phoneLoading) return;
+
+                          const token = `Bearer ${localStorage.getItem(
+                            "clover-x"
+                          )}`;
+
+                          setPhoneLoading(true);
+
+                          const {
+                            data: {
+                              group: { calls: callsLink, id: groupId },
+                            },
+                          } = await axios.get(`/dao/${lq[0]}/groupname/${group}`, {
+                            headers: {
+                              Authorization: token,
+                            },
+                          });
+
+                          
+
+                          notifications({
+                            title: `${group} group is having a group Call`,
+                            message: "Click me to join in",
+                            receivers: lq[2],
+                            exclude: address || "",
+                          });
+
+                          if (!callsLink) {
+                            const {
+                              data: {
+                                data: { roomId: callId },
+                              },
+                            } = await axios.post(
+                              "/api/rooms/create",
+                              {
+                                title: group,
+                                videoOnEntry: true,
+                              },
+                              {
+                                baseURL: window.origin,
+                              }
+                            );
+
+                            await axios.patch(
+                              `/dao/${lq[0]}/group/${groupId}`,
+                              {
+                                calls: callId,
+                              },
+                              {
+                                headers: {
+                                  Authorization: token,
+                                  "Content-Type": "application/json",
+                                },
+                              }
+                            );
+
+                            
+                            setCallId(callId);
+                          } else {
+                            setCallId(callsLink);
+                          }
+
+                          setPhoneModal(true);
+
+                          setPhoneLoading(false);
+                        }}
+                        size="medium"
+                      >
+                        <>
+                          {!phoneLoading ? (
+                            <BiPhoneCall
+                              size={20}
+                              className="relative -left-[1px] text-[#777]"
+                            />
+                          ) : (
+                            <CircularProgress
+                              size={20}
+                              className="relative -left-[1px] text-[#777]"
+                            />
+                          )}
+                        </>
+                      </IconButton>
 
                       <div
                         style={{

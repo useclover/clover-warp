@@ -24,7 +24,7 @@ export default function handler(
 
       const { address, contractAddress, hash } = req.body;
 
-      const validateAddress = ethers.utils.verifyMessage(
+      const validateAddress = ethers.verifyMessage(
         "UseClover Signature Request \n\nSign To Continue \n",
         hash
       );
@@ -40,8 +40,8 @@ export default function handler(
           });
 
         
-          const provider = new ethers.providers.JsonRpcProvider(
-            "https://api.hyperspace.node.glif.io/rpc/v1"
+          const provider = new ethers.JsonRpcProvider(
+            "https://api.calibration.node.glif.io/rpc/v1"
           );
 
           const dao = daos.filter((a: any) => a.contract);
@@ -54,24 +54,27 @@ export default function handler(
 
             for (let i = 0; i < dao.length; i++) {
 
-              if (ethers.utils.getAddress(dao[i].contract) == contractAddress) {
+              const cont = ethers.getAddress(dao[i].contract)
 
+              if (
+                cont == contractAddress ||
+                cont == "0xaCDFc5338390Ce4eC5AD61E3dC255c9F2560D797"
+              ) {
+                
                 const { joined, metadata } = dao[i];
 
                 const rJoined = JSON.parse(joined);
 
-                [ ...rJoined, metadata ].forEach((val: string) => {
-                  const address1 = ethers.utils.getAddress(val);
+                [...rJoined, metadata].forEach((val: string) => {
+                  const address1 = ethers.getAddress(val);
 
-                  const address2 = ethers.utils.getAddress(address);
+                  const address2 = ethers.getAddress(address);
 
                   if (address1 == address2) {
                     sdao.push({ ...dao[i] });
                   }
                 });
-
               } else {
-
                 if (checked.indexOf(dao[i].contract) != -1) {
                   continue;
                 } else {
@@ -81,31 +84,26 @@ export default function handler(
                 let balance: any = 0;
 
                 try {
-
                   const token = new ethers.Contract(
                     dao[i].contract,
                     balanceABI,
                     provider
                   );
 
-                  balance = ethers.utils.formatEther(
+                  balance = ethers.formatEther(
                     await token.balanceOf(address)
                   );
-
                 } catch (err) {
                   const error = err as Error;
                   console.log(error);
                 }
 
-
                 if (Number(balance) > 0) {
-                
-                    await axios.post(`/dao/${dao[i].id}/user/update`, {
-                      address
-                    });
+                  await axios.post(`/dao/${dao[i].id}/user/update`, {
+                    address,
+                  });
 
-                    sdao.push({ ...dao[i] });
-                
+                  sdao.push({ ...dao[i] });
                 }
               }
             }

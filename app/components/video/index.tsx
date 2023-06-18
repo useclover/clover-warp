@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FiTrash2, FiX } from 'react-icons/fi';
+import { FiTrash2, FiX } from "react-icons/fi";
 import { useHuddle01 } from "@huddle01/react";
 import {
   LinearProgress,
@@ -13,12 +13,16 @@ import {
   FormControl,
   Modal,
   Avatar,
+  AvatarGroup,
 } from "@mui/material";
 import Router from "next/router";
 import Image from "next/image";
 import empty from "../../../public/images/empty.png";
 import { FaRegFolderOpen, FaPlus, FaTrash, FaRegClock } from "react-icons/fa";
 import {
+  BsArrowRight,
+  BsArrowRightCircle,
+  BsArrowRightSquare,
   BsChatText,
   BsChatTextFill,
   BsCloudy,
@@ -47,13 +51,15 @@ import { logout } from "../../components/extras/logout";
 import Dash from "../dash";
 import { useAccount } from "wagmi";
 import { MdClose, MdLink, MdMeetingRoom } from "react-icons/md";
+import { RandomAvatar } from "react-random-avatars";
 
 const Rooms = () => {
-
   const { address, isConnected } = useAccount();
 
-    const [nname, setNname] = useState<string>("");
-    const [failMessage, setFailMessage] = useState<string>("");
+  const [nname, setNname] = useState<string>("");
+  const [desc, setDesc] = useState<string>("");
+
+  const [failMessage, setFailMessage] = useState<string>("");
 
   /* upload */
   const uploadData = useContext(GenContext);
@@ -65,7 +71,7 @@ const Rooms = () => {
     participants: any;
   }>();
 
-  const { initialize, isInitialized } = useHuddle01(); 
+  const { initialize, isInitialized } = useHuddle01();
 
   useEffect(() => {
     if (localStorage.getItem("cloverlog") === null) {
@@ -73,13 +79,11 @@ const Rooms = () => {
     } else {
       setLoginData(JSON.parse(localStorage.getItem("cloverlog") || "{}"));
     }
-
   }, []);
 
   useEffect(() => {
-
-        if (!isInitialized) initialize(process.env.NEXT_PUBLIC_HUDDLE_PROJECTID || "");    
-
+    if (!isInitialized)
+      initialize(process.env.NEXT_PUBLIC_HUDDLE_PROJECTID || "");
   }, [isInitialized, initialize]);
 
   const dirContent =
@@ -88,14 +92,13 @@ const Rooms = () => {
   const { success, error, loading, updateSuccess, updateLoading, errUpdate } =
     uploadData;
 
+  const [roomContent, setRoomContent] = useState<any[]>([]);
 
-    const [roomContent, setRoomContent] = useState<any[]>([]);
+  const [addNew, setAddNew] = useState<boolean>(false);
 
-    const [addNew, setAddNew] = useState<boolean>(false);
+  const [update, setUpdate] = useState<boolean>(false);
 
-    const [update, setUpdate] = useState<boolean>(false);
-
-    const [isLoading, setLoader] = useState(true);
+  const [isLoading, setLoader] = useState(true);
 
   const { name, contract, data, participants } = loginData || {
     name: "",
@@ -116,26 +119,20 @@ const Rooms = () => {
       setRoomContent(await getRooms());
 
       setLoader(false);
-
     }
 
     if (name != "") {
       init();
     }
-
   }, [data, update, address, contract, name]);
-
-
-
 
   const [open, setOpen] = useState(false);
   const [showStorage, setShowStorage] = useState(true);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-
   return !isLoading ? (
-        <>
+    <>
       <Dash />
 
       <Modal
@@ -151,7 +148,6 @@ const Rooms = () => {
         aria-labelledby="Add a new meeting room"
         aria-describedby="Add room to DAO"
       >
-
         <Box
           className="sm:!w-full 3md:!px-1 h-fit 3mdd:px-[2px]"
           sx={{
@@ -166,8 +162,6 @@ const Rooms = () => {
           }}
         >
           <div className="py-4 px-6 bg-white -mb-[1px] rounded-t-[.9rem]">
-            
-            
             <div className="mb-2 flex items-start justify-between">
               <div>
                 <h2 className="font-[500] text-[rgb(32,33,36)] text-[1.55rem] 3md:text-[1.2rem]">
@@ -202,25 +196,45 @@ const Rooms = () => {
                     py: 3,
                   }}
                 >
+                  <div className="my-3">
+                    <TextField
+                      fullWidth
+                      id="outlined-basic"
+                      label="Room name"
+                      variant="outlined"
+                      value={nname}
+                      onChange={(
+                        e: React.ChangeEvent<
+                          HTMLInputElement | HTMLTextAreaElement
+                        >
+                      ) => {
+                        setNname(e.target.value);
+                        setFailMessage("");
+                      }}
+                    />
+                  </div>
 
-                  <div>
-                      <TextField
-                        fullWidth
-                        id="outlined-basic"
-                        label="Room name"
-                        variant="outlined"
-                        value={nname}
-                        onChange={(
-                          e: React.ChangeEvent<
-                            HTMLInputElement | HTMLTextAreaElement
-                          >
-                        ) => {
-                          setNname(e.target.value);
-                          setFailMessage("");
-                        }}
-                      />
-                    </div>                  
-
+                  <div className="my-3">
+                    <TextField
+                      fullWidth
+                      id="outlined-basic"
+                      label="Room description"
+                      variant="outlined"
+                      placeholder="Enter a short description of the room"
+                      value={desc}
+                      multiline
+                      helperText={"Not required"}
+                      rows={4}
+                      onChange={(
+                        e: React.ChangeEvent<
+                          HTMLInputElement | HTMLTextAreaElement
+                        >
+                      ) => {
+                        setDesc(e.target.value);
+                        setFailMessage("");
+                      }}
+                    />
+                  </div>
                 </FormControl>
               </Box>
             </div>
@@ -230,32 +244,29 @@ const Rooms = () => {
             <div className="flex items-center">
               <Button
                 onClick={async () => {
-                        if (nname.length) {
+                  if (nname.length) {
+                    setLoader(true);
 
-                          setLoader(true);
+                    try {
+                      const create = await createRoom(nname, desc);
 
-                          try {
+                      setAddNew(false);
 
-                            const create = await createRoom(nname);
+                      window.location.href = create;
 
-                            setAddNew(false);
+                      // Router.push(`/dashboard/rooms/${create}`);
+                    } catch (err: any) {
+                      setLoader(false);
 
-                            window.location.href = create;
-
-                            // Router.push(`/dashboard/rooms/${create}`);
-
-                          } catch (err: any) {
-                            setLoader(false);
-
-                            setFailMessage(
-                              "Something went wrong, please try again later"
-                            );
-                          }
-                        } else {
-                            setLoader(false);
-                          setFailMessage("Name of channel is required");
-                        }
-                      }}
+                      setFailMessage(
+                        "Something went wrong, please try again later"
+                      );
+                    }
+                  } else {
+                    setLoader(false);
+                    setFailMessage("Name of channel is required");
+                  }
+                }}
                 className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#1891fe] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
               >
                 <MdMeetingRoom
@@ -267,22 +278,19 @@ const Rooms = () => {
               </Button>
             </div>
           </div>
-        </Box>          
+        </Box>
       </Modal>
 
-      
+      <div className="w-full flex items-start justify-between filedrop min-h-screen">
+        <Button
+          onClick={() => setAddNew(true)}
+          className="!py-2 !mr-4 !flex !fixed !right-[15px] !bottom-[20px] !cursor-pointer !justify-center !z-[90] !items-center !px-4 !bg-[#1890FF] !text-white !border-solid !border-white !border-[2px] !w-[64px] !h-[64px] !rounded-[50%] overflow-hidden hover:bg-[#0c75d6] font-[300]"
+        >
+          <BsPlusLg size={25} />
+        </Button>
 
-     
-          <div className="w-full flex items-start justify-between filedrop min-h-screen">
-            <Button
-              onClick={() => setAddNew(true)}
-              className="!py-2 !mr-4 !flex !fixed !right-[15px] !bottom-[20px] !cursor-pointer !justify-center !z-[90] !items-center !px-4 !bg-[#1890FF] !text-white !border-solid !border-white !border-[2px] !w-[64px] !h-[64px] !rounded-[50%] overflow-hidden hover:bg-[#0c75d6] font-[300]"
-            >
-              <BsPlusLg size={25} />
-            </Button>
-
-            <div className="w-full st:!pl-0 pb-[65px] transition-all delay-500 h-full flex flex-col cusscroller overflow-y-scroll overflow-x-hidden">
-              {/* <div className="my-2">
+        <div className="w-full st:!pl-0 pb-[65px] transition-all delay-500 h-full flex flex-col cusscroller overflow-y-scroll overflow-x-hidden">
+          {/* <div className="my-2">
                 <ToggleButtonGroup
                   value={tagValue}
                   className="cusscroller"
@@ -347,125 +355,143 @@ const Rooms = () => {
                 </ToggleButtonGroup>
               </div> */}
 
-              <div className="px-5 h-full">
-                <div className="px-1">
-                  {!Boolean(roomContent.length) && !isLoading && (
-                    <div
-                      className="empty"
-                      style={{
-                        display: "flex",
-                        width: "100%",
-                        height: "fit-content",
-                        justifyContent: "center",
-                        flexDirection: "column",
-                        alignItems: "center",
-                      }}
-                    >
-                      <div className="h-[259px] justify-center w-full my-5 flex">
-                        <Image
-                          src={empty}
-                          className="mb-3"
-                          width={350}
-                          height={259}
-                          alt="No rooms yet"
-                        />
-                      </div>
+          <div className="px-5 pt-[10px] h-fit">
+            <div className="px-1">
+              {!Boolean(roomContent.length) && !isLoading && (
+                <div
+                  className="empty"
+                  style={{
+                    display: "flex",
+                    width: "100%",
+                    height: "fit-content",
+                    justifyContent: "center",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <div className="h-[259px] justify-center w-full my-5 flex">
+                    <Image
+                      src={empty}
+                      className="mb-3"
+                      width={350}
+                      height={259}
+                      alt="No rooms yet"
+                    />
+                  </div>
 
-                      <div className="mt-2 mb-3">
-                        <h2 className="text-[22px] text-center font-bold">
-                          No rooms yet
-                        </h2>
-                        <span className="mt-2 text-[17px] flex w-full text-center">
-                          click the `{<FaPlus size={17} />}` button to add one
-                        </span>
-                      </div>
-                    </div>
-                  )}
+                  <div className="mt-2 mb-3">
+                    <h2 className="text-[22px] text-center font-bold">
+                      No rooms yet
+                    </h2>
+                    <span className="mt-2 text-[17px] flex w-full text-center">
+                      click the `{<FaPlus size={17} />}` button to add one
+                    </span>
+                  </div>
+                </div>
+              )}
 
-                  {Boolean(roomContent.length) && (
-                    <div
-                      style={{
-                        gridTemplateColumns:
-                          "repeat(auto-fill, minmax(260px, 1fr))",
-                      }}
-                      className="flist pt-7 grid gap-2 grid-flow-dense"
-                    >
-                      {roomContent.map((attributes: any, i: number) => {
-                        
-                        const { name, creator: owner, meetId } = attributes;
+              {Boolean(roomContent.length) && (
+                <div
+                  style={{
+                    gridTemplateColumns:
+                      "repeat(auto-fill, minmax(280px, 1fr))",
+                  }}
+                  className="flist pt-7 grid gap-2 grid-flow-dense"
+                >
+                  {roomContent.map((attributes: any, i: number) => {
+                    const {
+                      name,
+                      user,
+                      creator: owner,
+                      id,
+                      active,
+                    } = attributes;
 
-                        return (
-                          <Link
-                            href={`https://app.huddle01.com/${meetId}`}
-                            key={i}
-                          >
+                    console.log(user, "lee");
+
+                    const activeParticipants = JSON.parse(active || "[]");
+
+                    return (
+                      <div
+                        key={i}
+                        className="w-full border border-[rgb(218,220,224)] rounded-lg border-solid p-5 flex flex-col justify-between min-h-[230px]"
+                      >
+                        <div>
+                          <div className="mb-5 flex items-center">
+                            <RandomAvatar name={owner} size={40} />
+                            <div className="ml-3">
+                              <h3 className="text-[15px] leading-[20px] font-[500] text-[#121212] mb-[2px]">
+                                {user["name"]
+                                  ? user["name"]
+                                  : `${owner.substring(0, 6)}...
+                                      ${owner.substring(38, 42)}`}
+                              </h3>
+                              <span className="block text-[12px] leading-[1.2] truncate w-full text-[#575757]">
+                                Host/Organiser
+                              </span>
+                            </div>
+                          </div>
+
+                          <div>
+                            <h4 className="font-[500] text-[16px] font-[inherit]">
+                              {name}
+                            </h4>
+                            <span className="block text-[12px] leading-[1.2] truncate w-full text-[rgb(87,87,87)]">
+                              {activeParticipants.length
+                                ? `${activeParticipants.length} participants`
+                                : "No participants yet"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <Link href={`/dashboard/rooms/${id}`}>
                             <a>
-                              <div className="w-full border border-[rgb(218,220,224)] rounded-md border-solid p-2 hover:bg-[rgb(248,248,248)] transition-all delay-300 cursor-pointer">
-                                <div className="mb-4">
-                                  <Avatar
-                                    sx={{
-                                      width: "100%",
-                                      height: 183,
-                                      margin: "auto",
-                                      backgroundColor: "#1890FF",
-                                    }}
-                                    className="text-[60px] font-bold"
-                                    variant="rounded"
-                                  >
-                                    {(
-                                      String(name).charAt(0) +
-                                      String(name).charAt(1)
-                                    ).toUpperCase()}
-                                  </Avatar>
-                                </div>
-
-                                <div className="flex items-center mb-[10px] justify-between">
-                                  <div className="flex items-center w-[calc(100%-44px)]">
-                                    <div className="text-white w-[40px] h-[40px] min-w-[40px] min-h-[40px] rounded-md mr-[.75rem] flex items-center justify-center bg-[#1890FF]">
-                                      <MdMeetingRoom size={21} />
-                                    </div>
-                                    <div className="truncate">
-                                      <h3 className="truncate flex items-center text-[17px] leading-[20px] font-[500] text-[#121212] mb-[2px]">
-                                        {name}
-                                      </h3>
-                                      <span className="block text-[14px] leading-[1.2] truncate w-full text-[#575757]">
-                                        {`hosted by ${owner.substring(0, 6)}...
-                                        ${owner.substring(38, 42)}`}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  {/* <div
-                                    onClick={(e: any) => {
-                                      e.preventDefault();
-                                    }}
-                                  >
-                                    <IconButton
-                                      color="inherit"
-                                      size={"large"}
-                                      sx={{
-                                        color: "#6b6b6b",
-                                      }}
-                                    >
-                                      <FiTrash2 size={20} />
-                                    </IconButton>
-                                  </div> */}
-                                </div>
-                              </div>
+                              <Button className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-[#1891fe] -left-3 !bg-white !border !border-solid !border-transparent hover:!border-[#1891fe] !transition-all !duration-500 !rounded-lg">
+                                <span className="mr-2 font-[400]">
+                                  Join Meeting
+                                </span>
+                                <BsArrowRightCircle size={20} />
+                              </Button>
                             </a>
                           </Link>
-                        );
-                      })}
-                    </div>
-                  )}
+
+                          <AvatarGroup
+                            max={3}
+                            sx={{
+                              "& .MuiAvatar-circular": {
+                                width: '33px',
+                                fontSize: '13px',
+                                height: '33px'
+                              },
+                            }}
+                            className="!flex !items-center !justify-center mx-2"
+                          >
+                            {activeParticipants.map(
+                              (addr: string, ii: number) => (
+                                <div
+                                  key={ii}
+                                  className="border-solid border-white border-[2px] rounded-[50%] -mr-[6px]"
+                                >
+                                  <RandomAvatar size={33} name={addr} />
+                                </div>
+                              )
+                            )}
+                          </AvatarGroup>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
+              )}
             </div>
           </div>
-        </>
-      ) : (
-        <Loader />
-      )
-
+        </div>
+      </div>
+    </>
+  ) : (
+    <Loader />
+  );
 };
 
 export default Rooms;

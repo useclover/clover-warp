@@ -13,10 +13,9 @@ const SocketHandler = (req: NextApiRequest, res: SocketApiResponse) => {
     return;
   }
 
-  if (!res?.socket?.server?.io) {
+  if (!res?.socket?.server?.io?.[0]) {
     const io = new Server(res.socket.server);
 
-    console.log("reached here", "");
 
     if (typeof res?.socket?.server?.io != "object") res.socket.server.io = [];
 

@@ -59,11 +59,11 @@ import { CContext } from "../extras/contexts/CContext";
 import Chatlist from "./sidebar/chatlist";
 import Loader from "../loader";
 import { useAccount } from "wagmi";
-import { BiSend, BiX } from "react-icons/bi";
+import { BiSend, BiUser, BiX } from "react-icons/bi";
 import EmojiPicker from "emoji-picker-react";
 import { GroupChatType, MessageType, TextAPIData } from "../types";
 import Cryptr from "cryptr";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -152,6 +152,14 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
   const routing = useRef<boolean>(false);
 
+  const [alias, setAlias] = useState<string>('');
+
+  const [aliasError, setAliasError] = useState<string>('')
+
+  const [aliasLoading, setAliasLoading] = useState<boolean>(false);
+
+  const [nameModal, setNameModal] = useState<boolean>(true);
+
   const [filelist, setFilelist] = useState<number | undefined>();
 
   const rContext = useContext(CContext);
@@ -222,6 +230,16 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
         participants,
       });
 
+      const { data: { user } } = await axios.get('/user', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('clover-x')}`
+        }
+      });
+
+      if (user.name) setNameModal(false);
+
+      localStorage.setItem('cloveruser', JSON.stringify(user));
+
       const mess = await retrieveMessages();
 
       const flist = await retrieveFiles();
@@ -275,8 +293,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
     group,
   ]);
 
-
-
+  
   useEffect(() => {
 
       if (groupChat !== undefined && groupChat.length > 0) {
@@ -321,6 +338,43 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
   }, [groupChat])
 
+  const submitName = async () => {
+      if (aliasLoading) return;
+
+      setAliasLoading(true);
+
+      if (!alias.length) { 
+        setAliasError("Your name is required");
+        setAliasLoading(false);
+        return;
+      }
+
+      try {
+
+      const { data: { user } } = await axios.patch('/user', { name: alias }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('clover-x')}`
+        }
+      });
+
+      localStorage.setItem("cloveruser", JSON.stringify(user));
+
+      setAliasLoading(false);
+
+      setNameModal(false)
+    
+    }catch (err) {
+
+        const error = err as any
+
+        setAliasLoading(false)        
+
+        setAliasError(error?.response?.data.message || "")
+
+    }
+
+  };
+
   const route = async (path: string) => {
     if (pathname.includes(path)) return;
 
@@ -338,6 +392,119 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
       {!isLoading && (
         <div className="app">
+          <Modal
+            open={nameModal}
+            sx={{
+              "&& .MuiBackdrop-root": {
+                backdropFilter: "blur(5px)",
+                width: "calc(100% - 8px)",
+              },
+            }}
+            onClose={() => false}
+            className="overflow-y-scroll overflow-x-hidden cusscroller flex justify-center"
+            aria-labelledby="Alias"
+            aria-describedby="We need a username from user"
+          >
+            <>
+              <Box
+                className="sm:!w-full 3md:!px-1 h-fit 3mdd:px-[2px]"
+                sx={{
+                  minWidth: 300,
+                  width: "70%",
+                  maxWidth: 800,
+                  borderRadius: 6,
+                  outline: "none",
+                  p: 1,
+                  position: "relative",
+                  margin: "auto",
+                }}
+              >
+                <div className="py-4 px-6 bg-white -mb-[1px] rounded-t-[.9rem]">
+                  <div className="mb-2 flex items-start justify-between">
+                    <div>
+                      <h2 className="font-[500] text-[rgb(32,33,36)] text-[1.55rem] 3md:text-[1.2rem]">
+                        Add Username
+                      </h2>
+                      <span className="text-[rgb(69,70,73)] font-[500] text-[14px]">
+                        Add in a username that would be unique to you
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="form relative pt-4">
+                    <Box sx={{ width: "100%" }}>
+                      {Boolean(aliasError.length) && (
+                        <div className="rounded-md w-[95%] font-bold mt-2 mx-auto p-3 bg-[#ff8f33] text-white">
+                          {aliasError}
+                        </div>
+                      )}
+
+                      <FormControl
+                        fullWidth
+                        sx={{
+                          px: 2,
+                          py: 3,
+                        }}
+                      >
+                        <div>
+                          <TextField
+                            fullWidth
+                            id="outlined-basic"
+                            label="Name"
+                            variant="outlined"
+                            helperText={
+                              "Username can only contain alphanumeric characters"
+                            }
+                            value={alias}
+                            onChange={(
+                              e: React.ChangeEvent<
+                                HTMLInputElement | HTMLTextAreaElement
+                              >
+                            ) => {
+                              setAliasError("");
+                              setAlias(e.target.value);
+                            }}
+                          />
+                        </div>
+                      </FormControl>
+                    </Box>
+                  </div>
+                </div>
+
+                <div className="bg-[#efefef] flex justify-center items-center rounded-b-[.9rem] px-6 py-4">
+                  <div className="flex items-center">
+
+                    <Button
+                      onClick={submitName}
+                      className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#1891fe] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+                    >
+                      {aliasLoading ? (
+                        <>
+                          <div className="mr-3 h-[20px] text-[#fff]">
+                            <CircularProgress
+                              color={"inherit"}
+                              className="!w-[20px] !h-[20px]"
+                            />
+                          </div>{" "}
+                          <span>Just a Sec...</span>
+                        </>
+                      ) : (
+                        <>
+                          <BiUser
+                            color={"inherit"}
+                            className={"mr-2 !fill-white"}
+                            size={20}
+                          />{" "}
+                          Submit
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </Box>
+            </>
+          </Modal>
+
           <Modal
             open={addNew}
             sx={{
@@ -421,7 +588,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                             "& .MuiToggleButtonGroup-grouped": {
                               borderRadius: "4px !important",
                               minWidth: 241,
-                              marginLeft: '5px !important',
+                              marginLeft: "5px !important",
                               backgroundColor: "#1212121a",
                               border: "none",
                             },
@@ -459,7 +626,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                             campaign
                           </ToggleButton>
                           {contract.toLowerCase() ==
-                            "0xacdfc5338390ce4ec5ad61e3dc255c9f2560d797" && (
+                            "0x74367351f1A6809cED9Cc70654C6BF8c2d1913c9" && (
                             <ToggleButton
                               sx={{
                                 textTransform: "capitalize",
@@ -467,8 +634,8 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                               }}
                               value={"2"}
                             >
-                              <AiOutlineUserAdd className="mr-2" size={20} />A New
-                              Participant
+                              <AiOutlineUserAdd className="mr-2" size={20} />A
+                              New Participant
                             </ToggleButton>
                           )}
                         </ToggleButtonGroup>
@@ -650,7 +817,6 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                           <Button
                             onClick={async () => {
                               if (nname.length) {
-
                                 setLoader(true);
 
                                 try {
@@ -661,7 +827,12 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                     return;
                                   }
 
-                                  await createGroupChat(nname, [...disparts].filter((v: string | undefined) => v !== undefined));
+                                  await createGroupChat(
+                                    nname,
+                                    [...disparts].filter(
+                                      (v: string | undefined) => v !== undefined
+                                    )
+                                  );
 
                                   socket?.emit?.("add_group");
 
@@ -760,7 +931,6 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                     setAddNew(false);
 
                                     setLoader(false);
-
                                   } else {
                                     setLoader(false);
 
@@ -919,45 +1089,39 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                 </div>
               </div>
 
-              {groupChat?.map(({ name: gps, lastchat: clst, groupKeys, key }, i) => {
+              {groupChat?.map(
+                ({ name: gps, lastchat: clst, groupKeys, key }, i) => {
+                  // console.log(groupKeys, key)
 
-                // console.log(groupKeys, key)
+                  return (
+                    <Chatlist
+                      key={i}
+                      onClick={async () => {
+                        rContext.update?.({
+                          group: gps,
+                        });
 
-                return (
+                        if (pathname[pathname.length - 1] != "dashboard") {
+                          setLoader(true);
 
-                  <Chatlist
-                    key={i}
-                    onClick={async () => {
-                
-                      rContext.update?.({
-                        group: gps,
-                      });
-
-                      if (pathname[pathname.length - 1] != "dashboard") {
-                         setLoader(true);
-
-                        //  window.location.href = `/dashboard#${i}`;
-                        router.push(`/dashboard#${i}`);
-
+                          //  window.location.href = `/dashboard#${i}`;
+                          router.push(`/dashboard#${i}`);
+                        }
+                      }}
+                      time={clst !== undefined ? clst["date"] : undefined}
+                      img={groupImgCache[gps]}
+                      selected={
+                        pathname[pathname.length - 1] == "dashboard" &&
+                        gps == group
                       }
-                
-                    }}
-                    time={clst !== undefined ? clst["date"] : undefined}
-                    img={
-                      groupImgCache[gps]
-                    }
-                    selected={
-                      pathname[pathname.length - 1] == "dashboard" &&
-                      gps == group
-                    }
-                    iv={clst?.["iv"]}
-                    lastMsg={clst !== undefined ? clst["content"][0] : ""}
-                    name={`${gps} ${!i ? "(Main)" : ""}`}
-                    index={gps}
-                  />
-
-                );
-              })}
+                      iv={clst?.["iv"]}
+                      lastMsg={clst !== undefined ? clst["content"][0] : ""}
+                      name={`${gps} ${!i ? "(General)" : ""}`}
+                      index={gps}
+                    />
+                  );
+                }
+              )}
 
               <div className="overlay"></div>
             </div>

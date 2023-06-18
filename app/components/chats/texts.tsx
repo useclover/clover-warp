@@ -49,13 +49,15 @@ const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras,
 
               if (imgCache[sender || ""] === undefined) {
 
-              const { data: { image } } = await axios.get(`/user/img/${sender}`, {
-                  headers: {
-                      "Content-Type": "application/json",
-                      "Accept": "application/json",
-                      Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
-                  }
-              });
+              // const { data: { image } } = await axios.get(`/user/img/${sender}`, {
+              //     headers: {
+              //         "Content-Type": "application/json",
+              //         "Accept": "application/json",
+              //         Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
+              //     }
+              // });
+
+              const image = "";
 
               if (image) {
 
@@ -63,7 +65,10 @@ const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras,
 
                   setUserImg(image);
 
+              }else{
+                  imgCache[sender || ""] = "";
               };
+
             }else{
                 setUserImg(imgCache[sender || ""]); 
             }            
@@ -171,9 +176,9 @@ const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras,
       onClick={() => {
         setExtras(selected ? "" : messId);
 
-        const add = address ? ethers.utils.getAddress(address) : "";
+        const add = address ? ethers.getAddress(address) : "";
 
-        const add2 = sender ? ethers.utils.getAddress(sender) : "";
+        const add2 = sender ? ethers.getAddress(sender) : "";
 
         setEditable(add == add2);
       }}

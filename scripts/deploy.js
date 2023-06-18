@@ -8,7 +8,7 @@ const hre = require("hardhat");
 
 async function main() {
 
-  const Share = await hre.ethers.getContractFactory("share");
+  const Share = await hre.ethers.getContractFactory("SimpleNFT");
   const share = await Share.deploy();
 
   await share.deployed();

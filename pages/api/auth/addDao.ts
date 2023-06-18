@@ -22,7 +22,7 @@ export default function handler(
 
       const { hash, metadata, contract, joined, name, desc, defCon } = req.body;
 
-      const validateAddress = ethers.utils.verifyMessage(
+      const validateAddress = ethers.verifyMessage(
         "UseClover Signature Request \n\nSign To Continue \n",
         hash
       );
