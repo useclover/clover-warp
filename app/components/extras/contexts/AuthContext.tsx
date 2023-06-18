@@ -1,26 +1,18 @@
-import { createClient, useAccount, WagmiConfig } from "wagmi";
-import connectors from '../connectors';
-import * as ethers from 'ethers';
-import { webSocketProvider } from '../connectors/chains';
+import { WagmiConfig, createConfig, configureChains, mainnet } from "wagmi";
+import { publicProvider } from "wagmi/providers/public";
 
+import connectors from "../connectors";
+import * as ethers from "ethers";
+import { webSocketPublicClient, publicClient, chains } from "../connectors/chains";
 
-
-const client = createClient({
+const client = createConfig({
   autoConnect: true,
-  connectors,
-  webSocketProvider,
-  provider: ethers.getDefaultProvider(),
+  publicClient,
+  webSocketPublicClient,
 });
 
 const AuthProvider = ({ children }: { children: JSX.Element }) => {
-    return (
-        
-      <WagmiConfig client={client}>
-
-            {children}
-
-        </WagmiConfig>
-    )
-}
+  return <WagmiConfig config={client}>{children}</WagmiConfig>;
+};
 
 export default AuthProvider;

@@ -24,7 +24,7 @@ export default function handler(
 
       (async () => {
 
-        const validateAddress = ethers.utils.verifyMessage(
+        const validateAddress = ethers.verifyMessage(
           "UseClover Signature Request \n\nSign To Continue \n",
           hash
         );
@@ -97,6 +97,8 @@ export default function handler(
       }catch(err){
 
           const error = err as any;
+
+          console.log(error)
 
           res.status(error?.status || 400).json({
             error: true,

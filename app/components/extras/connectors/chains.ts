@@ -39,10 +39,10 @@ export const FileCoinHyperspace: Chain = {
   },
   rpcUrls: {
     default: {
-      http: ["https://api.hyperspace.node.glif.io/rpc/v1"],
+      http: ["https://api.calibration.node.glif.io/rpc/v1"],
     },
     public: {
-      http: ["https://api.hyperspace.node.glif.io/rpc/v1"],
+      http: ["https://api.calibration.node.glif.io/rpc/v1"],
     },
   },
   blockExplorers: {
@@ -54,7 +54,7 @@ export const FileCoinHyperspace: Chain = {
   testnet: true,
 };
 
-export const { chains, provider, webSocketProvider } = configureChains(
+export const { chains, publicClient, webSocketPublicClient } = configureChains(
   [
     FileCoinWallaby,
     FileCoinHyperspace

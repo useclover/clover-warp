@@ -6,6 +6,7 @@ import axios from 'axios';
 import { CCprovider } from "../app/components/extras/contexts/CContext";
 import '../app/components/types.d.ts';
 
+
 function MyApp({ Component, pageProps }: AppProps) {
 
   axios.defaults.baseURL = process.env.NEXT_PUBLIC_APP_URL || "";
@@ -14,7 +15,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     <AuthProvider>
       <GenProvider>
         <CCprovider>
-          <Component {...pageProps} />
+            <Component {...pageProps} />
         </CCprovider>
       </GenProvider>
     </AuthProvider>
