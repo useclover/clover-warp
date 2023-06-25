@@ -16,6 +16,7 @@ const connectors = [
       shimDisconnect: true,
     },
   }),
+  
   new WalletConnectConnector({
     chains,
     options: {

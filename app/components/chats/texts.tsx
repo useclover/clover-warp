@@ -176,9 +176,9 @@ const Text = ({ content, sender, date, reply, sent, enlargen, messId, setExtras,
       onClick={() => {
         setExtras(selected ? "" : messId);
 
-        const add = address ? ethers.getAddress(address) : "";
+        const add = address ? ethers.utils.getAddress(address) : "";
 
-        const add2 = sender ? ethers.getAddress(sender) : "";
+        const add2 = sender ? ethers.utils.getAddress(sender) : "";
 
         setEditable(add == add2);
       }}

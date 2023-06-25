@@ -7,10 +7,11 @@ import bgLogo from "../public/images/logolg.png";
 import cicon from "../public/images/icon.png";
 import { BiUserPlus, BiX } from "react-icons/bi";
 import { AiOutlineAppstoreAdd } from "react-icons/ai";
+import SwipeableViews from "react-swipeable-views";
 import axios from "axios";
 import validator from "validator";
 import hero from "../public/images/phone.svg";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Button,
@@ -25,7 +26,7 @@ import {
 } from "@mui/material";
 import Loader from "../app/components/loader";
 // import web3 from "web3";
-import contract from "../SimpleNFT.json";
+import contract from "../artifacts/contracts/localdao.sol/CloverSuiteNFT.json";
 import { makeNFTClient } from "../app/components/extras/storage/utoken";
 import Router from "next/router";
 import {
@@ -33,6 +34,8 @@ import {
   useConnect,
   useNetwork,
   useSignMessage,
+  useSigner,
+  useSwitchNetwork,
 } from "wagmi";
 import { ethers } from "ethers";
 import { balanceABI } from "../app/components/extras/abi";
@@ -42,16 +45,21 @@ import trusted from "../public/images/trust.svg";
 import { BsList, BsPatchPlusFill, BsPlusCircle, BsPlusCircleFill } from "react-icons/bs";
 import { MdClose, MdInfo, MdPersonAddAlt } from "react-icons/md";
 import Web3 from "web3";
+import TabPanel from "../app/components/TabPanel";
 
 // 0x74367351f1a6809ced9cc70654c6bf8c2d1913c9;
 export const contractAddress: string = "0xA1C059147C14c69736c6EF79cD799B9D7fe85a42";
 
-const abi: any = contract.abi;
-
 const Home: NextPage = () => {
-  const { chain: chainId, chains } = useNetwork();
+
+  const { chain: chainId } = useNetwork();
+
+  const { data: signer } = useSigner();
 
   const { address, isConnected } = useAccount();
+
+  const { chains, error, pendingChainId, switchNetworkAsync } =
+    useSwitchNetwork();
 
   const { connectors, isLoading: connecting, connectAsync } = useConnect();
 
@@ -60,16 +68,17 @@ const Home: NextPage = () => {
   const [sidebar, setSidebar] = useState(false);
 
   const [isNotSupported, setSupport] = useState<boolean>(false);
+
   const [loginError, setLoginError] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
   const [isLoading, setLoading] = useState<boolean>(false);
   const handleClose = () => {
     setOpen(false)
-    console.log('clicked clos')
   };
   const [failMessage, setFailMessage] = useState<string>("");
 
   const [userAddress, setUserAddress] = useState<string>("");
+  const [trxhash, setHash] = useState<string>("")
 
   const [testName, setTestName] = useState<string>("");
   const [testEmail, setTestEmail] = useState<string>("");
@@ -88,6 +97,12 @@ const Home: NextPage = () => {
   const [participants, setParticipants] = useState<string[]>([]);
   const [part, setPart] = useState<string>("");
   const [bigLoader, setBigLoader] = useState<boolean>(false);
+  const [deployed, setDeployed] = useState<string>("")
+
+  const timer: any = useRef();
+
+  const [timeCounted, setTimeCounted] = useState<number>(0);
+
   const [showModal, setShowModal] = useState<boolean>(false);
 
   const helper = {
@@ -120,11 +135,23 @@ const Home: NextPage = () => {
 
   const [start, setStart] = useState<boolean>(false);
 
+  const [value, setValue] = useState<number>(0)
+
   const useClose = () => setShowModal(false);
 
   const closeStart = () => setStart(false);
 
   let nft: any = "";
+
+  useEffect(() => {
+    if (timeCounted >= 15) {
+
+      clearTimeout(timer.current);
+
+      setTimeCounted(0);
+
+    }
+  }, [timeCounted, timer]);
 
   const generateNftData = async (
     name: string,
@@ -160,52 +187,34 @@ const Home: NextPage = () => {
     return nft.url;
   };
 
-  const mintNFT = async (tokenURI: string, receiver: string[]) => {
-
-    const web3 = new Web3("https://rpc.ankr.com/filecoin_testnet");
-
-    // const provider = new ethers.JsonRpcProvider(
-    //   "https://api.calibration.node.glif.io/rpc/v1"
-    // );
+  const createDAO = async (tokenURI: string, receiver: string[]) => {
 
     try {
   
     const addresses = receiver.map((stringAddress: string) =>
-      web3.utils.toChecksumAddress(stringAddress)
+      ethers.utils.getAddress(stringAddress)
     );
-
-
-    const contractx = new web3.eth.Contract(
-      abi,
-      "0x60da5f4B583F6fa7c36511e59fdB49E016eCCc43"
-    );
-
-
-    const dd = await contractx.methods.mintTokens().call();
-
-    console.log(dd)
-
-
-      // const token = new ethers.Contract(
-      //   "0x60da5f4B583F6fa7c36511e59fdB49E016eCCc43",
-      //   abi,
-      //   signer as any
-      // );
+   
+      const contractlocal = new ethers.ContractFactory(
+        contract.abi,
+        contract.bytecode,
+        signer as any
+      );
  
-      // const brec = receiver.map(e => ethers.getAddress(e));
+      const receipt = await contractlocal.deploy(name, `${name.charAt(0)}CS`, addresses, tokenURI);      
 
-      // console.log(token, 'token')
+      setHash(receipt.deployTransaction.hash);
+      
+      setDeployed(receipt.address)
 
-      // const receipt = await token.mintTokens(brec[0], tokenURI);
-
-      // console.log(receipt);
-
-      // return "continue";
+      return {
+        hash: receipt.deployTransaction.hash,
+        address: receipt.address
+      };
 
     } catch (err) {
-
-      console.log(err);
-
+        console.log(err)
+        throw err
     }
   };
 
@@ -248,13 +257,14 @@ const Home: NextPage = () => {
         "useClover App test"
       );
 
-      await mintNFT(metadata, [userAddress]);
+     
 
       const { data } = await axios.post("/api/auth/test", {
         name: testName,
         email: testEmail,
+        metadata,
         address: userAddress,
-        hash: signedHash
+        hash: signedHash,
       }, {
         baseURL: window.origin
       });
@@ -290,11 +300,19 @@ const Home: NextPage = () => {
       await connectAsync({ connector: connectors[0] });
     }
 
-    const signedHash = await signMessageAsync({
-      message: "UseClover Signature Request \n\nSign To Continue \n",
-    });    
+    
+    if (chainId?.id != 314159) {
+       await switchNetworkAsync?.(314159);
+    }
 
-    setSignature(signedHash);
+
+    if (!value) {
+      const signedHash = await signMessageAsync({
+        message: "UseClover Signature Request \n\nSign To Continue \n",
+      });
+
+      setSignature(signedHash);
+    }
 
     try {
       
@@ -312,6 +330,7 @@ const Home: NextPage = () => {
         return;
       }
 
+
       if (!contractAd.length && daoType !== "default") {
         setFailMessage(
           "A contract address is required if you dont have one use the create new option"
@@ -322,9 +341,15 @@ const Home: NextPage = () => {
 
       } else if (daoType == "default") {
 
-        if (participants.length) {
+        if (!value) {
+          setValue(1)
+          setBigLoader(false);
+          return;
+        }
+
+        if (participants.length && value == 1) {
           participants.forEach(async (v) => {
-            if (!ethers.isAddress(v)) {
+            if (!ethers.utils.isAddress(v)) {
               setBigLoader(false);
               setFailMessage(
                 `Error Retrieving data from ${v}, check the address and try again`
@@ -342,7 +367,7 @@ const Home: NextPage = () => {
         // send nft to dao
       } else {
 
-        const provider = new ethers.JsonRpcProvider(
+        const provider = new ethers.providers.JsonRpcProvider(
           "https://api.calibration.node.glif.io/rpc/v1"
         );
 
@@ -371,13 +396,8 @@ const Home: NextPage = () => {
         // });
 
 
-
         const payload: any = {
-          hash: signedHash,
-          contract:
-            daoType == "default"
-              ? contractAddress
-              : ethers.getAddress(contractAd),
+          hash: signature,
           joined: JSON.stringify(participants),
           desc: des || "",
           name,
@@ -389,20 +409,32 @@ const Home: NextPage = () => {
 
           nftown.push(userAddress);
 
-          // const metadata = await generateNftData(
-          //   name,
-          //   userAddress,
-          //   des.length ? des : undefined
-          // );
+          if (value == 1) {
 
-          await mintNFT(
-            "ipfs://bafyreig33yazwzksfsgdtw4za2pgiyin72qegdxi5vky4sust7ihsxiabe/metadata.json",
+          const metadata = await generateNftData(
+            name,
+            userAddress,
+            des.length ? des : undefined
+          );
+
+          await createDAO(
+            metadata,
             nftown
           );
 
+          setValue(2);
+          timer.current = setInterval(() => {
+            setTimeCounted((timeCounted) => timeCounted + 1);
+          }, 1000);
+          setBigLoader(false);
+
           return;
 
+          }
+
           payload["metadata"] = userAddress;
+
+          payload['contract'] = deployed;
 
           const {
             data: {
@@ -420,21 +452,23 @@ const Home: NextPage = () => {
             JSON.stringify({
               name,
               creator: userAddress,
-              hash: signedHash,
-              contract: contractAddress,
+              contract: deployed,
               data: id,
+              hash: signature,
               participants,
             })
           );
 
           notifications({
-            title: `You were added to ${name} on clover`,
+            title: `You were added to ${name} on Clover Suite`,
             message: "click me to log in to your DAO",
             exclude: userAddress,
             receivers: participants,
           });
 
         } else {
+
+          payload['contract'] = ethers.utils.getAddress(contractAd);
 
           const {
             data: {
@@ -451,9 +485,9 @@ const Home: NextPage = () => {
             "cloverlog",
             JSON.stringify({
               name,
-              contract: ethers.getAddress(contractAd),
+              contract: ethers.utils.getAddress(contractAd),
               creator: address,
-              hash: signedHash,
+              hash: signature,
               data: id,
               participants: [address],
             })
@@ -473,6 +507,7 @@ const Home: NextPage = () => {
             "Something went wrong, please try again"
         );
       }
+
     } catch (err) {
       const error = err as Error;
 
@@ -512,7 +547,7 @@ const Home: NextPage = () => {
         const { data: loginData } = await axios.post(
           "/api/auth/login",
           {
-            address: ethers.getAddress(add?.account || userAddress),
+            address: ethers.utils.getAddress(add?.account || userAddress),
             hash: signedHash,
             contractAddress,
           },
@@ -923,6 +958,8 @@ const Home: NextPage = () => {
                           if (!e?.target?.value) return;
 
                           setDaoType(e.target.value);
+
+                          if (e?.target?.value == "exist") setValue(0);
                         }}
                       >
                         <ToggleButton
@@ -935,6 +972,7 @@ const Home: NextPage = () => {
                           <MdPersonAddAlt className="mr-2" size={20} /> Create
                           New
                         </ToggleButton>
+
                         <ToggleButton
                           sx={{
                             textTransform: "capitalize",
@@ -947,222 +985,313 @@ const Home: NextPage = () => {
                         </ToggleButton>
                       </ToggleButtonGroup>
 
-                      <div>
-                        <TextField
-                          fullWidth
-                          id="outlined-basic"
-                          label="Name of DAO"
-                          variant="outlined"
-                          value={name}
-                          onChange={(
-                            e: React.ChangeEvent<
-                              HTMLInputElement | HTMLTextAreaElement
-                            >
-                          ) => {
-                            setName(e.target.value);
-                          }}
-                        />
-                      </div>
-                      <div className="mt-6">
-                        <TextField
-                          fullWidth
-                          id="outlined-basic"
-                          label="Description of DAO"
-                          variant="outlined"
-                          helperText="Short Description Of DAO, Can be left empty - max 300 characters"
-                          value={des}
-                          onChange={(
-                            e: React.ChangeEvent<
-                              HTMLInputElement | HTMLTextAreaElement
-                            >
-                          ) => {
-                            const val = e.target.value;
-
-                            setDes(val.substring(0, 300));
-                          }}
-                        />
-                      </div>
-                      {daoType == "exist" && (
-                        <>
-                          <div className="my-6">
-                            <TextField
-                              fullWidth
-                              id="outlined-basic"
-                              label="Contract Address"
-                              variant="outlined"
-                              helperText="Contract address of the token that would allow users into the DAO"
-                              value={contractAd}
-                              onChange={(
-                                e: React.ChangeEvent<
-                                  HTMLInputElement | HTMLTextAreaElement
-                                >
-                              ) => {
-                                setContractAd(e.target.value);
-                              }}
-                            />
-                          </div>
-
-                          <div className="">
-                            <Tooltip
-                              arrow
-                              title="Who would have access to the created DAO, could anyone who has the token or you could list specific people/addresses"
-                            >
-                              <label className="my-3 cursor-pointer flex items-center w-fit">
-                                Who has access?{" "}
-                                <MdInfo
-                                  className="ml-2 text-[#2e2e2e]"
-                                  size={18}
-                                />
-                              </label>
-                            </Tooltip>
-
-                            <ToggleButtonGroup
-                              value={access}
-                              sx={{
-                                justifyContent: "space-between",
-                                marginBottom: "15px !important",
-                                width: "100%",
-                                "& .Mui-selected": {
-                                  backgroundColor: `rgba(24, 145, 254, 0.66) !important`,
-                                  color: `#fff !important`,
-                                },
-                                "& .MuiButtonBase-root:first-of-type": {
-                                  marginRight: "0px !important",
-                                  marginLeft: "0px !important",
-                                },
-                                "& .MuiButtonBase-root": {
-                                  padding: "10px 15px !important",
-                                },
-                                "& .MuiToggleButtonGroup-grouped": {
-                                  borderRadius: "2rem !important",
-                                  minWidth: 55,
-                                  marginLeft: 3,
-                                  backgroundColor: "#12121213",
-                                  border: "none",
-                                },
-                              }}
-                              exclusive
-                              className="w-full cusscroller overflow-y-hidden !justify-around mb-4 pb-1"
-                              onChange={(e: any) => {
-                                if (!e?.target?.value) return;
-
-                                setAccess(e.target.value);
-                              }}
-                            >
-                              <ToggleButton
-                                sx={{
-                                  textTransform: "capitalize",
-                                  fontWeight: "bold",
-                                }}
-                                value={"unlist"}
-                              >
-                                Anyone
-                              </ToggleButton>
-                              <ToggleButton
-                                sx={{
-                                  textTransform: "capitalize",
-                                  fontWeight: "bold",
-                                }}
-                                value={"list"}
-                              >
-                                Listed Addresses
-                              </ToggleButton>
-                            </ToggleButtonGroup>
-                          </div>
-                        </>
-                      )}
-
-                      {(daoType == "default" || access == "list") && (
-                        <>
-                          <label className="mt-3">Participants</label>
-                          <div className="flex w-full my-2 cusscroller overflow-hidden overflow-x-scroll items-center">
-                            {participants.map((e, i: number) => (
-                              <div
-                                className="border text-[#777] border-solid ml-[2px] rounded p-2 flex items-center justify-between"
-                                key={i}
-                              >
-                                <span>
-                                  {e.substring(0, 5) +
-                                    "...." +
-                                    e.substring(e.length - 5, e.length)}
-                                </span>
-                                <MdClose
-                                  size={15}
-                                  className={
-                                    "ml-1 cursor-pointer hover:text-[#121212]"
-                                  }
-                                  onClick={() => {
-                                    const partx: string[] = [...participants];
-                                    partx.splice(i, 1);
-                                    setParticipants(partx);
-                                  }}
-                                />
-                              </div>
-                            ))}
-                          </div>
-
+                      <TabPanel value={value} index={0}>
+                        <div>
                           <TextField
                             fullWidth
                             id="outlined-basic"
-                            helperText="if left empty, only you would have access to the newly created DAO, you can always add more people later"
+                            label="Name of DAO"
                             variant="outlined"
-                            value={part}
-                            placeholder="click enter to add address"
-                            onChange={(e: any) => {
-                              setPart(e.target.value);
+                            value={name}
+                            onChange={(
+                              e: React.ChangeEvent<
+                                HTMLInputElement | HTMLTextAreaElement
+                              >
+                            ) => {
+                              setName(e.target.value);
                             }}
-                            onKeyUp={(e: any) => {
-                              setPart(e.target.value);
+                          />
+                        </div>
+                        <div className="mt-6">
+                          <TextField
+                            fullWidth
+                            id="outlined-basic"
+                            label="Description of DAO"
+                            variant="outlined"
+                            helperText="Short Description Of DAO, Can be left empty - max 300 characters"
+                            value={des}
+                            onChange={(
+                              e: React.ChangeEvent<
+                                HTMLInputElement | HTMLTextAreaElement
+                              >
+                            ) => {
+                              const val = e.target.value;
 
-                              if (e.keyCode == 13 || e.which === 13) {
+                              setDes(val.substring(0, 300));
+                            }}
+                          />
+                        </div>
+                        {daoType == "exist" && (
+                          <>
+                            <div className="my-6">
+                              <TextField
+                                fullWidth
+                                id="outlined-basic"
+                                label="Contract Address"
+                                variant="outlined"
+                                helperText="Contract address of the token that would allow users into the DAO"
+                                value={contractAd}
+                                onChange={(
+                                  e: React.ChangeEvent<
+                                    HTMLInputElement | HTMLTextAreaElement
+                                  >
+                                ) => {
+                                  setContractAd(e.target.value);
+                                }}
+                              />
+                            </div>
+
+                            <div className="">
+                              <Tooltip
+                                arrow
+                                title="Who would have access to the created DAO, could anyone who has the token or you could list specific people/addresses"
+                              >
+                                <label className="my-3 cursor-pointer flex items-center w-fit">
+                                  Who has access?{" "}
+                                  <MdInfo
+                                    className="ml-2 text-[#2e2e2e]"
+                                    size={18}
+                                  />
+                                </label>
+                              </Tooltip>
+
+                              <ToggleButtonGroup
+                                value={access}
+                                sx={{
+                                  justifyContent: "space-between",
+                                  marginBottom: "15px !important",
+                                  width: "100%",
+                                  "& .Mui-selected": {
+                                    backgroundColor: `rgba(24, 145, 254, 0.66) !important`,
+                                    color: `#fff !important`,
+                                  },
+                                  "& .MuiButtonBase-root:first-of-type": {
+                                    marginRight: "0px !important",
+                                    marginLeft: "0px !important",
+                                  },
+                                  "& .MuiButtonBase-root": {
+                                    padding: "10px 15px !important",
+                                  },
+                                  "& .MuiToggleButtonGroup-grouped": {
+                                    borderRadius: "2rem !important",
+                                    minWidth: 55,
+                                    marginLeft: 3,
+                                    backgroundColor: "#12121213",
+                                    border: "none",
+                                  },
+                                }}
+                                exclusive
+                                className="w-full cusscroller overflow-y-hidden !justify-around mb-4 pb-1"
+                                onChange={(e: any) => {
+                                  if (!e?.target?.value) return;
+
+                                  setAccess(e.target.value);
+                                }}
+                              >
+                                <ToggleButton
+                                  sx={{
+                                    textTransform: "capitalize",
+                                    fontWeight: "bold",
+                                  }}
+                                  value={"unlist"}
+                                >
+                                  Anyone
+                                </ToggleButton>
+                                <ToggleButton
+                                  sx={{
+                                    textTransform: "capitalize",
+                                    fontWeight: "bold",
+                                  }}
+                                  value={"list"}
+                                >
+                                  Listed Addresses
+                                </ToggleButton>
+                              </ToggleButtonGroup>
+                            </div>
+                          </>
+                        )}
+
+                        {(daoType == "default" || access == "list") && (
+                          <>
+                            <label className="mt-3 block">Participants</label>
+                            <div className="flex w-full my-2 cusscroller overflow-hidden overflow-x-scroll items-center">
+                              {participants.map((e, i: number) => (
+                                <div
+                                  className="border text-[#777] border-solid ml-[2px] rounded p-2 flex items-center justify-between"
+                                  key={i}
+                                >
+                                  <span>
+                                    {e.substring(0, 5) +
+                                      "...." +
+                                      e.substring(e.length - 5, e.length)}
+                                  </span>
+                                  <MdClose
+                                    size={15}
+                                    className={
+                                      "ml-1 cursor-pointer hover:text-[#121212]"
+                                    }
+                                    onClick={() => {
+                                      const partx: string[] = [...participants];
+                                      partx.splice(i, 1);
+                                      setParticipants(partx);
+                                    }}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+
+                            <TextField
+                              fullWidth
+                              id="outlined-basic"
+                              helperText="if left empty, only you would have access to the newly created DAO, you can always add more people later"
+                              variant="outlined"
+                              value={part}
+                              placeholder="click enter to add address"
+                              onChange={(e: any) => {
+                                setPart(e.target.value);
+                              }}
+                              onKeyUp={(e: any) => {
+                                setPart(e.target.value);
+
+                                if (e.keyCode == 13 || e.which === 13) {
+                                  if (part.length) {
+                                    if (
+                                      !ethers.utils.isAddress(part) ||
+                                      (participants.includes(
+                                        ethers.utils.getAddress(part)
+                                      ) &&
+                                        ethers.utils.isAddress(part))
+                                    ) {
+                                      setPart("");
+                                      return;
+                                    }
+
+                                    const partx: string[] = [...participants];
+                                    partx.push(ethers.utils.getAddress(part));
+
+                                    setParticipants(partx);
+
+                                    setPart("");
+                                  }
+                                }
+                              }}
+                              onBlur={(e: any) => {
+                                setPart(e.target.value);
+
                                 if (part.length) {
                                   if (
-                                    !ethers.isAddress(part) ||
+                                    !ethers.utils.isAddress(part) ||
                                     (participants.includes(
-                                      ethers.getAddress(part)
+                                      ethers.utils.getAddress(part)
                                     ) &&
-                                      ethers.isAddress(part))
+                                      ethers.utils.isAddress(part))
                                   ) {
                                     setPart("");
                                     return;
                                   }
 
                                   const partx: string[] = [...participants];
-                                  partx.push(ethers.getAddress(part));
+                                  partx.push(ethers.utils.getAddress(part));
 
                                   setParticipants(partx);
 
                                   setPart("");
                                 }
-                              }
+                              }}
+                            />
+                          </>
+                        )}
+                      </TabPanel>
+
+                      <TabPanel index={1} value={value}>
+                        <p className="text-[#7c7c7c] mt-3 block font-[500] text-[15px]">
+                          You are about deploying a contract for your new DAO
+                          which might require a little amount for gas fees, to
+                          go on click the button below to continue.
+                          <br />
+                          <br />
+                          If your DAO already has a contract, please click the
+                          `Add Existing` Button on the top right
+                        </p>
+                      </TabPanel>
+
+                      <TabPanel value={value} className="!h-[200px]" index={2}>
+                        <div className="h-full backdrop-blur-[3px] absolute left-0 bg-[rgba(255,255,255,.6)] top-0 z-[100] flex flex-col justify-evenly items-center w-full">
+                          <div className="animation-ctn">
+                            <div className="icon icon--order-success svg">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="154px"
+                                height="154px"
+                              >
+                                <g
+                                  fill="none"
+                                  stroke={"#1891fe"}
+                                  strokeWidth="2"
+                                >
+                                  <circle
+                                    cx="77"
+                                    cy="77"
+                                    r="72"
+                                    style={{
+                                      strokeDasharray: "480px, 480px",
+                                      strokeDashoffset: "960px",
+                                    }}
+                                  ></circle>
+                                  <circle
+                                    id="colored"
+                                    fill={"#1891fe"}
+                                    cx="77"
+                                    cy="77"
+                                    r="72"
+                                    style={{
+                                      strokeDasharray: "480px, 480px",
+                                      strokeDashoffset: "960px",
+                                    }}
+                                  ></circle>
+                                  <polyline
+                                    className="st0"
+                                    stroke={"#fff"}
+                                    strokeWidth="10"
+                                    points="43.5,77.8 63.7,97.9 112.2,49.4 "
+                                    style={{
+                                      strokeDasharray: "100px, 100px",
+                                      strokeDashoffset: "200px",
+                                    }}
+                                  />
+                                </g>
+                              </svg>
+                            </div>
+                          </div>
+
+                          <h2
+                            style={{
+                              color: `#1891fe`,
                             }}
-                            onBlur={(e: any) => {
-                              setPart(e.target.value);
+                            className="mb-2 text-[15px] font-[600]"
+                          >
+                            DAO created Successfully
+                          </h2>
 
-                              if (part.length) {
-                                
-                                if (
-                                  !ethers.isAddress(part) ||
-                                  (participants.includes(
-                                    ethers.getAddress(part)
-                                  ) &&
-                                    ethers.isAddress(part))
-                                ) {
-                                  setPart("");
-                                  return;
-                                }
-
-                                const partx: string[] = [...participants];
-                                partx.push(ethers.getAddress(part));
-
-                                setParticipants(partx);
-
-                                setPart("");
-                              }
-                            }}
-                          />
-                        </>
-                      )}
+                          <Link
+                            href={`https://calibration.filfox.info/en/message/${trxhash}`}
+                          >
+                            <a
+                              target={"_blank"}
+                              className="text-[#5a5a5a] cursor-pointer mb-1 font-[400]"
+                            >
+                              View transaction on{" "}
+                              <span
+                                style={{
+                                  color: "#1891fe",
+                                }}
+                              >
+                                filfox
+                              </span>
+                            </a>
+                          </Link>
+                        </div>
+                      </TabPanel>
                     </FormControl>
                   </Box>
                 </div>
@@ -1182,7 +1311,16 @@ const Home: NextPage = () => {
                       className={"mr-2 !fill-white"}
                       size={20}
                     />{" "}
-                    Register
+                    {value ? (
+                      <div className="flex items-center">
+                        <span>Continue</span>{" "}
+                        {value == 2 && <span className="block ml-[2px]">
+                          {15 - timeCounted}s
+                        </span>}
+                      </div>
+                    ) : (
+                      "Register"
+                    )}
                   </Button>
                 </div>
               </div>

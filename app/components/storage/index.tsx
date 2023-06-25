@@ -194,8 +194,6 @@ const Storage = () => {
     }
 
     await uploadProvider(blobFiles, maxSize);
-
-
   };
 
   const dropHere = async (event: React.DragEvent<HTMLDivElement>) => {
@@ -223,13 +221,11 @@ const Storage = () => {
 
       setUpdate(!update);
 
-      console.log(cid, index);
 
       const filename = files[index].name;
 
       const extension = filename.split(".").pop();
 
-      console.log(chatkeys, name)
 
       const cidData = JSON.stringify(await encrypt(cid, chatkeys[name]));
 

@@ -1,6 +1,7 @@
 import { configureChains, Chain } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
+import { filecoinCalibration, filecoin } from "wagmi/chains";
 
 export const FileCoinWallaby: Chain = {
   id: 31415,
@@ -39,10 +40,10 @@ export const FileCoinHyperspace: Chain = {
   },
   rpcUrls: {
     default: {
-      http: ["https://api.calibration.node.glif.io/rpc/v1"],
+      http: ["https://api.hyperspace.node.glif.io/rpc/v1"],
     },
     public: {
-      http: ["https://api.calibration.node.glif.io/rpc/v1"],
+      http: ["https://api.hyperspace.node.glif.io/rpc/v1"],
     },
   },
   blockExplorers: {
@@ -54,11 +55,8 @@ export const FileCoinHyperspace: Chain = {
   testnet: true,
 };
 
-export const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [
-    FileCoinWallaby,
-    FileCoinHyperspace
-  ],
+export const { chains, provider, webSocketProvider } = configureChains(
+  [FileCoinWallaby, FileCoinHyperspace, filecoinCalibration, filecoin],
   [
     publicProvider(),
     jsonRpcProvider({

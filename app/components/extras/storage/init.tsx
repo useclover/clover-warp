@@ -24,35 +24,35 @@ export const notifications = async ({
   const channel = `eip155:5:${process.env.NEXT_PUBLIC_PUBLIC_KEY}`;
 
   try {
+    
+    receivers.forEach(async (val: string) => {
+      if (val.toLowerCase() == exclude.toLowerCase()) {
+        return;
+      }
 
-    // receivers.forEach(async (val: string) => {
-    //   if (val.toLowerCase() == exclude.toLowerCase()) {
-    //     return;
-    //   }
+      const receiver = `eip155:5:${val}`;
 
-    //   const receiver = `eip155:5:${val}`;
+      await PushAPI.payloads.sendNotification({
+        signer,
+        type: 3,
+        identityType: 2,
+        notification: {
+          title,
+          body: message,
+        },
+        payload: {
+          title,
+          body: message,
+          cta: "",
+          img: "",
+        },
+        recipients: receiver,
+        channel,
+        env: "staging",
+      });
+    });
 
-    //   await PushAPI.payloads.sendNotification({
-    //     signer,
-    //     type: 3,
-    //     identityType: 2,
-    //     notification: {
-    //       title,
-    //       body: message,
-    //     },
-    //     payload: {
-    //       title,
-    //       body: message,
-    //       cta: "",
-    //       img: "",
-    //     },
-    //     recipients: receiver,
-    //     channel,
-    //     env: "staging",
-    //   });
-    // });
-
-    // return true;
+    return true;
 
   } catch (err) {
     console.log(err, "err");
