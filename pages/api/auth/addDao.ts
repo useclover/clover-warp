@@ -22,7 +22,7 @@ export default function handler(
 
       const { hash, metadata, contract, joined, name, desc, defCon } = req.body;
 
-      const validateAddress = ethers.verifyMessage(
+      const validateAddress = ethers.utils.verifyMessage(
         "UseClover Signature Request \n\nSign To Continue \n",
         hash
       );
@@ -53,6 +53,7 @@ export default function handler(
             };
           }
 
+
           const keypair = await crypto.subtle.generateKey(
             {
               name: "ECDH",
@@ -71,6 +72,7 @@ export default function handler(
             "jwk",
             keypair.privateKey
           );
+          
 
           const cryptr = new Cryptr(contract);
 

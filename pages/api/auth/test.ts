@@ -3,6 +3,8 @@ import axios from "axios";
 import Cryptr from "cryptr";
 import { ethers } from "ethers";
 import type { NextApiRequest, NextApiResponse } from "next";
+import nft from "../../../artifacts/contracts/localdao.sol/CloverSuiteNFT.json"
+import { contractAddress } from "../../index";
 
 type Data = {
   message: string;
@@ -18,13 +20,13 @@ export default function handler(
   
   if (req.method == 'POST') {
 
-    const { name, email, address, hash } = req.body;
+    const { name, email, address, hash, metadata } = req.body;
 
-    if (name && email && address) {
+    if (name && email && address && metadata) {
 
       (async () => {
 
-        const validateAddress = ethers.verifyMessage(
+        const validateAddress = ethers.utils.verifyMessage(
           "UseClover Signature Request \n\nSign To Continue \n",
           hash
         );
@@ -41,6 +43,24 @@ export default function handler(
               },
             };
           }
+
+        const providers = new ethers.providers.JsonRpcProvider(
+          "https://api.calibration.node.glif.io/rpc/v1"
+        );
+
+        const wallet = new ethers.Wallet(
+          process.env.NEXT_PUBLIC_MATIC_PRIVATE_KEY || ""
+         );
+
+         const signer = wallet.connect(providers)
+
+         const contractFac = new ethers.Contract(
+           contractAddress,
+           nft.abi,
+           signer
+         );
+
+         await contractFac.mintTokens([address], metadata);
 
         const {
           data: { group: { data: gdata } },

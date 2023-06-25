@@ -24,7 +24,7 @@ export default function handler(
 
       const { address, contractAddress, hash } = req.body;
 
-      const validateAddress = ethers.verifyMessage(
+      const validateAddress = ethers.utils.verifyMessage(
         "UseClover Signature Request \n\nSign To Continue \n",
         hash
       );
@@ -40,7 +40,7 @@ export default function handler(
           });
 
         
-          const provider = new ethers.JsonRpcProvider(
+          const provider = new ethers.providers.JsonRpcProvider(
             "https://api.calibration.node.glif.io/rpc/v1"
           );
 
@@ -54,7 +54,7 @@ export default function handler(
 
             for (let i = 0; i < dao.length; i++) {
 
-              const cont = ethers.getAddress(dao[i].contract)
+              const cont = ethers.utils.getAddress(dao[i].contract)
 
               if (
                 cont == contractAddress ||
@@ -66,15 +66,16 @@ export default function handler(
                 const rJoined = JSON.parse(joined);
 
                 [...rJoined, metadata].forEach((val: string) => {
-                  const address1 = ethers.getAddress(val);
+                  const address1 = ethers.utils.getAddress(val);
 
-                  const address2 = ethers.getAddress(address);
+                  const address2 = ethers.utils.getAddress(address);
 
                   if (address1 == address2) {
                     sdao.push({ ...dao[i] });
                   }
                 });
               } else {
+
                 if (checked.indexOf(dao[i].contract) != -1) {
                   continue;
                 } else {
@@ -90,7 +91,7 @@ export default function handler(
                     provider
                   );
 
-                  balance = ethers.formatEther(
+                  balance = ethers.utils.formatEther(
                     await token.balanceOf(address)
                   );
                 } catch (err) {
@@ -99,8 +100,11 @@ export default function handler(
                 }
 
                 if (Number(balance) > 0) {
+
                   await axios.post(`/dao/${dao[i].id}/user/update`, {
                     address,
+                  }, {
+                     headers: { "X-App-Key": process.env.APP_KEY || "" }                 
                   });
 
                   sdao.push({ ...dao[i] });

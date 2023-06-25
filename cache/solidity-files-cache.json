@@ -1,45 +1,6 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "c:\\Users\\hp\\Documents\\Clover\\contracts\\share.sol": {
-      "lastModificationDate": 1683830874427,
-      "contentHash": "e72b98658758eb497f21db4629738e64",
-      "sourceName": "contracts/share.sol",
-      "solcConfig": {
-        "version": "0.8.7",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC721/ERC721.sol",
-        "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol",
-        "@openzeppelin/contracts/utils/Counters.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.7"
-      ],
-      "artifacts": [
-        "SimpleNFT"
-      ]
-    },
     "c:\\Users\\hp\\Documents\\Clover\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\ERC721.sol": {
       "lastModificationDate": 1683830060678,
       "contentHash": "79ff1a7eb801a525aa315fb7a679eede",
@@ -842,10 +803,10 @@
         "IERC165"
       ]
     },
-    "C:\\Users\\hp\\Documents\\Clover\\contracts\\share.sol": {
-      "lastModificationDate": 1686646298636,
-      "contentHash": "b90b032d7d12b0101b1b3c577a22efd2",
-      "sourceName": "contracts/share.sol",
+    "C:\\Users\\hp\\Documents\\Clover\\contracts\\localdao.sol": {
+      "lastModificationDate": 1687728409628,
+      "contentHash": "b085d917c787247248b6318647eb43d6",
+      "sourceName": "contracts/localdao.sol",
       "solcConfig": {
         "version": "0.8.7",
         "settings": {
@@ -878,7 +839,7 @@
         "^0.8.7"
       ],
       "artifacts": [
-        "SimpleNFT"
+        "CloverSuiteNFT"
       ]
     }
   }
