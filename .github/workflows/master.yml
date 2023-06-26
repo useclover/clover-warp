@@ -29,3 +29,21 @@ jobs:
 
           # sftp args
           args: '-o ConnectTimeout=50'
+          
+    - name: 📂 Sync files
+      uses: wlixcc/SFTP-Deploy-Action@v1.2.1
+      with:
+
+          username: ${{ secrets.ftp_fusername }}
+          server: ${{ secrets.ftp_host }}
+          port: 22 # default is 22
+          ssh_private_key: ${{ secrets.ftp_secret }}
+
+
+          # will put all file under this path
+          local_path: ./*
+          # files will copy to under remote_path
+          remote_path: /home/clover/frontendtest/
+
+          # sftp args
+          args: '-o ConnectTimeout=50'
