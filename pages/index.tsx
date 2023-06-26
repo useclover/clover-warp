@@ -44,7 +44,6 @@ import Link from "next/link";
 import trusted from "../public/images/trust.svg";
 import { BsList, BsPatchPlusFill, BsPlusCircle, BsPlusCircleFill } from "react-icons/bs";
 import { MdClose, MdInfo, MdPersonAddAlt } from "react-icons/md";
-import Web3 from "web3";
 import TabPanel from "../app/components/TabPanel";
 
 // 0x74367351f1a6809ced9cc70654c6bf8c2d1913c9;
@@ -143,15 +142,7 @@ const Home: NextPage = () => {
 
   let nft: any = "";
 
-  useEffect(() => {
-    if (timeCounted >= 15) {
-
-      clearTimeout(timer.current);
-
-      setTimeCounted(0);
-
-    }
-  }, [timeCounted, timer]);
+ 
 
   const generateNftData = async (
     name: string,
@@ -217,6 +208,21 @@ const Home: NextPage = () => {
         throw err
     }
   };
+
+  const once = useRef<boolean>(false);
+
+   useEffect(() => {
+     if (timeCounted >= 15) {
+       clearTimeout(timer.current);
+
+       if (!once.current) {
+        once.current = true
+        sumitDeets()
+      };
+
+       setTimeCounted(0);
+     }
+   }, [timeCounted, timer]);
 
   const [testErr, setTestErr] = useState("");
 
@@ -499,6 +505,8 @@ const Home: NextPage = () => {
       } catch (err) {
         const error = err as any;
 
+        once.current = false;
+
         setBigLoader(false);
         console.log(err);
 
@@ -510,7 +518,7 @@ const Home: NextPage = () => {
 
     } catch (err) {
       const error = err as Error;
-
+      once.current = false;
       console.log(error);
       setBigLoader(false);
       setFailMessage("Something went wrong, please try again");
