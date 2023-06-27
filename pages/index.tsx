@@ -297,14 +297,25 @@ const Home: NextPage = () => {
   };
 
   const sumitDeets = async () => {
-   
+
+    if (isLoading || bigLoader) return;
+
     setBigLoader(true);
+
+    const logged = localStorage.getItem('clover-x');
+
+    if (logged) {
+      Router.push('/dashboard');
+      return;
+    }
 
     let send: boolean = false;
 
     if (!isConnected) {
       await connectAsync({ connector: connectors[0] });
     }
+
+    
 
     const chainMain = Number(process.env.NEXT_PUBLIC_CHAIN || 314159);
     
@@ -543,6 +554,13 @@ const Home: NextPage = () => {
       if (!isConnected) {
         add = await connectAsync({ connector: connectors[0] });
       }
+
+        const chainMain = Number(process.env.NEXT_PUBLIC_CHAIN || 314159);
+
+       if (chainId?.id != chainMain) {
+         await switchNetworkAsync?.(chainMain);
+       }
+
 
       const signedHash = await signMessageAsync({
         message: "UseClover Signature Request \n\nSign To Continue \n",
