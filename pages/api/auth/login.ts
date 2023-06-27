@@ -41,7 +41,7 @@ export default function handler(
 
         
           const provider = new ethers.providers.JsonRpcProvider(
-            "https://api.calibration.node.glif.io/rpc/v1"
+            process.env.NEXT_PUBLIC_RPC || ""
           );
 
           const dao = daos.filter((a: any) => a.contract);

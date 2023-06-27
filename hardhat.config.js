@@ -7,7 +7,7 @@ module.exports = {
   solidity: {
     version: "0.8.7",
     networks: {
-      hyperspace: {
+      calibration: {
         chainId: 314159,
         url: "https://rpc.ankr.com/filecoin_testnet",
         accounts: [PRIVATE_KEY],
