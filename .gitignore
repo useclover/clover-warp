@@ -52,4 +52,7 @@ coverage.json
 typechain
 typechain-types
 
+flat.sol
+testdeploy.js
+
 /inspo

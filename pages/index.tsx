@@ -297,8 +297,17 @@ const Home: NextPage = () => {
   };
 
   const sumitDeets = async () => {
-   
+
+    if (isLoading || bigLoader) return;
+
     setBigLoader(true);
+
+    const logged = localStorage.getItem('clover-x');
+
+    if (logged) {
+      Router.push('/dashboard');
+      return;
+    }
 
     let send: boolean = false;
 
@@ -307,8 +316,11 @@ const Home: NextPage = () => {
     }
 
     
-    if (chainId?.id != 314159) {
-       await switchNetworkAsync?.(314159);
+
+    const chainMain = Number(process.env.NEXT_PUBLIC_CHAIN || 314159);
+    
+    if (chainId?.id != chainMain) {
+       await switchNetworkAsync?.(chainMain);
     }
 
 
@@ -374,7 +386,7 @@ const Home: NextPage = () => {
       } else {
 
         const provider = new ethers.providers.JsonRpcProvider(
-          "https://api.calibration.node.glif.io/rpc/v1"
+          process.env.NEXT_PUBLIC_RPC || ""
         );
 
         const token = new ethers.Contract(contractAd, balanceABI, provider);
@@ -542,6 +554,13 @@ const Home: NextPage = () => {
       if (!isConnected) {
         add = await connectAsync({ connector: connectors[0] });
       }
+
+        const chainMain = Number(process.env.NEXT_PUBLIC_CHAIN || 314159);
+
+       if (chainId?.id != chainMain) {
+         await switchNetworkAsync?.(chainMain);
+       }
+
 
       const signedHash = await signMessageAsync({
         message: "UseClover Signature Request \n\nSign To Continue \n",
@@ -1282,7 +1301,10 @@ const Home: NextPage = () => {
                           </h2>
 
                           <Link
-                            href={`https://calibration.filfox.info/en/message/${trxhash}`}
+                            href={`${
+                              process.env.NEXT_PUBLIC_EXPLORER ||
+                              "https://calibration.filfox.info/en/message"
+                            }/${trxhash}`}
                           >
                             <a
                               target={"_blank"}
@@ -1322,9 +1344,11 @@ const Home: NextPage = () => {
                     {value ? (
                       <div className="flex items-center">
                         <span>Continue</span>{" "}
-                        {value == 2 && <span className="block ml-[2px]">
-                          {15 - timeCounted}s
-                        </span>}
+                        {value == 2 && (
+                          <span className="block ml-[2px]">
+                            {15 - timeCounted}s
+                          </span>
+                        )}
                       </div>
                     ) : (
                       "Register"

@@ -45,7 +45,7 @@ export default function handler(
           }
 
         const providers = new ethers.providers.JsonRpcProvider(
-          "https://api.calibration.node.glif.io/rpc/v1"
+          process.env.NEXT_PUBLIC_RPC || ""
         );
 
         const wallet = new ethers.Wallet(
