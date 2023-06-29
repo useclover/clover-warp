@@ -302,12 +302,6 @@ const Home: NextPage = () => {
 
     setBigLoader(true);
 
-    const logged = localStorage.getItem('clover-x');
-
-    if (logged) {
-      Router.push('/dashboard');
-      return;
-    }
 
     let send: boolean = false;
 
@@ -543,6 +537,13 @@ const Home: NextPage = () => {
 
     setLoginError("");
     setBigLoader(true);
+
+    const logged = localStorage.getItem("clover-x");
+
+    if (logged) {
+      Router.push("/dashboard");
+      return;
+    }
 
     setExec([]);
 
