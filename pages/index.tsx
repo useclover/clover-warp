@@ -541,8 +541,25 @@ const Home: NextPage = () => {
     const logged = localStorage.getItem("clover-x");
 
     if (logged) {
-      Router.push("/dashboard");
-      return;
+      
+      try {
+
+        await axios.get('/user', {
+          headers: {
+            authorization: `Bearer ${logged}`
+          }
+        });
+
+        Router.push('/dashboard');
+
+        return;
+
+      } catch (err) {
+
+        localStorage.removeItem('clover-x')
+
+      }
+
     }
 
     setExec([]);
