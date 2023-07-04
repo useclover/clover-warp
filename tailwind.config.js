@@ -25,10 +25,14 @@ module.exports = {
       "2usm": { max: "505px" },
       "2sm": { max: "975px" },
       usm: { max: "940px" },
+
+      // homepage
+      "mmsm": { max: "1030px" },
+      "mmsst": { max: "830px" },
     },
     extend: {
       backgroundImage: {
-          pattern: "./public/images/"
+        "heroimg": "url('../public/images/heroimg.svg')",
       }
     },
   },

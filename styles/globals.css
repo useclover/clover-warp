@@ -561,7 +561,7 @@ body::-webkit-scrollbar-track,
 }
 
 .owner .chat-msg-text {
-  background-color: #1890FF;
+  background-color: #5e43ec;
   color: #fff;
   border-radius: 16px;
 }
@@ -575,7 +575,7 @@ body::-webkit-scrollbar-track,
 }
 
 .logo {
-  color: #1890FF;
+  color: #5e43ec;
   flex-shrink: 0;
 }
 
@@ -708,7 +708,7 @@ body::-webkit-scrollbar-thumb,
 
 .msg.active {
   background: linear-gradient(to right, rgba(238, 242, 244, 0.4) 0%, rgba(238, 242, 244, 0) 100%);
-  border-left: 4px solid #1890FF;
+  border-left: 4px solid #5e43ec;
 }
 
 .msg-username {
@@ -840,7 +840,7 @@ body .EmojiPickerReact{
 }
 
 .view-more {
-  color: #1890FF;
+  color: #5e43ec;
   font-weight: 600;
   font-size: 15px;
   margin: 25px 0;
@@ -876,7 +876,7 @@ body .EmojiPickerReact{
 }
 
 .blue {
-  background-color: #1890FF;
+  background-color: #5e43ec;
 }
 
 img {
@@ -933,4 +933,19 @@ img {
   z-index: 3;
   position: relative;
   margin-left: 280px;
+}
+
+.txtColBase {
+  width:fit-content;
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
+
+.txtCol {
+  background:linear-gradient(90deg,#B1DFF5 12%,#B0B2F6 40.16%, #8BD9FB 90%);
+}
+
+.txtColsub {
+  background:linear-gradient(90deg,#9528C9 12%,#C9289C 40.16%, #9528C9 90%);
 }

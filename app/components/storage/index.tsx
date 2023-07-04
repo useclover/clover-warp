@@ -325,7 +325,7 @@ const Storage = () => {
 
                 elem?.click();
               }}
-              className="!py-2 !mr-4 !flex !fixed !right-[15px] !bottom-[20px] !cursor-pointer !justify-center !z-[90] !items-center !px-4 !bg-[#1890FF] !text-white !border-solid !border-white !border-[2px] !w-[64px] !h-[64px] !rounded-[50%] overflow-hidden hover:bg-[#0c75d6] font-[300]"
+              className="!py-2 !mr-4 !flex !fixed !right-[15px] !bottom-[20px] !cursor-pointer !justify-center !z-[90] !items-center !px-4 !bg-[#5e43ec] !text-white !border-solid !border-white !border-[2px] !w-[64px] !h-[64px] !rounded-[50%] overflow-hidden hover:bg-[#0c75d6] font-[300]"
             >
               <BsPlusLg size={25} />
             </Button>
@@ -352,7 +352,7 @@ const Storage = () => {
                       height: 5,
                       width: "100%",
                       "& .MuiLinearProgress-bar": {
-                        backgroundColor: "#1890FF",
+                        backgroundColor: "#5e43ec",
                         borderBottomRightRadius: "16px",
                         borderTopRightRadius: "16px",
                       },
@@ -369,7 +369,7 @@ const Storage = () => {
                     width: "100%",
                     padding: "0px 10px",
                     "& .Mui-selected": {
-                      backgroundColor: `#1890FF !important`,
+                      backgroundColor: `#5e43ec !important`,
                       color: `#fff !important`,
                     },
                     "& .MuiToggleButtonGroup-grouped": {

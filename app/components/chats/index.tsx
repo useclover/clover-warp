@@ -652,7 +652,7 @@ const Chats = () => {
                   </div>
                   <div className="chat-area-main">
                     {prevMessLoading && (
-                      <div className="text-[#1890FF] flex items-center justify-center py-2">
+                      <div className="text-[#5e43ec] flex items-center justify-center py-2">
                         <CircularProgress size={18} color={"inherit"} />
                       </div>
                     )}
@@ -901,7 +901,7 @@ const Chats = () => {
 
                             setMessageText("");
                           }}
-                          className="!bg-[#1890FF] !ml-3  !normal-case !rounded-[50%] !max-w-[45px] !min-w-[45px] !w-[45px] !h-[45px] !font-[inherit] !p-[10px]"
+                          className="!bg-[#5e43ec] !ml-3  !normal-case !rounded-[50%] !max-w-[45px] !min-w-[45px] !w-[45px] !h-[45px] !font-[inherit] !p-[10px]"
                         >
                           <BiSend className={"!text-[#fff]"} size={20} />
                         </Button>

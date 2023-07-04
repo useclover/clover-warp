@@ -388,7 +388,7 @@ const Room = () => {
                               onClick={() => false}
                               size={"medium"}
                               style={{
-                                backgroundColor: true ? "#fff" : "#1891fe",
+                                backgroundColor: true ? "#fff" : "#5e43ec",
                               }}
                             >
                               {/* style */}
@@ -464,7 +464,7 @@ const Room = () => {
                           color: sidemodal
                             ? pchat
                               ? "#777"
-                              : "#1891fe"
+                              : "#5e43ec"
                             : "#777",
                         }}
                         size={26}
@@ -507,7 +507,7 @@ const Room = () => {
 
                     <Button
                       onClick={() => leaveRoom()}
-                      className="!py-3 !font-[400] !px-8 !capitalize !flex !items-center !text-white !fill-white !bg-[#1891fe] !border !border-solid !border-[rgb(218,220,224)] !text-[13px] !transition-all hover:!text-[#f0f0f0] !rounded-[6rem]"
+                      className="!py-3 !font-[400] !px-8 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(218,220,224)] !text-[13px] !transition-all hover:!text-[#f0f0f0] !rounded-[6rem]"
                     >
                       End Meeting
                     </Button>
@@ -577,7 +577,7 @@ const Room = () => {
                           color: sidemodal
                             ? !pchat
                               ? "#777"
-                              : "#1891fe"
+                              : "#5e43ec"
                             : "#777",
                         }}
                         size={24}
@@ -674,7 +674,7 @@ const Room = () => {
 
                                 setMessageText("");
                               }}
-                              className="!bg-[#1890FF] !ml-3  !normal-case !rounded-[50%] !max-w-[45px] !min-w-[45px] !w-[45px] !h-[45px] !font-[inherit] !p-[10px]"
+                              className="!bg-[#5e43ec] !ml-3  !normal-case !rounded-[50%] !max-w-[45px] !min-w-[45px] !w-[45px] !h-[45px] !font-[inherit] !p-[10px]"
                             >
                               <BiSend className={"!text-[#fff]"} size={20} />
                             </Button>
@@ -869,7 +869,7 @@ const Room = () => {
 
                       // router.push(`/dashboard/rooms/${randId}/${id}`);
                     }}
-                    className="!py-2 !font-[500] !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#1891fe] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+                    className="!py-2 !font-[500] !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
                   >
                     {joiningRoom ? (
                       <>
