@@ -541,8 +541,25 @@ const Home: NextPage = () => {
     const logged = localStorage.getItem("clover-x");
 
     if (logged) {
-      Router.push("/dashboard");
-      return;
+      
+      try {
+
+        await axios.get('/user', {
+          headers: {
+            authorization: `Bearer ${logged}`
+          }
+        });
+
+        Router.push('/dashboard');
+
+        return;
+
+      } catch (err) {
+
+        localStorage.removeItem('clover-x')
+
+      }
+
     }
 
     setExec([]);
@@ -665,18 +682,18 @@ const Home: NextPage = () => {
                     </div>
 
                     <IconButton onClick={() => setSidebar(false)}>
-                      <BiX className="text-[rgb(24, 145, 254)]" size={30} />
+                      <BiX className="text-[#5e43ec]" size={30} />
                     </IconButton>
                   </div>
 
                   <Link href="#">
-                    <h1 className="flex text-[#1891fe] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold">
+                    <h1 className="flex text-[#5e43ec] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold">
                       Product
                     </h1>
                   </Link>
 
                   <Link href="#">
-                    <h1 className="flex text-[#1891fe] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold">
+                    <h1 className="flex text-[#5e43ec] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold">
                       Solutions
                     </h1>
                   </Link>
@@ -686,7 +703,7 @@ const Home: NextPage = () => {
                       setSidebar(false);
                       setStart(true);
                     }}
-                    className="flex text-[#1891fe] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold"
+                    className="flex text-[#5e43ec] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold"
                   >
                     Get Started
                   </h1>
@@ -756,7 +773,7 @@ const Home: NextPage = () => {
                             style={{
                               fontFamily: "Poppins",
                             }}
-                            className="!py-4 !px-8 !min-w-[203px] rounded-lg !capitalize !font-semibold !text-xl !text-white !bg-[#1891fe]"
+                            className="!py-4 !px-8 !min-w-[203px] rounded-lg !capitalize !font-semibold !text-xl !text-white !bg-[#5e43ec]"
                           >
                             Authenticate
                           </Button>
@@ -770,7 +787,7 @@ const Home: NextPage = () => {
                             style={{
                               fontFamily: "Poppins",
                             }}
-                            className="!py-4 !px-8 !min-w-[203px] rounded-lg !capitalize !font-semibold !text-xl !text-white !bg-[#1891fe]"
+                            className="!py-4 !px-8 !min-w-[203px] rounded-lg !capitalize !font-semibold !text-xl !text-white !bg-[#5e43ec]"
                           >
                             Register DAO
                           </Button>
@@ -863,7 +880,7 @@ const Home: NextPage = () => {
                             Router.push("/dashboard");
                           }}
                           style={{ fontFamily: "inherit" }}
-                          className="transition-all rounded-md delay-500 hover:border-[#1891fe] hover:text-[#1891fe] items-center text-[16px] flex border-[1px] 4sm:mr-2 text-[#575757] mb-2 w-full py-4 px-4"
+                          className="transition-all rounded-md delay-500 hover:border-[#5e43ec] hover:text-[#5e43ec] items-center text-[16px] flex border-[1px] 4sm:mr-2 text-[#575757] mb-2 w-full py-4 px-4"
                         >
                           <div className="w-[45px] relative rounded-[50%] justify-center bg-[#e7e7e7] mr-4 flex items-center h-[45px]">
                             <Image
@@ -1254,7 +1271,7 @@ const Home: NextPage = () => {
                               >
                                 <g
                                   fill="none"
-                                  stroke={"#1891fe"}
+                                  stroke={"#5e43ec"}
                                   strokeWidth="2"
                                 >
                                   <circle
@@ -1268,7 +1285,7 @@ const Home: NextPage = () => {
                                   ></circle>
                                   <circle
                                     id="colored"
-                                    fill={"#1891fe"}
+                                    fill={"#5e43ec"}
                                     cx="77"
                                     cy="77"
                                     r="72"
@@ -1294,7 +1311,7 @@ const Home: NextPage = () => {
 
                           <h2
                             style={{
-                              color: `#1891fe`,
+                              color: `#5e43ec`,
                             }}
                             className="mb-2 text-[15px] font-[600]"
                           >
@@ -1314,13 +1331,17 @@ const Home: NextPage = () => {
                               View transaction on{" "}
                               <span
                                 style={{
-                                  color: "#1891fe",
+                                  color: "#5e43ec",
                                 }}
                               >
                                 filfox
                               </span>
                             </a>
                           </Link>
+                         
+                             <p className="text-[#7c7c7c] mt-2 block font-[500] text-[15px]">
+                                Your DAO would be verified within 10 - 20mins
+                            </p>  
                         </div>
                       </TabPanel>
                     </FormControl>
@@ -1335,7 +1356,7 @@ const Home: NextPage = () => {
                       setFailMessage("");
                       sumitDeets();
                     }}
-                    className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#1891fe] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+                    className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
                   >
                     <BsPatchPlusFill
                       color={"inherit"}
@@ -1482,7 +1503,7 @@ const Home: NextPage = () => {
                   <div className="flex items-center">
                     <Button
                       onClick={submitTest}
-                      className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#1891fe] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+                      className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
                     >
                       <BiUserPlus
                         color={"inherit"}
@@ -1512,18 +1533,18 @@ const Home: NextPage = () => {
                     </div>
 
                     <IconButton onClick={() => setSidebar(false)}>
-                      <BiX className="text-[rgb(24, 145, 254)]" size={30} />
+                      <BiX className="text-[#5e43ec]" size={30} />
                     </IconButton>
                   </div>
 
                   <Link href="#">
-                    <h1 className="flex text-[#1891fe] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold">
+                    <h1 className="flex text-[#5e43ec] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold">
                       Product
                     </h1>
                   </Link>
 
                   <Link href="#">
-                    <h1 className="flex text-[#1891fe] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold">
+                    <h1 className="flex text-[#5e43ec] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold">
                       Solutions
                     </h1>
                   </Link>
@@ -1533,7 +1554,7 @@ const Home: NextPage = () => {
                       setSidebar(false);
                       setStart(true);
                     }}
-                    className="flex text-[#1891fe] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold"
+                    className="flex text-[#5e43ec] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold"
                   >
                     Get Started
                   </h1>
@@ -1544,7 +1565,7 @@ const Home: NextPage = () => {
 
           <div className="min-w-screen max-h-screen overflow-y-scroll overflow-x-hidden cusscroller relative bg-white p-4">
             <div className="max-w-[1430px] mx-auto">
-              <div className="bg-[#1890FF] usm:flex-col rounded-t-[1rem] usm:rounded-[1rem] rounded-bl-[1rem] min-w-full py-5 px-[40px] flex justify-center relative">
+              <div className="bg-[#5e43ec] usm:flex-col rounded-t-[1rem] usm:rounded-[1rem] rounded-bl-[1rem] min-w-full py-5 px-[40px] flex justify-center relative">
                 <div className="w-full">
                   <div className="flex items-center justify-between px-[30px] bg-white rounded-[1rem] py-2 mb-12">
                     <div className="h-[30px]">
@@ -1558,13 +1579,13 @@ const Home: NextPage = () => {
 
                     <div className="flex items-center w-[150px] mmd:hidden  justify-between">
                       <Link href="#">
-                        <span className="text-[#1890FF] text-[14px]">
+                        <span className="text-[#5e43ec] text-[14px]">
                           Product
                         </span>
                       </Link>
 
                       <Link href="#">
-                        <span className="text-[#1890FF] text-[14px]">
+                        <span className="text-[#5e43ec] text-[14px]">
                           Solutions
                         </span>
                       </Link>
@@ -1574,13 +1595,13 @@ const Home: NextPage = () => {
                       className="!hidden mmd:!block"
                       onClick={() => setSidebar(true)}
                     >
-                      <BsList className="text-[#1890FF] cursor-pointer text-[30px]" />
+                      <BsList className="text-[#5e43ec] cursor-pointer text-[30px]" />
                     </IconButton>
 
                     <div className="mmd:hidden">
                       <Button
                         onClick={() => setStart(true)}
-                        className="!bg-[#1891fe] !rounded-[.5rem] !text-white !mt-0 !py-2 !px-4 !font-medium"
+                        className="!bg-[#5e43ec] !rounded-[.5rem] !text-white !mt-0 !py-2 !px-4 !font-medium"
                       >
                         Get started
                       </Button>
@@ -1605,14 +1626,14 @@ const Home: NextPage = () => {
                     <div className="flex items-center usm:justify-center">
                       <Button
                         onClick={() => setStart(true)}
-                        className="!bg-[#387CF7] !border-solid !border-white !border-[2px] !mb-5 !rounded-[.5rem] !text-white !mt-0 !py-3 !px-4 !font-medium !capitalize"
+                        className="!bg-[#5e43ec] !border-solid !border-white !border-[2px] !mb-5 !rounded-[.5rem] !text-white !mt-0 !py-3 !px-4 !font-medium !capitalize"
                       >
                         Get started
                       </Button>
 
                       <Button
                         onClick={() => setImprove(true)}
-                        className="!bg-[#387CF7] !border-solid !border-white !border-[2px] !mb-5 !rounded-[.5rem] !text-white !hidden !ml-5 usm:!block !mt-0 !py-3 !px-4 !font-medium !capitalize"
+                        className="!bg-[#5e43ec] !border-solid !border-white !border-[2px] !mb-5 !rounded-[.5rem] !text-white !hidden !ml-5 usm:!block !mt-0 !py-3 !px-4 !font-medium !capitalize"
                       >
                         Help us improve?
                       </Button>
@@ -1625,7 +1646,7 @@ const Home: NextPage = () => {
                     Help us build better
                   </h4>
 
-                  <div className="flex bg-[#1891fe] items-center rounded-[1rem] p-5 justify-between min-h-[415px] mb-3 flex-col">
+                  <div className="flex bg-[#5e43ec] items-center rounded-[1rem] p-5 justify-between min-h-[415px] mb-3 flex-col">
                     {Boolean(testErr.length) && (
                       <div className="rounded-md w-[95%] font-bold mt-2 mx-auto px-3 py-2 bg-[#ff8f33] text-white">
                         {testErr}
@@ -1690,8 +1711,8 @@ const Home: NextPage = () => {
                   </div>
                 </div>
 
-                <div className="bg-[#1891fe] right-0 top-0 w-[45%] h-[225px] absolute rounded-br-[1rem] usm:hidden">
-                  <div className="w-[90.4%] rounded-b-[1rem] bg-[#1891fe] right-0 h-[30px] absolute bottom-[-10px]"></div>
+                <div className="bg-[#5e43ec] right-0 top-0 w-[45%] h-[225px] absolute rounded-br-[1rem] usm:hidden">
+                  <div className="w-[90.4%] rounded-b-[1rem] bg-[#5e43ec] right-0 h-[30px] absolute bottom-[-10px]"></div>
                 </div>
               </div>
             </div>

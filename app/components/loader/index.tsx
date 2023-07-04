@@ -28,13 +28,13 @@ const Loader = ({
         </div>
       )}
       <Box
-        className="text-[#1890FF] mt-11 justify-center "
+        className="text-[#5e43ec] mt-11 justify-center "
         sx={{ display: "flex" }}
       >
         <CircularProgress size={text ? 80 : 60} color="inherit" />
       </Box>
       {text !== "" && (
-        <div className="text-[#1890FF] text-xl font-bold">{text}</div>
+        <div className="text-[#5e43ec] text-xl font-bold">{text}</div>
       )}
     </div>
   );

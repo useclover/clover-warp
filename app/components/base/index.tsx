@@ -476,7 +476,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
                     <Button
                       onClick={submitName}
-                      className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#1891fe] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+                      className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
                     >
                       {aliasLoading ? (
                         <>
@@ -794,7 +794,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                 "& .select__control--is-focused": {
                                   borderWidth: "0px",
                                   borderBottomWidth: "2px",
-                                  borderBottomColor: `#1891fe !important`,
+                                  borderBottomColor: `#5e43ec !important`,
                                   boxShadow: "none",
                                 },
                               }),
@@ -862,7 +862,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                 setFailMessage("Name of channel is required");
                               }
                             }}
-                            className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#1891fe] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+                            className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
                           >
                             <BsPatchPlusFill
                               color={"inherit"}
@@ -951,7 +951,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                 );
                               }
                             }}
-                            className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#1891fe] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+                            className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
                           >
                             <BsPatchPlusFill
                               color={"inherit"}
@@ -974,15 +974,15 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
               onClick={() => setSidebar(!sidebar)}
             >
               {sidebar ? (
-                <BsList className="text-[#1890FF] cursor-pointer text-[30px]" />
+                <BsList className="text-[#5e43ec] cursor-pointer text-[30px]" />
               ) : (
-                <BiX className="text-[#1890FF] cursor-pointer text-[30px]" />
+                <BiX className="text-[#5e43ec] cursor-pointer text-[30px]" />
               )}
             </IconButton>
 
-            <div className="logo flex-shrink-0 text-[#1890FF]">
+            <div className="logo flex-shrink-0 text-[#5e43ec]">
               <Link href="/">
-                <a className="text-[#1890FF] cursor-pointer flex pl-4 items-center font-bold text-[18px]">
+                <a className="text-[#5e43ec] cursor-pointer flex pl-4 items-center font-bold text-[18px]">
                   <Image src={logo} width={100} height={33.33} alt="clover" />
                 </a>
               </Link>
@@ -1023,7 +1023,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                 title="Add More Discussions, voting, airdrop"
                 onClick={() => setAddNew(true)}
               >
-                <div className="w-[44px] min-w-[44px] flex items-center justify-center mr-[15px] rounded-[50%] bg-[#1890FF] h-[44px]">
+                <div className="w-[44px] min-w-[44px] flex items-center justify-center mr-[15px] rounded-[50%] bg-[#5e43ec] h-[44px]">
                   <BsPlusLg size={19} color="#fff" />
                 </div>
                 <div className="msg-detail w-full">
@@ -1043,7 +1043,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                 title="Meeting rooms"
                 onClick={async () => await route("rooms")}
               >
-                <div className="w-[44px] min-w-[44px] flex items-center justify-center mr-[15px] rounded-[50%] bg-[#1890FF] h-[44px]">
+                <div className="w-[44px] min-w-[44px] flex items-center justify-center mr-[15px] rounded-[50%] bg-[#5e43ec] h-[44px]">
                   <MdMeetingRoom size={19} color="#fff" />
                 </div>
                 <div className="msg-detail w-full">
@@ -1062,7 +1062,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                 }`}
                 onClick={async () => await route("storage")}
               >
-                <div className="w-[44px] min-w-[44px] flex items-center justify-center mr-[15px] rounded-[50%] bg-[#1890FF] h-[44px]">
+                <div className="w-[44px] min-w-[44px] flex items-center justify-center mr-[15px] rounded-[50%] bg-[#5e43ec] h-[44px]">
                   <FaCloud size={26} color="#fff" />
                 </div>
                 <div className="msg-detail w-full">
@@ -1076,7 +1076,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                         borderRadius: "5rem",
                         backgroundColor: "#D9D9D9",
                         "& .MuiLinearProgress-bar": {
-                          backgroundColor: "#1890FF",
+                          backgroundColor: "#5e43ec",
                         },
                       }}
                       value={((filelist || 0) / 50) * 100}

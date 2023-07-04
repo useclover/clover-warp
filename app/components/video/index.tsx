@@ -267,7 +267,7 @@ const Rooms = () => {
                     setFailMessage("Name of channel is required");
                   }
                 }}
-                className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#1891fe] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+                className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
               >
                 <MdMeetingRoom
                   color={"inherit"}
@@ -284,7 +284,7 @@ const Rooms = () => {
       <div className="w-full flex items-start justify-between filedrop min-h-screen">
         <Button
           onClick={() => setAddNew(true)}
-          className="!py-2 !mr-4 !flex !fixed !right-[15px] !bottom-[20px] !cursor-pointer !justify-center !z-[90] !items-center !px-4 !bg-[#1890FF] !text-white !border-solid !border-white !border-[2px] !w-[64px] !h-[64px] !rounded-[50%] overflow-hidden hover:bg-[#0c75d6] font-[300]"
+          className="!py-2 !mr-4 !flex !fixed !right-[15px] !bottom-[20px] !cursor-pointer !justify-center !z-[90] !items-center !px-4 !bg-[#5e43ec] !text-white !border-solid !border-white !border-[2px] !w-[64px] !h-[64px] !rounded-[50%] overflow-hidden hover:bg-[#0c75d6] font-[300]"
         >
           <BsPlusLg size={25} />
         </Button>
@@ -298,7 +298,7 @@ const Rooms = () => {
                     width: "100%",
                     padding: "0px 10px",
                     "& .Mui-selected": {
-                      backgroundColor: `#1890FF !important`,
+                      backgroundColor: `#5e43ec !important`,
                       color: `#fff !important`,
                     },
                     "& .MuiToggleButtonGroup-grouped": {
@@ -447,7 +447,7 @@ const Rooms = () => {
                         <div className="flex items-center justify-between">
                           <Link href={`/dashboard/rooms/${id}`}>
                             <a>
-                              <Button className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-[#1891fe] -left-3 !bg-white !border !border-solid !border-transparent hover:!border-[#1891fe] !transition-all !duration-500 !rounded-lg">
+                              <Button className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-[#5e43ec] -left-3 !bg-white !border !border-solid !border-transparent hover:!border-[#5e43ec] !transition-all !duration-500 !rounded-lg">
                                 <span className="mr-2 font-[400]">
                                   Join Meeting
                                 </span>
