@@ -26,7 +26,7 @@ const Homepage = () => {
     <>
       <Head>
         <title>CloverSuites - Seamless collaboration for DAOs</title>
-        <meta name="description" content="DAO suite" />
+        <meta name="description" content="CloverSuites is the easiest way to collaborate within a DAO. Enjoy DAO wide chats, calls, proposals and shared storage, at once." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="bg-[#07051E] relative mmdd:h-[450px] mmdd:px-[23px] h-[550px] flex items-center px-[50px] w-full">
