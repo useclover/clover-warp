@@ -7,6 +7,7 @@ import Link from "next/link";
 import { IndexContextProps } from "../../types";
 import { useContext } from "react";
 import { IndexContext } from "../../../contexts/IndexContext";
+import { WiMoonAltFull } from "react-icons/wi";
 
 const Footers = () => {
 
@@ -42,9 +43,10 @@ const Footers = () => {
       </div>
       <div className="flex items-center mmdd:flex-col mmdd:items-start justify-between">
         <div className="flex mmdd:mb-2 items-center">
-          <Image alt={"nigerian flag"} src={nigeria} height={13} width={20} />
+            {/* <WiMoonAltFull size={20} /> */}
+          {/* <Image alt={"nigerian flag"} src={nigeria} height={13} width={20} /> */}
           <span className="block ml-1 text-[14px] text-white">
-            Lagos, Nigeria
+            Your DAO
           </span>
         </div>
         <div className="flex items-center">

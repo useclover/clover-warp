@@ -24,6 +24,7 @@ import { IndexContext } from "../app/contexts/IndexContext";
 import Loader from "../app/components/loader";
 
 const Homepage = () => {
+  
   const { improve, registerModal, login, bigLoader } =
     useContext<IndexContextProps>(IndexContext);
 
