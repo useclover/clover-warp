@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { lq } from '../storage/init';
-import { contractAddress } from '../../../../pages';
 import Cryptr from 'cryptr';
 
 export interface mess {

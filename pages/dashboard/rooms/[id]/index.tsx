@@ -334,7 +334,7 @@ const Room = () => {
                           borderRadius: "6rem",
                           backgroundColor: "#fff",
                           "& .Mui-selected": {
-                            backgroundColor: `rgba(24, 145, 254, 0.8) !important`,
+                            backgroundColor: `rgba(94, 67, 236, 0.8) !important`,
                             color: `#fff !important`,
                           },
                           "& .MuiButtonBase-root": {
@@ -507,7 +507,7 @@ const Room = () => {
 
                     <Button
                       onClick={() => leaveRoom()}
-                      className="!py-3 !font-[400] !px-8 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(218,220,224)] !text-[13px] !transition-all hover:!text-[#f0f0f0] !rounded-[6rem]"
+                      className="!py-3 !font-[400] !px-8 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(94,67,236)] !text-[13px] !transition-all hover:!text-[#f0f0f0] !rounded-[6rem]"
                     >
                       End Meeting
                     </Button>
@@ -869,7 +869,7 @@ const Room = () => {
 
                       // router.push(`/dashboard/rooms/${randId}/${id}`);
                     }}
-                    className="!py-2 !font-[500] !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+                    className="!py-2 !font-[500] !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(94,67,236)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
                   >
                     {joiningRoom ? (
                       <>

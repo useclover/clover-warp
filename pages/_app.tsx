@@ -5,6 +5,7 @@ import "../styles/globals.css";
 import axios from 'axios';
 import { CCprovider } from "../app/components/extras/contexts/CContext";
 import '../app/components/types.d.ts';
+import { IndexContextProvider } from "../app/contexts/IndexContext";
 
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -15,7 +16,9 @@ function MyApp({ Component, pageProps }: AppProps) {
     <AuthProvider>
       <GenProvider>
         <CCprovider>
+          <IndexContextProvider>
             <Component {...pageProps} />
+          </IndexContextProvider>
         </CCprovider>
       </GenProvider>
     </AuthProvider>

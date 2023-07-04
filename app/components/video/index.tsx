@@ -267,7 +267,7 @@ const Rooms = () => {
                     setFailMessage("Name of channel is required");
                   }
                 }}
-                className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+                className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(94,67,236)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
               >
                 <MdMeetingRoom
                   color={"inherit"}
@@ -414,7 +414,7 @@ const Rooms = () => {
                     return (
                       <div
                         key={i}
-                        className="w-full border border-[rgb(218,220,224)] rounded-lg border-solid p-5 flex flex-col justify-between min-h-[230px]"
+                        className="w-full border border-[rgb(94,67,236)] rounded-lg border-solid p-5 flex flex-col justify-between min-h-[230px]"
                       >
                         <div>
                           <div className="mb-5 flex items-center">

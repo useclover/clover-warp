@@ -4,12 +4,20 @@ import { FaTwitter } from "react-icons/fa";
 import { HiSparkles } from "react-icons/hi";
 import nigeria from "../../../../public/images/nigeria.svg";
 import Link from "next/link";
+import { IndexContextProps } from "../../types";
+import { useContext } from "react";
+import { IndexContext } from "../../../contexts/IndexContext";
 
 const Footers = () => {
+
+    const { improve } =
+      useContext<IndexContextProps>(IndexContext);
+
   return (
     <div className="px-11 2usm:px-5 py-4 bg-[#121212]">
       <div className="flex justify-between items-center border-b pb-[18px] border-b-solid border-b-[#474747] mb-[18px]">
         <Button
+          onClick={() => improve?.(true)}
           style={{
             fontFamily: "Poppins",
           }}
