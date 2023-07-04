@@ -25,8 +25,8 @@ const Homepage = () => {
   return (
     <>
       <Head>
-        <title>Clover</title>
-        <meta name="description" content="DAO suite" />
+        <title>CloverSuites - Seamless collaboration for DAOs</title>
+        <meta name="description" content="CloverSuites is the easiest way to collaborate within a DAO. Enjoy DAO wide chats, calls, proposals and shared storage, at once." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="bg-[#07051E] relative mmdd:h-[450px] mmdd:px-[23px] h-[550px] flex items-center px-[50px] w-full">
@@ -280,7 +280,7 @@ const Homepage = () => {
 
       {/* end of usrs */}
 
-      <section className="px-11 bg-[#F6F7F8] 2usm:px-5 py-[30px]">
+      {/* <section className="px-11 bg-[#F6F7F8] 2usm:px-5 py-[30px]">
         <div className="flex items-center st:flex-col st:items-start justify-between">
           <h2 className="font-[600] st:text-[25px] text-[30px] txtColBase txtColsub mb-6">
             Browse our growing content library
@@ -331,9 +331,9 @@ const Homepage = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
-      <section className="px-11 py-[30px] 2usm:px-5 bg-[#f6f7f8]">
+      {/* <section className="px-11 py-[30px] 2usm:px-5 bg-[#f6f7f8]">
         <div className="flex items-center st:flex-col st:items-start justify-between mb-5">
           <div>
             <span className="uppercase block text-[15px] mb-1">
@@ -527,7 +527,7 @@ const Homepage = () => {
             </Link>
           </div>
         </div>
-      </section>
+      </section> */}
 
       <Footers />
     </>
