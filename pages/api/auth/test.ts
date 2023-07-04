@@ -4,7 +4,8 @@ import Cryptr from "cryptr";
 import { ethers } from "ethers";
 import type { NextApiRequest, NextApiResponse } from "next";
 import nft from "../../../artifacts/contracts/localdao.sol/CloverSuiteNFT.json"
-import { contractAddress } from "../../index";
+import { contractAddress } from "../../../app/contexts/IndexContext";
+
 
 type Data = {
   message: string;

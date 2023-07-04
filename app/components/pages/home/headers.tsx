@@ -3,12 +3,16 @@ import logo from "../../../../public/images/logo.png";
 import Link from "next/link"
 import { Button, IconButton, Modal } from "@mui/material";
 import { BiChevronRight, BiX } from "react-icons/bi";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { BsList } from "react-icons/bs";
+import { IndexContext } from "../../../contexts/IndexContext";
+import { IndexContextProps } from "../../types";
 
 const Nav = () => {
 
     const [open, setOpen] = useState<boolean>(false);
+
+    const { registerModal, login } = useContext<IndexContextProps>(IndexContext);
 
     return (
       <>
@@ -32,27 +36,29 @@ const Nav = () => {
                   </h1>
                 </Link>
 
-                <Link href="/pricing">
+                {/* <Link href="/pricing">
                   <h1 className="flex text-[#5e43ec] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold">
                     Pricing
                   </h1>
-                </Link>
+                </Link> */}
 
                 <h1
                   onClick={() => {
                     setOpen(false);
+                    login?.();
                   }}
                   className="flex text-[#5e43ec] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold"
                 >
-                  Authenticate your DAO
+                  Authenticate
                 </h1>
                 <h1
                   onClick={() => {
                     setOpen(false);
+                    registerModal?.(true);
                   }}
                   className="flex text-[#5e43ec] justify-between py-[14px] px-[17px] text-[25px] cursor-pointer font-bold"
                 >
-                  Register your DAO
+                  Register
                 </h1>
               </div>
             </div>
@@ -83,19 +89,21 @@ const Nav = () => {
               style={{
                 fontFamily: "Poppins",
               }}
+              onClick={login}
               className="!py-[9px] !px-4 !border !border-solid !border-[#797979] !rounded-[9px] !font-[300] mmsst:!hidden !normal-case !text-[12px] !text-white !flex !items-center !bg-[#29292b] backdrop-blur-[10px]"
             >
-              Authenticate
+              Authenticate your DAO
               <BiChevronRight size={18} className="ml-1" />
             </Button>
 
             <Button
+              onClick={() => registerModal?.(true)}
               style={{
                 fontFamily: "Poppins",
               }}
               className="!py-[9px] !px-4 !border !border-solid !border-[#5e43ec] !rounded-[9px] mmsst:!hidden !font-[300] !normal-case !text-[12px] !text-white !flex !items-center !bg-[#5e43ec]"
             >
-              Register
+              Register your DAO
               <BiChevronRight size={18} className="ml-1" />
             </Button>
             <IconButton

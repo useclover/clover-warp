@@ -476,7 +476,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
                     <Button
                       onClick={submitName}
-                      className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+                      className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(94,67,236)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
                     >
                       {aliasLoading ? (
                         <>
@@ -575,7 +575,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                             marginBottom: "15px !important",
                             width: "100%",
                             "& .Mui-selected": {
-                              backgroundColor: `rgba(24, 145, 254, 0.8) !important`,
+                              backgroundColor: `rgba(94,67,236, 0.8) !important`,
                               color: `#fff !important`,
                             },
                             "& .MuiButtonBase-root:first-of-type": {
@@ -862,7 +862,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                 setFailMessage("Name of channel is required");
                               }
                             }}
-                            className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+                            className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(94,67,236)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
                           >
                             <BsPatchPlusFill
                               color={"inherit"}
@@ -951,7 +951,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                                 );
                               }
                             }}
-                            className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(218,220,224)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+                            className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(94,67,236)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
                           >
                             <BsPatchPlusFill
                               color={"inherit"}

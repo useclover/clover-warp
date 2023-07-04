@@ -90,4 +90,12 @@ export interface fstructure extends dir {
   files: (store | dir)[];
 }
 
+export interface IndexContextProps {
+  isLoading?: boolean;
+  bigLoader?: boolean;
+  improve?: React.Dispatch<React.SetStateAction<boolean>>;
+  registerModal?: React.Dispatch<React.SetStateAction<boolean>>;
+  login?: () => Promise<void>;
+}
+
 export {}
