@@ -25,7 +25,7 @@ const Homepage = () => {
   return (
     <>
       <Head>
-        <title>Clover</title>
+        <title>CloverSuites - Seamless collaboration for DAOs</title>
         <meta name="description" content="DAO suite" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
