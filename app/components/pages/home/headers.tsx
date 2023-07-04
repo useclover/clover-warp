@@ -77,11 +77,11 @@ const Nav = () => {
                 Testnet
               </a>
             </Link>
-            <Link href={"/pricing"}>
+            {/* <Link href={"/pricing"}>
               <a className="py-[14px] mmsst:!hidden text-white px-3 text-[14px] flex items-center justify-center">
                 Pricing
               </a>
-            </Link>
+            </Link> */}
           </div>
 
           <div className="flex items-center justify-between mmsst:min-w-fit min-w-[390px]">
