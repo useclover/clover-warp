@@ -18,7 +18,7 @@ import bgLogo from "../../public/images/logolg.png";
 import cicon from "../../public/images/icon.png";
 import { BiUserPlus, BiX } from "react-icons/bi";
 import styles from "../../styles/Home.module.css";
-import ethers from 'ethers'
+import { ethers } from 'ethers'
 import axios from 'axios'
 import contract from "../../artifacts/contracts/localdao.sol/CloverSuiteNFT.json";
 import { makeNFTClient } from "../../app/components/extras/storage/utoken";
