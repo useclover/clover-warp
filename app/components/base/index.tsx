@@ -1109,6 +1109,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                         }
                       }}
                       time={clst !== undefined ? clst["date"] : undefined}
+                      curTime={clst !== undefined ? clst["time"] : undefined}
                       img={groupImgCache[gps]}
                       selected={
                         pathname[pathname.length - 1] == "dashboard" &&

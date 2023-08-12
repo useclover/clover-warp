@@ -217,7 +217,7 @@ const IndexContextProvider = ({ children }: { children: JSX.Element | JSX.Elemen
         console.log(err);
         throw err;
     }
-    };
+  };
 
 
     const submitTest = async () => {
@@ -516,7 +516,9 @@ const IndexContextProvider = ({ children }: { children: JSX.Element | JSX.Elemen
         }
 
         setTimeCounted(0);
+
       }
+      
     }, [timeCounted, timer]);
 
 
@@ -780,6 +782,7 @@ const IndexContextProvider = ({ children }: { children: JSX.Element | JSX.Elemen
                       <button
                         key={i}
                         onClick={async () => {
+                          
                           setLoading(true);
 
                           const name: string = vv.name;
@@ -801,7 +804,7 @@ const IndexContextProvider = ({ children }: { children: JSX.Element | JSX.Elemen
                                   : vv.joined,
                             })
                           );
-
+                          setShowModal(false)
                           Router.push("/dashboard");
                         }}
                         style={{ fontFamily: "inherit" }}

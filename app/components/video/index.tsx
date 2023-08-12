@@ -414,7 +414,7 @@ const Rooms = () => {
                     return (
                       <div
                         key={i}
-                        className="w-full border border-[rgb(94,67,236)] rounded-lg border-solid p-5 flex flex-col justify-between min-h-[230px]"
+                        className="w-full border border-[rgb(94,67,236)] rounded-lg border-solid p-5 flex flex-col justify-between min-h-[200px]"
                       >
                         <div>
                           <div className="mb-5 flex items-center">

@@ -8,7 +8,6 @@ export const CContext = createContext<mreply>({});
 
 export const CCprovider = ({ children }: { children: JSX.Element }) => {
 
-
   const [group, setGroup] = useState<string | undefined>();
 
   const [groupData, setGroupData] = useState<
