@@ -18,6 +18,7 @@ module.exports = {
       "mst": { max: "1230px" },
       "mmst": { max: "1230px" },
       "sst": {max: "780px"},
+      "srt": {min: "780px"},
       "st": { max: "750px" },
       "mmdd": { max: "630px" },
       "mmd": {max: "640px"},
@@ -26,7 +27,7 @@ module.exports = {
       "2sm": { max: "975px" },
       usm: { max: "940px" },
 
-      // homepage
+      // homepage780
       "mmsm": { max: "1030px" },
       "mmsst": { max: "830px" },
     },

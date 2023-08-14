@@ -26,7 +26,7 @@ export default function handler(
             if (title) {
 
               const { data: response } = await axios.post(
-                "https://iriko.testing.huddle01.com/api/v1/create-room",
+                "https://api.huddle01.com/api/v1/create-room",
                 {
                   title,
                   hostWallets: hostWallets || undefined,

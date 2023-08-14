@@ -18,6 +18,7 @@ import {
   useLobby,
   useMeetingMachine,
   usePeers,
+  useRecording,
   useRoom,
   useVideo,
 } from "@huddle01/react/hooks";
@@ -115,7 +116,45 @@ const Room = () => {
   
   const { address, isConnected } = useAccount();
 
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const { state, send } = useMeetingMachine();
+
+  const [roomId, setRoomId] = useState("");
+  const [displayNameText, setDisplayNameText] = useState("Guest");
+  const [projectId, setProjectId] = useState("");
+  const [accessToken, setAccessToken] = useState("");
+
   const { joinLobby, leaveLobby, isLobbyJoined } = useLobby();
+  const {
+    fetchAudioStream,
+    produceAudio,
+    stopAudioStream,
+    stopProducingAudio,
+    stream: micStream,
+  } = useAudio();
+  const {
+    fetchVideoStream,
+    produceVideo,
+    stopVideoStream,
+    stopProducingVideo,
+    error: camError,
+    stream: camStream,
+  } = useVideo();
+
+  // Event Listner
+  useEventListener("lobby:cam-on", () => {
+    if (camStream && videoRef.current) videoRef.current.srcObject = camStream;
+  });
+
+  const {
+    startRecording,
+    stopRecording,
+    error,
+    data: recordingData,
+  } = useRecording();
+
+  const { setDisplayName, error: displayNameError } = useDisplayName();
 
   const { joinRoom, leaveRoom, isRoomJoined } = useRoom();
 
@@ -125,27 +164,7 @@ const Room = () => {
 
   const [pchat, setPchat] = useState<boolean>(true);
 
-  const { state, send } = useMeetingMachine();
-
   const [messageText, setMessageText] = useState("");
-
-  const {
-    fetchAudioStream,
-    stopAudioStream,
-    error: micError,
-    stream: audioStream,
-    produceAudio,
-    stopProducingAudio,
-  } = useAudio();
-
-  const {
-    fetchVideoStream,
-    stopVideoStream,
-    error: camError,
-    stream: videoStream,
-    produceVideo,
-    stopProducingVideo,
-  } = useVideo();
 
 
   const { initialize, isInitialized } = useHuddle01();
@@ -174,7 +193,6 @@ const Room = () => {
       setLoginData(data);
       
       if (!isInitialized) initialize(process.env.NEXT_PUBLIC_HUDDLE_PROJECTID || "");
-
     }
 
   }, [address, router]);
@@ -199,12 +217,11 @@ const Room = () => {
 
   const [camera, setCamera] = useState<boolean>(false);
 
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  const { setDisplayName, error: displayNameError } = useDisplayName();
 
   useEffect(() => {
+
     async function init() {
+      
       await beginStorageProvider({
         user: address || "",
         contract,
@@ -221,9 +238,12 @@ const Room = () => {
 
         if (!isLobbyJoined) joinLobby(main.meetId);
 
+        console.log("isLobbyJoined", isLobbyJoined)
+
         setLoader(false);
 
         setMeeting(main);
+
       } else {
         router.push("/404");
       }
@@ -236,9 +256,9 @@ const Room = () => {
 
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.srcObject = videoStream;
+      videoRef.current.srcObject = camStream;
     }
-  }, [videoStream]);
+  }, [camStream]);
 
   const getActive = () => {
     return JSON.parse(meeting.active || "[]");
@@ -251,25 +271,28 @@ const Room = () => {
 
   });
 
-  useEventListener("room:peer-left", async () => {
-    const num = peerIds.length + 1;
+  useEventListener("room:peer-left", () => {
+      console.log(peers, peerIds, "haa")
+  })
 
-    const {
-      data: { room },
-    } = await axios.patch(
-      `/dao/${randId}/rooms/${id}/active?left=${num}`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
-        },
-      }
-    );
+  // useEventListener("room:peer-left", async () => {
+  //   const num = peerIds.length + 1;
 
-    setMeeting(room);
-  });
+  //   const {
+  //     data: { room },
+  //   } = await axios.patch(
+  //     `/dao/${randId}/rooms/${id}/active?left=${num}`,
+  //     {},
+  //     {
+  //       headers: {
+  //         Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
+  //       },
+  //     }
+  //   );
 
-  
+  //   setMeeting(room);
+  // });
+
 
   return (
     <>
@@ -480,7 +503,7 @@ const Room = () => {
                           }
                         } else {
                           if (produceAudio.isCallable) {
-                            produceAudio(audioStream);
+                            produceAudio(micStream);
 
                             setMicrophone(true);
                           }
@@ -521,7 +544,7 @@ const Room = () => {
                           }
                         } else {
                           if (produceVideo.isCallable) {
-                            produceVideo(videoStream);
+                            produceVideo(camStream);
 
                             setCamera(true);
 
@@ -691,7 +714,7 @@ const Room = () => {
           {!isRoomJoined && (
             <div className="w-full flex items-start">
               <div className="min-h-screen px-4 w-[60%] flex justify-evenly flex-col">
-                <div className="mt-[20px] w-full st:flex st:justify-between st:items-center mb-[1.24rem]">
+                <div className="mt-[20px] w-full st:flex st:justify-between st:items-center mb-[1.24rem] block">
                   <div className="flex items-start text-center justify-center">
                     <div className="items-center">
                       <h2 className="font-[400] text-[rgb(136, 137, 141)] text-[1.25rem]">
@@ -733,12 +756,12 @@ const Room = () => {
                     <IconButton
                       onClick={async () => {
                         if (microphone) {
+                          console.log(stopAudioStream.isCallable, 's')
                           stopAudioStream();
-                          console.log("work");
                           setMicrophone(false);
                         } else {
+                          console.log(fetchAudioStream.isCallable, 's')
                           fetchAudioStream();
-                          console.log("king");
                           setMicrophone(true);
                         }
                       }}
@@ -808,7 +831,7 @@ const Room = () => {
                 <div className="mt-[20px] w-full st:flex st:justify-between st:items-center mb-[1.24rem]">
                   <div className="flex items-start text-center justify-center">
                     <div className="items-center">
-                      <h2 className="font-[400] text-[rgb(136, 137, 141)] text-[1.25rem]">
+                      <h2 className="font-[400] text-[rgb(136, 137, 141)] text-[1.25rem] text-center w-full">
                         Ready to Join?
                       </h2>
                     </div>
