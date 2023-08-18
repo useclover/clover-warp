@@ -473,7 +473,6 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
                 <div className="bg-[#efefef] flex justify-center items-center rounded-b-[.9rem] px-6 py-4">
                   <div className="flex items-center">
-
                     <Button
                       onClick={submitName}
                       className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(94,67,236)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
@@ -1014,7 +1013,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
           </div>
           <div className="wrapper w-full flex flex-grow-[1] overflow-hidden">
             <div
-              className={`conversation-area relative flex-col overflow-y-auto overflow-x-hidden w-[340px] flex-shrink-0 border-r-solid border-r border-r-[#eef2f4] cusscroller ${
+              className={`conversation-area relative flex-col overflow-y-auto overflow-x-hidden w-[340px] srt:!flex flex-shrink-0 border-r-solid border-r border-r-[#eef2f4] cusscroller ${
                 sidebar ? "!hidden" : "!flex"
               }`}
             >
@@ -1109,6 +1108,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                         }
                       }}
                       time={clst !== undefined ? clst["date"] : undefined}
+                      curTime={clst !== undefined ? clst["time"] : undefined}
                       img={groupImgCache[gps]}
                       selected={
                         pathname[pathname.length - 1] == "dashboard" &&

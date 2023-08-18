@@ -193,7 +193,7 @@ export const retrieveGroupChats = async (groups?: any) => {
     let lastchat = undefined;
 
     if (chat.data !== undefined) {
-      const { data, messId, sender, index, created_at: udate } = chat;
+      const { data, messId, sender, index, created_at: udate, time } = chat;
 
       const ddata = JSON.parse(data);
 
@@ -205,6 +205,7 @@ export const retrieveGroupChats = async (groups?: any) => {
         sender,
         index,
         date: date.getTime(),
+        time
       };
     }
     const { key: encryptedHash, init } = eData;
@@ -212,7 +213,6 @@ export const retrieveGroupChats = async (groups?: any) => {
     const { contract, hash } = JSON.parse(
       localStorage.getItem("cloverlog") || '{"contract":""}'
     );
-
 
     let decryptedKeys;
 
@@ -228,7 +228,7 @@ export const retrieveGroupChats = async (groups?: any) => {
       name: groupname,
       lastchat,
       groupKeys: encryptedHash,
-      key
+      key,
     });
 
   });

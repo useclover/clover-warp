@@ -289,7 +289,8 @@ const Rooms = () => {
           <BsPlusLg size={25} />
         </Button>
 
-        <div className="w-full st:!pl-0 pb-[65px] transition-all delay-500 h-full flex flex-col cusscroller overflow-y-scroll overflow-x-hidden">
+        <div className="w-full st:!pl-0 pb-[65px] transition-all delay-500 h-full flex flex-col cusscroller overflow-y-scroll st:pb-[120px] overflow-x-hidden">
+
           {/* <div className="my-2">
                 <ToggleButtonGroup
                   value={tagValue}
@@ -394,9 +395,9 @@ const Rooms = () => {
                 <div
                   style={{
                     gridTemplateColumns:
-                      "repeat(auto-fill, minmax(280px, 1fr))",
+                      "repeat(auto-fill, minmax(300px, 1fr))",
                   }}
-                  className="flist pt-7 grid gap-2 grid-flow-dense"
+                  className="pt-7 grid gap-2 grid-flow-dense"
                 >
                   {roomContent.map((attributes: any, i: number) => {
                     const {
@@ -414,7 +415,7 @@ const Rooms = () => {
                     return (
                       <div
                         key={i}
-                        className="w-full border border-[rgb(94,67,236)] rounded-lg border-solid p-5 flex flex-col justify-between min-h-[230px]"
+                        className="w-full border border-[rgb(94,67,236)] rounded-lg border-solid p-5 flex flex-col justify-between min-h-[200px] min-w-[300px]"
                       >
                         <div>
                           <div className="mb-5 flex items-center">
@@ -445,24 +446,26 @@ const Rooms = () => {
                         </div>
 
                         <div className="flex items-center justify-between">
-                          <Link href={`/dashboard/rooms/${id}`}>
-                            <a>
-                              <Button className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-[#5e43ec] -left-3 !bg-white !border !border-solid !border-transparent hover:!border-[#5e43ec] !transition-all !duration-500 !rounded-lg">
+                          
+                              <Button
+                                onClick={() =>
+                                  (window.location.href = `/dashboard/rooms/${id}`)
+                                }
+                                className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-[#5e43ec] -left-3 !bg-white !border !border-solid !border-transparent hover:!border-[#5e43ec] !transition-all !duration-500 !rounded-lg"
+                              >
                                 <span className="mr-2 font-[400]">
                                   Join Meeting
                                 </span>
                                 <BsArrowRightCircle size={20} />
                               </Button>
-                            </a>
-                          </Link>
 
                           <AvatarGroup
                             max={3}
                             sx={{
                               "& .MuiAvatar-circular": {
-                                width: '33px',
-                                fontSize: '13px',
-                                height: '33px'
+                                width: "33px",
+                                fontSize: "13px",
+                                height: "33px",
                               },
                             }}
                             className="!flex !items-center !justify-center mx-2"
