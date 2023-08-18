@@ -4,6 +4,7 @@ import Image from "next/image";
 import logo from "../../../public/images/logo.png";
 import { useState, useEffect, useRef } from "react";
 import Loader from "../../../../app/components/loader";
+import { Audio, Video } from "@huddle01/react/components";
 import { useDisplayName } from "@huddle01/react/app-utils";
 import {
   lq,
@@ -55,8 +56,6 @@ import {
   RiLayoutGridFill,
 } from "react-icons/ri";
 import { FaUser } from "react-icons/fa";
-import { BsChat, BsChatFill } from "react-icons/bs";
-import PeerVideoAudioElem from "../../../../app/components/video/PeerVideoAudioElem";
 
 const ChatItem = ({ user }: { user: boolean }) => {
   return (
@@ -113,32 +112,33 @@ const PartItem = () => {
 };
 
 const Room = () => {
-  
+
   const { address, isConnected } = useAccount();
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const { state, send } = useMeetingMachine();
 
-  const [roomId, setRoomId] = useState("");
-  const [displayNameText, setDisplayNameText] = useState("Guest");
-  const [projectId, setProjectId] = useState("");
-  const [accessToken, setAccessToken] = useState("");
+  const [initLoader, setInitLoader] = useState()
 
-  const { joinLobby, leaveLobby, isLobbyJoined } = useLobby();
+  const { joinLobby, leaveLobby, isLobbyJoined, isLoading: lobbyLoading } = useLobby();
+
   const {
     fetchAudioStream,
     produceAudio,
+    isLoading: audioLoading,
     stopAudioStream,
     stopProducingAudio,
     stream: micStream,
   } = useAudio();
+
   const {
     fetchVideoStream,
     produceVideo,
     stopVideoStream,
     stopProducingVideo,
     error: camError,
+    isLoading: camLoading,
     stream: camStream,
   } = useVideo();
 
@@ -147,16 +147,16 @@ const Room = () => {
     if (camStream && videoRef.current) videoRef.current.srcObject = camStream;
   });
 
-  const {
-    startRecording,
-    stopRecording,
-    error,
-    data: recordingData,
-  } = useRecording();
+  // const {
+  //   startRecording,
+  //   stopRecording,
+  //   error,
+  //   data: recordingData,
+  // } = useRecording();
 
   const { setDisplayName, error: displayNameError } = useDisplayName();
 
-  const { joinRoom, leaveRoom, isRoomJoined } = useRoom();
+  const { joinRoom, leaveRoom, isRoomJoined, isLoading: roomLoading } = useRoom();
 
   const [layout, setLayout] = useState<string>("grid");
 
@@ -165,7 +165,6 @@ const Room = () => {
   const [pchat, setPchat] = useState<boolean>(true);
 
   const [messageText, setMessageText] = useState("");
-
 
   const { initialize, isInitialized } = useHuddle01();
 
@@ -191,10 +190,10 @@ const Room = () => {
       const data = JSON.parse(localStorage.getItem("cloverlog") || "{}");
 
       setLoginData(data);
-      
-      if (!isInitialized) initialize(process.env.NEXT_PUBLIC_HUDDLE_PROJECTID || "");
-    }
 
+      if (!isInitialized)
+        initialize(process.env.NEXT_PUBLIC_HUDDLE_PROJECTID || "");
+    }
   }, [address, router]);
 
   const [isLoading, setLoader] = useState(true);
@@ -213,15 +212,13 @@ const Room = () => {
 
   const [meeting, setMeeting] = useState<any>({});
 
-  const [microphone, setMicrophone] = useState<boolean>(false);
+  const [microphone, setMicrophone] = useState<boolean>(true);
 
-  const [camera, setCamera] = useState<boolean>(false);
+  const [camera, setCamera] = useState<boolean>(true);
 
 
   useEffect(() => {
-
     async function init() {
-      
       await beginStorageProvider({
         user: address || "",
         contract,
@@ -233,17 +230,11 @@ const Room = () => {
       // // const main = false;
 
       if (main !== false) {
-
-        console.log(main, "main")
-
         if (!isLobbyJoined) joinLobby(main.meetId);
-
-        console.log("isLobbyJoined", isLobbyJoined)
 
         setLoader(false);
 
         setMeeting(main);
-
       } else {
         router.push("/404");
       }
@@ -255,44 +246,89 @@ const Room = () => {
   }, [address, id, contract, name, participants]);
 
   useEffect(() => {
+    if (isLobbyJoined) {
+      const user = JSON.parse(localStorage.getItem("cloveruser") || "{}");
+
+      if (user?.name) setDisplayName(user.name);
+    }
+  }, [isLobbyJoined]);
+
+  useEffect(() => {
+    if (fetchAudioStream.isCallable) {
+      fetchAudioStream();
+    }
+  }, [fetchAudioStream.isCallable]);
+
+  useEffect(() => {
+    if (fetchVideoStream.isCallable) {
+      fetchVideoStream();
+    }
+  }, [fetchVideoStream.isCallable]);
+
+  useEffect(() => {
     if (videoRef.current) {
       videoRef.current.srcObject = camStream;
     }
   }, [camStream]);
 
+
   const getActive = () => {
     return JSON.parse(meeting.active || "[]");
   };
 
-
   useEventListener("room:new-peer", async () => {
-
     console.log(peers, peerIds, "hmm");
-
   });
 
   useEventListener("room:peer-left", () => {
-      console.log(peers, peerIds, "haa")
+    console.log(peers, peerIds, "haa");
+  });
+
+  const activateVideo = () => new Promise((resolve, reject) => {
+      if (!audioLoading) {
+          produceVideo(camStream)
+          resolve(true)
+      }
+  });
+
+  const activateAudio = () => new Promise((resolve, reject) => {
+        setTimeout(() => {
+            produceAudio(micStream)
+            resolve(true)
+        }, 1000);
   })
 
-  // useEventListener("room:peer-left", async () => {
-  //   const num = peerIds.length + 1;
+  useEventListener("room:joined", () => {
+    if (isRoomJoined) {
+      (async () => {
+          if (microphone && produceAudio.isCallable) {
+            await activateAudio()
+          }
 
-  //   const {
-  //     data: { room },
-  //   } = await axios.patch(
-  //     `/dao/${randId}/rooms/${id}/active?left=${num}`,
-  //     {},
-  //     {
-  //       headers: {
-  //         Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
-  //       },
-  //     }
-  //   );
+          if (camera && produceVideo.isCallable) {
+              await activateVideo();
+          }          
+      })()
+    }   
+  })
 
-  //   setMeeting(room);
-  // });
+  useEventListener("room:peer-left", async () => {
+    const num = peerIds.length + 1;
 
+    const {
+      data: { room },
+    } = await axios.patch(
+      `/dao/${randId}/rooms/${id}/active?left=${num}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
+        },
+      }
+    );
+
+    setMeeting(room);
+  });
 
   return (
     <>
@@ -393,13 +429,19 @@ const Room = () => {
                     </div>
                   </div>
                   <div className="h-[calc(100vh-200px)] overflow-hidden flex items-center cusscroller overflow-y-scroll relative">
-                    <div className="grid gap-4 grid-cols-3 my-3">
+                    <div
+                      style={{
+                        gridTemplateColumns:
+                          "repeat(auto-fill, minmax(300px, 1fr))",
+                      }}
+                      className="grid w-full gap-[4rem] grid-cols-3 my-3"
+                    >
                       {/* participants list */}
 
-                      <div className="rounded-[20px] min-w-[300px] h-[180px] min-h-[180px] bg-[#ffffff52] relative flex items-center justify-center overflow-hidden border-[2px] border-solid border-[#ececec]">
+                      <div className="rounded-[20px] max-w-[300px] min-w-[300px] h-[180px] min-h-[180px] bg-[#ffffff52] relative flex items-center justify-center overflow-hidden border-[2px] border-solid border-[#ececec]">
                         <RandomAvatar name={"Joel"} square={true} size={300} />
 
-                        <div className="absolute "></div>
+                        <div className="absolute"></div>
 
                         <div
                           className={`absolute overflow-hidden px-[6px] py-2 bg-inherit ${
@@ -430,11 +472,11 @@ const Room = () => {
                               )}
                             </IconButton>
                           </div>
-                          {false && (
+                          {/* {true && (
                             <div className="w-fit h-fit rounded-[50%] border-[2px] border-solid flex items-center justify-center border-[#e6e6e6] m-auto">
                               <RandomAvatar size={70} name={"joel"} />
                             </div>
-                          )}
+                          )} */}
                           <div className="w-fit text-[12px] flex h-fit rounded-[6rem] px-2 py-1 items-center bg-[#1f1f1f2c] text-white relative cursor-default">
                             <FaUser
                               size={10}
@@ -445,13 +487,77 @@ const Room = () => {
                         </div>
                       </div>
 
-                      {/* peerids */}
+                      {Object.values(peers).map((peer, i) => {
+                        return (
+                          <div
+                            key={i}
+                            className="rounded-[20px] max-w-[300px] min-w-[300px] h-[180px] min-h-[180px] bg-[#ffffff52] relative flex items-center justify-center overflow-hidden border-[2px] border-solid border-[#ececec]"
+                          >
+                            <RandomAvatar
+                              name={"Joel"}
+                              square={true}
+                              size={300}
+                            />
 
-                      {/* {peerIds.map((peer: string, i: number) => (
-                        <div className="bg-black w-[100px] h-[100px]" key={i}>
-                          <PeerVideoAudioElem key={i} peerIdAtIndex={peer} />
-                        </div>
-                      ))} */}
+                            <div className="absolute"></div>
+
+                            <div
+                              className={`absolute overflow-hidden px-[6px] py-2 bg-inherit ${
+                                true ? "backdrop-blur-[6px]" : ""
+                              } h-full w-full flex flex-col justify-between`}
+                            >
+                              <div className="w-full flex items-center justify-end">
+                                <IconButton
+                                  onClick={() => false}
+                                  size={"medium"}
+                                  style={{
+                                    backgroundColor: true ? "#fff" : "#5e43ec",
+                                  }}
+                                >
+                                  {/* style */}
+                                  {true ? (
+                                    <BiMicrophoneOff
+                                      color={"inherit"}
+                                      className="text-[#777]"
+                                      size={17}
+                                    />
+                                  ) : (
+                                    <BiMicrophone
+                                      color={"inherit"}
+                                      className="text-white"
+                                      size={17}
+                                    />
+                                  )}
+                                </IconButton>
+                              </div>
+                              {/* {true && (
+                            <div className="w-fit h-fit rounded-[50%] border-[2px] border-solid flex items-center justify-center border-[#e6e6e6] m-auto">
+                              <RandomAvatar size={70} name={"joel"} />
+                            </div>
+                          )} */}
+
+                              {peer.cam && (
+                                <Video
+                                  peerId={peer.peerId}
+                                  track={peer.cam}
+                                  debug
+                                />
+                              )}
+
+                              {peer.mic && (
+                                <Audio peerId={peer.peerId} track={peer.mic} />
+                              )}
+                              <div className="w-fit text-[12px] flex h-fit rounded-[6rem] px-2 py-1 items-center bg-[#1f1f1f2c] text-white relative cursor-default">
+                                <FaUser
+                                  size={10}
+                                  className="mr-[6px] relative -top-[2px]"
+                                />{" "}
+                                {peer.displayName}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -496,24 +602,24 @@ const Room = () => {
 
                     <IconButton
                       onClick={() => {
-                        if (microphone) {
-                          if (stopProducingVideo.isCallable) {
-                            stopProducingAudio();
-                            setMicrophone(false);
-                          }
+                        if (stopProducingVideo.isCallable) {
+                          stopProducingAudio();
+                          setMicrophone(false);
                         } else {
-                          if (produceAudio.isCallable) {
-                            produceAudio(micStream);
-
-                            setMicrophone(true);
-                          }
+                          produceAudio(micStream);
+                          setMicrophone(true);
                         }
                       }}
                       className="bg-white p-3 h-[50px] w-[50px]"
                       size={"large"}
                     >
-                    
-                      {microphone ? (
+                      {audioLoading ? (
+                        <CircularProgress
+                          color={"inherit"}
+                          className="!w-[26px] text-[#777] !h-[26px]"
+                        />
+                      ) : produceAudio.isCallable &&
+                        !stopProducingAudio.isCallable ? (
                         <BiMicrophone
                           color={"inherit"}
                           className="text-[#777]"
@@ -529,7 +635,10 @@ const Room = () => {
                     </IconButton>
 
                     <Button
-                      onClick={() => leaveRoom()}
+                      onClick={() => {
+                        leaveRoom();
+                        router.push("/dashboard/rooms");
+                      }}
                       className="!py-3 !font-[400] !px-8 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(94,67,236)] !text-[13px] !transition-all hover:!text-[#f0f0f0] !rounded-[6rem]"
                     >
                       End Meeting
@@ -537,24 +646,25 @@ const Room = () => {
 
                     <IconButton
                       onClick={() => {
-                        if (camera) {
-                          if (stopProducingVideo.isCallable) {
-                            stopProducingAudio();
-                            setCamera(false);
-                          }
+                        if (stopProducingVideo.isCallable) {
+                          stopProducingVideo();
+                          setCamera(false);
                         } else {
-                          if (produceVideo.isCallable) {
-                            produceVideo(camStream);
+                          produceVideo(camStream);
 
-                            setCamera(true);
-
-                          }
+                          setCamera(true);
                         }
                       }}
                       className="bg-white p-3 h-[50px] w-[50px]"
                       size={"large"}
                     >
-                      {camera ? (
+                      {camLoading ? (
+                        <CircularProgress
+                          color={"inherit"}
+                          className="!w-[26px] text-[#777] !h-[26px]"
+                        />
+                      ) : produceVideo.isCallable &&
+                        stopProducingVideo.isCallable ? (
                         <BiVideo
                           color={"inherit"}
                           className="text-[#777]"
@@ -756,12 +866,12 @@ const Room = () => {
                     <IconButton
                       onClick={async () => {
                         if (microphone) {
-                          console.log(stopAudioStream.isCallable, 's')
-                          stopAudioStream();
+                          // console.log(stopAudioStream.isCallable, "s");
+                          // stopAudioStream();
                           setMicrophone(false);
                         } else {
-                          console.log(fetchAudioStream.isCallable, 's')
-                          fetchAudioStream();
+                          // console.log(fetchAudioStream.isCallable, "s");
+                          // fetchAudioStream();
                           setMicrophone(true);
                         }
                       }}
@@ -786,10 +896,10 @@ const Room = () => {
                     <IconButton
                       onClick={() => {
                         if (camera) {
-                          stopVideoStream();
+                          // stopVideoStream();
                           setCamera(false);
                         } else {
-                          fetchVideoStream();
+                          // fetchVideoStream();
                           setCamera(true);
                         }
                       }}
@@ -866,9 +976,21 @@ const Room = () => {
 
                 <div className="">
                   <Button
-                    disabled={joiningRoom}
+                    disabled={
+                      roomLoading ||
+                      camLoading ||
+                      audioLoading ||
+                      !isInitialized
+                    }
                     onClick={async () => {
-                      if (joiningRoom) return;
+                      if (
+                        roomLoading ||
+                        camLoading ||
+                        audioLoading ||
+                        !isInitialized ||
+                        joiningRoom
+                      )
+                        return;
 
                       setJoiningRoom(true);
 
@@ -894,7 +1016,11 @@ const Room = () => {
                     }}
                     className="!py-2 !font-[500] !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(94,67,236)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
                   >
-                    {joiningRoom ? (
+                    {roomLoading ||
+                    camLoading ||
+                    audioLoading ||
+                    joiningRoom ||
+                    !joinRoom.isCallable ? (
                       <>
                         <div className="mr-3 h-[20px] text-[#fff]">
                           <CircularProgress
@@ -902,7 +1028,11 @@ const Room = () => {
                             className="!w-[20px] !h-[20px]"
                           />
                         </div>{" "}
-                        <span>Just a Sec...</span>
+                        <span>
+                          {roomLoading || joiningRoom
+                            ? "Joining..."
+                            : "Setting Up Things..."}
+                        </span>
                       </>
                     ) : (
                       <>Join Now</>

@@ -446,24 +446,26 @@ const Rooms = () => {
                         </div>
 
                         <div className="flex items-center justify-between">
-                          <Link href={`/dashboard/rooms/${id}`}>
-                            <a>
-                              <Button className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-[#5e43ec] -left-3 !bg-white !border !border-solid !border-transparent hover:!border-[#5e43ec] !transition-all !duration-500 !rounded-lg">
+                          
+                              <Button
+                                onClick={() =>
+                                  (window.location.href = `/dashboard/rooms/${id}`)
+                                }
+                                className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-[#5e43ec] -left-3 !bg-white !border !border-solid !border-transparent hover:!border-[#5e43ec] !transition-all !duration-500 !rounded-lg"
+                              >
                                 <span className="mr-2 font-[400]">
                                   Join Meeting
                                 </span>
                                 <BsArrowRightCircle size={20} />
                               </Button>
-                            </a>
-                          </Link>
 
                           <AvatarGroup
                             max={3}
                             sx={{
                               "& .MuiAvatar-circular": {
-                                width: '33px',
-                                fontSize: '13px',
-                                height: '33px'
+                                width: "33px",
+                                fontSize: "13px",
+                                height: "33px",
                               },
                             }}
                             className="!flex !items-center !justify-center mx-2"
