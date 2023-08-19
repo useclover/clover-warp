@@ -81,23 +81,23 @@ const ChatItem = ({ user }: { user: boolean }) => {
   );
 };
 
-const PartItem = () => {
+const PartItem = ({ mic, name, address, video }: { mic: boolean, address: string, video: boolean, name: string }) => {
   return (
     <div className="flex items-center justify-between py-2 bg-[#f3f3f3] px-2 rounded-md mb-1">
       <div className="flex items-center">
         <div className="rounded-[50%] w-[30px] mr-2 h-[30px] flex items-center justify-center">
-          <RandomAvatar name="Joel" size={30} />
+          <RandomAvatar name={address} size={30} />
         </div>
-        <span className="text-[14px] truncate">Me</span>
+        <span className="text-[14px] truncate">{name}</span>
       </div>
 
       <div className="flex items-center">
-        {true ? (
+        {video ? (
           <BiVideo className="text-[#777] mr-3" size={16} />
         ) : (
           <BiVideoOff className="text-[#777] mr-3" size={16} />
         )}
-        {true ? (
+        {mic ? (
           <BiMicrophone className="text-[#777]" size={16} />
         ) : (
           <BiMicrophoneOff
@@ -235,6 +235,7 @@ const Room = () => {
         setLoader(false);
 
         setMeeting(main);
+
       } else {
         router.push("/404");
       }
@@ -273,8 +274,26 @@ const Room = () => {
 
 
   const getActive = () => {
-    return JSON.parse(meeting.active || "[]");
+    const active = JSON.parse(meeting.active || "{}");
+
+    return { value: active, total: Object.keys(active).length };
+
   };
+
+  const getUser = (val: string) => {
+
+    const active = JSON.parse(meeting.active || "{}");
+
+    console.log(active, 'sss')
+    for (let a in active) {
+      if (active[a].ids && active[a].ids.includes(val)) {
+        return { name: active[a].name, address: a }
+      }
+    }
+
+    return { name: '', address: '' }
+
+  }
 
   useEventListener("room:new-peer", async () => {
     console.log(peers, peerIds, "hmm");
@@ -319,7 +338,9 @@ const Room = () => {
       data: { room },
     } = await axios.patch(
       `/dao/${randId}/rooms/${id}/active?left=${num}`,
-      {},
+      {
+        peerId: state.context.peerId
+      },
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
@@ -439,7 +460,7 @@ const Room = () => {
                       {/* participants list */}
 
                       <div className="rounded-[20px] max-w-[300px] min-w-[300px] h-[180px] min-h-[180px] bg-[#ffffff52] relative flex items-center justify-center overflow-hidden border-[2px] border-solid border-[#ececec]">
-                        <RandomAvatar name={"Joel"} square={true} size={300} />
+                        <RandomAvatar name={address} square={true} size={300} />
 
                         <div className="absolute"></div>
 
@@ -457,14 +478,14 @@ const Room = () => {
                               }}
                             >
                               {/* style */}
-                              {true ? (
-                                <BiMicrophoneOff
+                              {!produceAudio.isCallable ? (
+                                <BiMicrophone
                                   color={"inherit"}
                                   className="text-[#777]"
                                   size={17}
                                 />
                               ) : (
-                                <BiMicrophone
+                                <BiMicrophoneOff
                                   color={"inherit"}
                                   className="text-white"
                                   size={17}
@@ -494,7 +515,7 @@ const Room = () => {
                             className="rounded-[20px] max-w-[300px] min-w-[300px] h-[180px] min-h-[180px] bg-[#ffffff52] relative flex items-center justify-center overflow-hidden border-[2px] border-solid border-[#ececec]"
                           >
                             <RandomAvatar
-                              name={"Joel"}
+                              name={getUser(peer.peerId).address}
                               square={true}
                               size={300}
                             />
@@ -515,7 +536,7 @@ const Room = () => {
                                   }}
                                 >
                                   {/* style */}
-                                  {true ? (
+                                  {!peer.mic ? (
                                     <BiMicrophoneOff
                                       color={"inherit"}
                                       className="text-[#777]"
@@ -547,12 +568,19 @@ const Room = () => {
                               {peer.mic && (
                                 <Audio peerId={peer.peerId} track={peer.mic} />
                               )}
+
                               <div className="w-fit text-[12px] flex h-fit rounded-[6rem] px-2 py-1 items-center bg-[#1f1f1f2c] text-white relative cursor-default">
                                 <FaUser
                                   size={10}
                                   className="mr-[6px] relative -top-[2px]"
                                 />{" "}
-                                {peer.displayName}
+                                {getUser(peer.peerId).name ||
+                                  `${getUser(peer.peerId).address?.substring(
+                                    0,
+                                    6
+                                  )}....${getUser(
+                                    peer.peerId
+                                  ).address?.substring(38, 42)}`}
                               </div>
                             </div>
                           </div>
@@ -618,8 +646,8 @@ const Room = () => {
                           color={"inherit"}
                           className="!w-[26px] text-[#777] !h-[26px]"
                         />
-                      ) : produceAudio.isCallable &&
-                        !stopProducingAudio.isCallable ? (
+                      ) : !produceAudio.isCallable &&
+                        stopProducingAudio.isCallable ? (
                         <BiMicrophone
                           color={"inherit"}
                           className="text-[#777]"
@@ -663,7 +691,7 @@ const Room = () => {
                           color={"inherit"}
                           className="!w-[26px] text-[#777] !h-[26px]"
                         />
-                      ) : produceVideo.isCallable &&
+                      ) : !produceVideo.isCallable &&
                         stopProducingVideo.isCallable ? (
                         <BiVideo
                           color={"inherit"}
@@ -741,7 +769,31 @@ const Room = () => {
                         <div className="w-full cusscroller overflow-y-scroll overflow-x-hidden h-[calc(100vh-100px)]">
                           {/* list item down */}
 
-                          <PartItem />
+                          <PartItem
+                            address={address || "user"}
+                            name={"me"}
+                            mic={!produceAudio.isCallable}
+                            video={!produceVideo.isCallable}
+                          />
+
+                          {Object.values(peers).map((peer, i) => (
+                            <PartItem
+                              key={i}
+                              name={
+                                getUser(peer.peerId).name ||
+                                `${getUser(peer.peerId).address?.substring(
+                                  0,
+                                  6
+                                )}....${getUser(peer.peerId).address?.substring(
+                                  38,
+                                  42
+                                )}`
+                              }
+                              address={getUser(peer.peerId).address}
+                              mic={Boolean(peer.mic)}
+                              video={Boolean(peer.cam)}
+                            />
+                          ))}
                         </div>
                       </>
                     ) : (
@@ -950,26 +1002,28 @@ const Room = () => {
 
                 <div className="mb-[10px]">
                   <span className="text-[rgb(139,140,143)] font-[400] text-[13px]">
-                    {getActive().length
-                      ? `${getActive().length} people active in this room`
+                    {getActive().total
+                      ? `${getActive().total} people active in this room`
                       : "Nobody active at the moment"}
                   </span>
                 </div>
 
-                {Boolean(getActive().length) && (
+                {Boolean(getActive().total) && (
                   <div className="mb-[20px]">
                     <AvatarGroup
                       max={6}
                       className="!flex !items-center !justify-center"
                     >
-                      {getActive().map((addr: string, i: number) => (
-                        <div
-                          key={i}
-                          className="border-solid border-white border-[2px] rounded-[50%] -mr-[20px]"
-                        >
-                          <RandomAvatar name={addr} />
-                        </div>
-                      ))}
+                      {Object.keys(getActive().value).map(
+                        (addr: string, i: number) => (
+                          <div
+                            key={i}
+                            className="border-solid border-white border-[2px] rounded-[50%] -mr-[20px]"
+                          >
+                            <RandomAvatar name={addr} />
+                          </div>
+                        )
+                      )}
                     </AvatarGroup>
                   </div>
                 )}
@@ -996,7 +1050,9 @@ const Room = () => {
 
                       const { data } = await axios.patch(
                         `/dao/${randId}/rooms/${id}/active`,
-                        {},
+                        {
+                          peerId: state.context.peerId,
+                        },
                         {
                           headers: {
                             Authorization: `Bearer ${localStorage.getItem(
