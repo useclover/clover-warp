@@ -127,6 +127,7 @@ export const roomData = async (id: number) => {
   });
 
   return room;
+
 };
 
 export const createRoom = async (name: string, desc?: string) => {
