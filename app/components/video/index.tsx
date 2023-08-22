@@ -438,8 +438,8 @@ const Rooms = () => {
                               {name}
                             </h4>
                             <span className="block text-[12px] leading-[1.2] truncate w-full text-[rgb(87,87,87)]">
-                              {activeParticipants.length
-                                ? `${activeParticipants.length} participants`
+                              {Object.keys(activeParticipants).length
+                                ? `${Object.keys(activeParticipants).length} participants`
                                 : "No participants yet"}
                             </span>
                           </div>
@@ -470,7 +470,7 @@ const Rooms = () => {
                             }}
                             className="!flex !items-center !justify-center mx-2"
                           >
-                            {activeParticipants.map(
+                            {Object.keys(activeParticipants).map(
                               (addr: string, ii: number) => (
                                 <div
                                   key={ii}
