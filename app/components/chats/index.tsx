@@ -167,6 +167,7 @@ const Chats = () => {
   };
 
   const socketInit = async () => {
+
     await fetch(`/api/messages?lq=${main}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
@@ -291,6 +292,7 @@ const Chats = () => {
       messData?.[group || ""]["messages"][0].push(newMess);
 
       try {
+        
         notifications({
           title: `Message from ${address}`,
           message: messageText,

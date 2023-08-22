@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import Loader from "../../../../app/components/loader";
 import { Audio, Video } from "@huddle01/react/components";
 import { useDisplayName } from "@huddle01/react/app-utils";
+import io from "socket.io-client";
 import {
   lq,
   beginStorageProvider,
@@ -57,29 +58,30 @@ import {
 } from "react-icons/ri";
 import { FaUser } from "react-icons/fa";
 
-const ChatItem = ({ user }: { user: boolean }) => {
+const ChatItem = ({ user, message, address, name, className }: { user: boolean, message: string, address: string, name: string, className: boolean }) => {
   return (
     <>
-      <div className="flex items-start mb-[14px]">
+      <div className={`flex items-start mb-[14px] ${className ? 'last_chat' : ''}`}>
         <div>
           {" "}
-          <RandomAvatar size={40} name={"joel"} />
+          <RandomAvatar size={40} name={address} />
         </div>
 
         <div className={`ml-[9px] w-full`}>
           <span
             className={`text-[#c4c4c4] block mb-1 text-[13px] capitalize pl-[13px]`}
           >
-            {user ? "you" : "Temi"}
+            {user ? "you" : name}
           </span>
           <div className="rounded-[1rem] text-[#6a6a6a] bg-[#f1f1f1] text-[15px] px-3 py-3 w-full">
-            Hello People
+            {message}
           </div>
         </div>
       </div>
     </>
   );
 };
+
 
 const PartItem = ({ mic, name, address, video }: { mic: boolean, address: string, video: boolean, name: string }) => {
   return (
@@ -110,6 +112,9 @@ const PartItem = ({ mic, name, address, video }: { mic: boolean, address: string
     </div>
   );
 };
+
+
+let socket: any;
 
 const Room = () => {
 
@@ -164,7 +169,10 @@ const Room = () => {
 
   const [pchat, setPchat] = useState<boolean>(true);
 
+  const [username, setUserName] = useState('')
   const [messageText, setMessageText] = useState("");
+
+  const socketIsInit = useRef<boolean>(false);
 
   const { initialize, isInitialized } = useHuddle01();
 
@@ -183,6 +191,8 @@ const Room = () => {
     participants: any;
   }>();
 
+  const [chat, setChat] = useState<{ message: string; user: string, name: string, read?: boolean }[]>([]);  
+
   useEffect(() => {
     if (localStorage.getItem("cloverlog") === null) {
       router.push("/");
@@ -195,6 +205,38 @@ const Room = () => {
         initialize(process.env.NEXT_PUBLIC_HUDDLE_PROJECTID || "");
     }
   }, [address, router]);
+
+
+  const socketInit = async () => {
+
+    await fetch(`/api/rooms?id=${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("clover-x")}`,
+      },
+    });
+
+    socket = io();
+
+    socket?.on("connect", () => {
+      // socket.emit("join", name);
+      socketIsInit.current = true;
+    });
+
+  };
+
+  useEffect(() => {
+    if (!socketIsInit.current) socketInit();
+  }, [])
+
+  useEffect(() => {
+    if (socketIsInit.current) {
+      socket?.on("receive", (dx: any) => {
+
+        setChat([...chat, pchat ? dx : { ...dx, read: false }]);
+
+      });
+    }
+  }, [chat])
 
   const [isLoading, setLoader] = useState(true);
 
@@ -251,6 +293,9 @@ const Room = () => {
       const user = JSON.parse(localStorage.getItem("cloveruser") || "{}");
 
       if (user?.name) setDisplayName(user.name);
+
+      setUserName(user?.name);
+
     }
   }, [isLobbyJoined]);
 
@@ -284,7 +329,6 @@ const Room = () => {
 
     const active = JSON.parse(meeting.active || "{}");
 
-    console.log(active, 'sss')
     for (let a in active) {
       if (active[a].ids && active[a].ids.includes(val)) {
         return { name: active[a].name, address: a }
@@ -592,6 +636,15 @@ const Room = () => {
                   <div className="h-[100px] w-[40%] min-w-[500px] m-auto flex items-center justify-evenly py-[30px]">
                     <IconButton
                       onClick={() => {
+
+                        setChat(
+                         () => chat.map((ct) =>
+                            ct.user == address
+                              ? { ...ct }
+                              : { ...ct, read: true }
+                          )
+                        );
+                        
                         if (sidemodal && pchat) {
                           setPchat(false);
 
@@ -605,6 +658,7 @@ const Room = () => {
                         }
 
                         setSidemodal(!sidemodal);
+
                       }}
                       className="p-3 h-[50px] w-[50px]"
                       size={"large"}
@@ -616,6 +670,11 @@ const Room = () => {
                           : "#fff",
                       }}
                     >
+
+                      {Boolean(chat.filter(e => e?.read === true).length) && <div className="min-w-[25px] min-h-[25px] flex items-center justify-center -right-[10px] -top-[10px] text-[14px] aspect-square text-white p-1 absolute rounded-[50%] bg-[rgb(94,67,236)]">
+                        {chat.filter(e => e?.read === true).length}
+                      </div>}
+
                       <BiChat
                         style={{
                           color: sidemodal
@@ -638,7 +697,7 @@ const Room = () => {
                           setMicrophone(true);
                         }
                       }}
-                      className="bg-white p-3 h-[50px] w-[50px]"
+                      className="bg-white p-3 h-[50px] w-[50px] "
                       size={"large"}
                     >
                       {audioLoading ? (
@@ -804,10 +863,32 @@ const Room = () => {
                           </h2>
                         </div>
 
-                        <div className="w-full cusscroller overflow-y-scroll overflow-x-hidden h-[calc(100vh-132px)]">
-                          <ChatItem user={false} />
+                        <div className="w-full cusscroller overflow-y-scroll overflow-x-hidden h-[calc(100vh-132px)] chatmsg">
+                          {/* <ChatItem user={false} /> */}
 
-                          <ChatItem user={true} />
+                          {chat.map(
+                            (
+                              {
+                                user,
+                                message,
+                                name,
+                              }: {
+                                user: string;
+                                message: string;
+                                name: string;
+                              },
+                              d: number
+                            ) => (
+                              <ChatItem
+                                key={d}
+                                className={chat.length - 1 == d}
+                                address={user}
+                                name={name}
+                                message={message}
+                                user={user == address}
+                              />
+                            )
+                          )}
                         </div>
 
                         <div className="w-full py-2 flex items-center pr-3">
@@ -853,11 +934,34 @@ const Room = () => {
                           >
                             <Button
                               onClick={() => {
-                                // moveMessage(enlargen == 1);
+                                if (!messageText) {
+                                    return;
+                                }
 
-                                // setEnlargen(0);
+                                const messBody = {
+                                  message: messageText,
+                                  user: address || "user",
+                                  name: username,
+                                };
+
+                                setChat([...chat, messBody]);
 
                                 setMessageText("");
+
+                                const elem = document?.querySelector(".last_chat") as HTMLDivElement;
+
+                                const parentElem = document.querySelector('.chatmsg')
+
+                                  if (parentElem) {
+                                    setTimeout(() => {
+                                      parentElem.scrollTop =
+                                        parentElem.scrollHeight;
+                                    }, 100);
+                                    
+                                  }
+
+                                socket?.emit("broadcast", messBody);
+
                               }}
                               className="!bg-[#5e43ec] !ml-3  !normal-case !rounded-[50%] !max-w-[45px] !min-w-[45px] !w-[45px] !h-[45px] !font-[inherit] !p-[10px]"
                             >
@@ -927,7 +1031,7 @@ const Room = () => {
                           setMicrophone(true);
                         }
                       }}
-                      className="bg-[rgba(0,0,0,0.07)]"
+                      className="bg-[rgba(0,0,0,0.07)] relative"
                       size={"large"}
                     >
                       {microphone ? (

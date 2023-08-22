@@ -4,6 +4,7 @@ import axios from 'axios'
 import { SocketApiResponse } from '../../app/components/types';
 
 const SocketHandler = (req: NextApiRequest, res: SocketApiResponse) => {
+
   const { authorization: Authorization } = req.headers;
 
   const { lq } = req.query;
@@ -14,8 +15,8 @@ const SocketHandler = (req: NextApiRequest, res: SocketApiResponse) => {
   }
 
   if (!res?.socket?.server?.io?.[0]) {
+    
     const io = new Server(res.socket.server);
-
 
     if (typeof res?.socket?.server?.io != "object") res.socket.server.io = [];
 
@@ -47,10 +48,12 @@ const SocketHandler = (req: NextApiRequest, res: SocketApiResponse) => {
       socket.on("add_group", () => {
 
         socket.to(lq).emit("add_grp", async () => await update());
+
       });
 
       
     });
+
   }
 
   res.end();
