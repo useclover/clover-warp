@@ -408,8 +408,6 @@ const Rooms = () => {
                       active,
                     } = attributes;
 
-                    console.log(user, "lee");
-
                     const activeParticipants = JSON.parse(active || "[]");
 
                     return (
