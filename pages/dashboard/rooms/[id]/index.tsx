@@ -20,7 +20,6 @@ import {
   useLobby,
   useMeetingMachine,
   usePeers,
-  useRecording,
   useRoom,
   useVideo,
 } from "@huddle01/react/hooks";
@@ -234,6 +233,16 @@ const Room = () => {
 
         setChat([...chat, pchat ? dx : { ...dx, read: false }]);
 
+        if (pchat) {
+          const parentElem = document.querySelector(".chatmsg");
+
+          if (parentElem) {
+            setTimeout(() => {
+              parentElem.scrollTop = parentElem.scrollHeight;
+            }, 100);
+          }
+        }
+
       });
     }
   }, [chat])
@@ -361,19 +370,19 @@ const Room = () => {
         }, 1000);
   })
 
-  useEventListener("room:joined", () => {
-    if (isRoomJoined) {
-      (async () => {
-          if (microphone && produceAudio.isCallable) {
-            await activateAudio()
-          }
+  // useEventListener("room:joined", () => {
+  //   if (isRoomJoined) {
+  //     (async () => {
+  //         if (microphone && produceAudio.isCallable) {
+  //           await activateAudio()
+  //         }
 
-          if (camera && produceVideo.isCallable) {
-              await activateVideo();
-          }          
-      })()
-    }   
-  })
+  //         if (camera && produceVideo.isCallable) {
+  //             await activateVideo();
+  //         }          
+  //     })()
+  //   }   
+  // })
 
   useEventListener("room:peer-left", async () => {
     const num = peerIds.length + 1;
@@ -689,7 +698,8 @@ const Room = () => {
 
                     <IconButton
                       onClick={() => {
-                        if (stopProducingVideo.isCallable) {
+                        if (stopProducingAudio.isCallable) {
+                          
                           stopProducingAudio();
                           setMicrophone(false);
                         } else {
@@ -948,8 +958,6 @@ const Room = () => {
 
                                 setMessageText("");
 
-                                const elem = document?.querySelector(".last_chat") as HTMLDivElement;
-
                                 const parentElem = document.querySelector('.chatmsg')
 
                                   if (parentElem) {
@@ -1018,7 +1026,7 @@ const Room = () => {
                     )}
                   </div>
 
-                  <div className="flex w-[80%] mx-auto items-center mt-5 justify-evenly">
+                  {/* <div className="flex w-[80%] mx-auto items-center mt-5 justify-evenly">
                     <IconButton
                       onClick={async () => {
                         if (microphone) {
@@ -1076,7 +1084,7 @@ const Room = () => {
                         />
                       )}
                     </IconButton>
-                  </div>
+                  </div> */}
                 </div>
 
                 <div className="flex mt-11 items-center justify-center">

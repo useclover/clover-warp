@@ -3,6 +3,7 @@ import {
   useAudio,
   useHuddle01,
   useLobby,
+  useMeetingMachine,
   usePeers,
   useRoom,
 } from "@huddle01/react/hooks";
@@ -11,6 +12,7 @@ import { useAccount } from "wagmi";
 import { BiMicrophone, BiMicrophoneOff, BiPhoneCall } from "react-icons/bi";
 import { useRouter } from "next/router";
 import { MdOutlineCallEnd } from "react-icons/md";
+import { useDisplayName } from "@huddle01/react/app-utils";
 
 
 const Calls = ({ open, close, callId }: { open: boolean, close: () => void, callId: string }) => {
@@ -23,6 +25,7 @@ const Calls = ({ open, close, callId }: { open: boolean, close: () => void, call
 
     const { joinRoom, leaveRoom, isRoomJoined } = useRoom();
 
+    const { state, send } = useMeetingMachine();
 
     const {
       fetchAudioStream,
@@ -89,7 +92,7 @@ const Calls = ({ open, close, callId }: { open: boolean, close: () => void, call
                       size={"large"}
                     >
                     
-                      {microphone ? (
+                      {!produceAudio.isCallable ? (
                         <BiMicrophone
                           color={"inherit"}
                           className="text-[#777]"
