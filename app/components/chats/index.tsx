@@ -26,6 +26,7 @@ import {
   Tab,
   CircularProgress,
   Alert,
+  FormControl,
 } from "@mui/material";
 import empty from "../../../public/images/empty.png";
 import cicon from "../../../public/images/icon.png";
@@ -449,6 +450,7 @@ const Chats = () => {
               </div>
             </div>
           </Modal>
+          
 
           <Modal
             sx={{
@@ -463,64 +465,79 @@ const Chats = () => {
             aria-labelledby="Clover Votes"
             aria-describedby="Create A Voting Poll"
           >
-            <Box
-              className="sm:!w-full 3md:!px-1 h-fit 3mdd:px-[2px]"
-              sx={{
-                minWidth: 300,
-                width: "70%",
-                maxWidth: 800,
-                borderRadius: 6,
-                outline: "none",
-                p: 1,
-                position: "relative",
-                margin: "auto",
-              }}
-            >
-              <div className="py-4 px-6 bg-white -mb-[1px] rounded-[.9rem]">
-                <div className="mb-2 flex items-start justify-between">
-                  <div>
-                    <h2 className="font-[500] text-[rgb(32,33,36)] text-[1.55rem] 3md:text-[1.2rem]">
-                      DAO Voting
-                    </h2>
-                    <span className="text-[rgb(69,70,73)] font-[500] text-[14px]">
-                      Making decisions in your DAO
-                    </span>
+            <>
+              <Box
+                className="sm:!w-full 3md:!px-1 h-fit 3mdd:px-[2px]"
+                sx={{
+                  minWidth: 300,
+                  width: "70%",
+                  maxWidth: 800,
+                  borderRadius: 6,
+                  outline: "none",
+                  p: 1,
+                  position: "relative",
+                  margin: "auto",
+                }}
+              >
+                <div className="py-4 px-6 bg-white -mb-[1px] rounded-t-[.9rem]">
+                  <div className="mb-2 flex items-start justify-between">
+                    <div>
+                      <h2 className="font-[500] text-[rgb(32,33,36)] text-[1.55rem] 3md:text-[1.2rem]">
+                        DAO Voting
+                      </h2>
+                      <span className="text-[rgb(69,70,73)] font-[500] text-[14px]">
+                        Making decisions in your DAO
+                      </span>
+                    </div>
+
+                    <IconButton size={"medium"} onClick={() => setVotes(false)}>
+                      <MdClose
+                        size={20}
+                        color={"rgb(32,33,36)"}
+                        className="cursor-pointer"
+                      />
+                    </IconButton>
                   </div>
 
-                  <IconButton size={"medium"} onClick={() => setVotes(false)}>
-                    <MdClose
-                      size={20}
-                      color={"rgb(32,33,36)"}
-                      className="cursor-pointer"
-                    />
-                  </IconButton>
-                </div>
-
-                <div className="form relative pt-4">
-                  <div className={styles.container}>
-                    <div className="h-[220px] flex flex-col justify-center">
+                  <div className="form relative pt-4">
+                    <Box sx={{ width: "100%" }}>
                       {Boolean(voteError.length) && (
                         <div className="rounded-md w-[95%] font-bold mt-2 mx-auto p-3 bg-[#ff8f33] text-white">
                           {voteError}
                         </div>
                       )}
-                      <div className="flex justify-around sst:flex-col">
-                        <div className="self-center sst:mb-7">
-                          <Button
-                            style={{
-                              fontFamily: "Poppins",
-                            }}
-                            className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(94,67,236)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
-                          >
-                            Create
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
+
+                      <FormControl
+                        fullWidth
+                        sx={{
+                          px: 2,
+                          py: 3,
+                        }}
+                      >
+                        
+                        {/* inputs */}
+                        
+                      </FormControl>
+                    </Box>
                   </div>
                 </div>
-              </div>
-            </Box>
+
+                <div className="bg-[#efefef] flex justify-center items-center rounded-b-[.9rem] px-6 py-4">
+                  <div className="flex items-center">
+                    <Button
+                      className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(94,67,236)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+                    >
+                      <FaVoteYea
+                        color={"inherit"}
+                        className={"mr-2 !fill-white"}
+                        size={20}
+                      />{" "}
+                      Vote
+                    </Button>
+                  </div>
+                </div>
+              </Box>
+            </>
           </Modal>
 
           <div className="wrapper w-full flex flex-grow-[1] overflow-hidden">
