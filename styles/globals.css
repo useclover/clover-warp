@@ -549,6 +549,20 @@ body::-webkit-scrollbar-track,
   margin-top: 4px;
 }
 
+.owner.voting span{
+    color: #fff;
+}
+
+.owner.voting ul li>div {
+  background-color:#fff;
+}
+.owner.voting ul li>div div, .owner.voting ul li>div {
+  border-radius: 10px !important;
+}
+
+/* .owner.voting ul li>div div {
+
+} */
 
 .owner {
   flex-direction: row-reverse;
