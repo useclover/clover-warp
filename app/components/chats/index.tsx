@@ -1,9 +1,12 @@
 import Image from "next/image";
 import { useEffect, useState, useContext, useRef } from "react";
 import Router from "next/router";
-import { BsFolder, BsList, BsTrash } from "react-icons/bs";
+import { BsFolder, BsList, BsPlus, BsTrash } from "react-icons/bs";
 import styles from "../../../styles/Home.module.css";
 import io from "socket.io-client";
+import uniqueString from 'unique-string'
+import { LuVote } from "react-icons/lu"
+import contractjson from "../../../artifacts/contracts/localdao.sol/CloverSuiteNFT.json";
 import {
   FiImage,
   FiSettings,
@@ -27,7 +30,11 @@ import {
   CircularProgress,
   Alert,
   FormControl,
+  ToggleButtonGroup,
+  ToggleButton,
+  InputAdornment,
 } from "@mui/material";
+import * as ethers from "ethers";
 import empty from "../../../public/images/empty.png";
 import cicon from "../../../public/images/icon.png";
 import { GenContext } from "../extras/contexts/genContext";
@@ -51,7 +58,7 @@ import {
 import { CContext } from "../extras/contexts/CContext";
 import Text from "./texts";
 import Loader from "../loader";
-import { useAccount } from "wagmi";
+import { useAccount, useSwitchNetwork, useSigner, useDisconnect, useNetwork } from "wagmi";
 import { BiPhoneCall, BiSend, BiX } from "react-icons/bi";
 import EmojiPicker from "emoji-picker-react";
 import { ChatObject, ChatObjectType, MessageType } from "../types";
@@ -59,13 +66,27 @@ import axios from "axios";
 import { useHuddle01 } from "@huddle01/react";
 import { FaVoteYea } from "react-icons/fa";
 import { RandomAvatar } from "react-random-avatars";
+import TabPanel from "../TabPanel";
+import { getVotes, storeVote } from "../extras/vote";
+import toast from "react-hot-toast";
+import Timestamp from "react-timestamp";
 
 let socket: any;
 
 const Chats = () => {
+
   const [loginData, setLoginData] = useState<any>({});
 
-  const { address, isConnected } = useAccount();
+  const { address, isConnected: connected } = useAccount();
+
+  const { chains, error, pendingChainId, switchNetworkAsync } =
+    useSwitchNetwork();
+
+  const { chain: chainId } = useNetwork();
+
+  const { data: nullSigner } = useSigner();
+
+  const [signer, setSigner] = useState(nullSigner);
 
   const goDown = () => {
     const chatArea = document.querySelector(".chat-area");
@@ -125,10 +146,23 @@ const Chats = () => {
 
   const rContext = useContext(CContext);
 
+  const [toggle, setToggle] = useState<string | number>("0");
+
+  const [voteOptions, setVoteOptions] = useState<string[]>(['', '']);
+
   const { group, chatkeys, messages: messData } = rContext;
 
   const updateMessData = (data: MessageType) => {
     rContext.update?.({ messages: data });
+  };
+
+  const sx = {
+    "& .Mui-focused.MuiFormLabel-root": {
+      color: "#5e43ec",
+    },
+    "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: `#5e43ec !important`,
+    },
   };
 
   /* upload */
@@ -138,11 +172,16 @@ const Chats = () => {
 
   const [isLoading, setLoader] = useState(true);
 
+  const [vloading, setVloading] = useState(false);
+
+  const [title, setTitle] = useState('')
   const [prevMessLoading, setPrevMessLoading] = useState<boolean>(false);
 
   const [phoneLoading, setPhoneLoading] = useState<boolean>(false);
 
   const [votes, setVotes] = useState<boolean>(false)
+
+  const [voteData, setVoteData] = useState<any[]>([]);
 
   const [preloadMess, setPreloadMess] = useState<boolean>(true);
 
@@ -155,6 +194,8 @@ const Chats = () => {
   const [extrasId, setExtras] = useState<string>("");
 
   const loadOnce = useRef<boolean>(true);
+  
+  const { disconnect } = useDisconnect();
 
   const socketIsInit = useRef<boolean>(false);
 
@@ -169,9 +210,14 @@ const Chats = () => {
 
     updateMessData(mess);
 
+    const votes = await getVotes(main, name, contract);
+
+    setVoteData(() => votes);
+
     const gps = await retrieveGroupChats();
 
     rContext.update?.({ groupData: gps });
+
   };
 
   const socketInit = async () => {
@@ -232,6 +278,10 @@ const Chats = () => {
         rContext.update?.({ group: name });
       }
 
+      const votes = await getVotes(main, name, contract);
+
+      setVoteData(votes);
+
       setLoader(false);
     }
 
@@ -242,15 +292,121 @@ const Chats = () => {
 
   useEffect(() => {
     goDown();
-  }, [messageSend, group, isLoading, prevMessLoading]);
+  }, [messageSend, group, isLoading, prevMessLoading, vote]);
 
   const [enlargen, setEnlargen] = useState<number>(0);
+
+  const createVote = async () => {
+
+        if (!title) {
+            setVoteError('Title of Poll is required')
+            return;
+        }
+
+        if (voteOptions.length < 2) {
+            setVoteError('More than one options are required')
+            return;
+        }else{
+            voteOptions.forEach(e => {
+                if (!e.length) {
+                  setVoteError("Your Options are required");
+                  return;
+                }
+            })
+        }
+
+        if (!voteError.length) {
+
+          if (
+            !connected ||
+            chainId?.id != Number(process.env.NEXT_PUBLIC_CHAIN || 314159) ||
+            !signer
+          ) {
+
+            if (chainId != process.env.NEXT_PUBLIC_CHAIN) {
+              const switchNet = await switchNetworkAsync?.(
+                Number(process.env.NEXT_PUBLIC_CHAIN || 314159)
+              );
+
+            }
+
+          } else {
+
+            try {
+
+            const s = signer as any;
+
+            const contractInit = new ethers.Contract(
+              contract || "",
+              contractjson.abi,
+              s
+            );
+            
+            await contractInit.createVote(
+              voteOptions.map(() => 0)
+            );
+            
+            const voteId = (await contractInit.pollCount()).toNumber() - 1;
+
+            
+            await storeVote(
+              {
+                options: voteOptions,
+                sender: address || "",
+                title,
+                voteId,
+                group: group || "",
+              },
+              main
+            );
+
+            toast.success("Vote Created Successfully")
+            
+
+            // update state
+            setVoteData(() => [
+              ...voteData,
+              {
+                creator: address || "",
+                data: JSON.stringify({
+                  options: voteOptions,
+                  title,
+                }),
+                voteId,
+                group: group || "",
+                votedata: voteOptions.map(() => 0),
+                created_at: new Date(),
+              },
+            ]);
+
+            goDown();
+
+            // update the socket
+
+            socket?.emit?.("send_message");
+
+            setVotes(false);
+
+            }catch(err){
+                const error = err as any;
+
+                console.log(error)
+
+                toast.error(error.response?.data?.message || "Something went wrong, please try again");
+
+            }
+            
+
+          }
+        }
+  }
 
   const moveMessage = async (
     enlargen: boolean,
     type: ChatObjectType = "mess"
   ) => {
     if (messageText.length) {
+
       const encMessage = await encrypt(messageText, chatkeys[group || ""]);
 
       if (Boolean(edit)) {
@@ -273,6 +429,7 @@ const Chats = () => {
         upd();
 
         return;
+        
       }
 
       if (!Boolean(messData?.[group || ""]?.["messages"][0])) {
@@ -450,7 +607,6 @@ const Chats = () => {
               </div>
             </div>
           </Modal>
-          
 
           <Modal
             sx={{
@@ -514,9 +670,251 @@ const Chats = () => {
                           py: 3,
                         }}
                       >
-                        
-                        {/* inputs */}
-                        
+                        <div>
+                          <ToggleButtonGroup
+                            value={toggle}
+                            sx={{
+                              justifyContent: "space-between",
+                              marginBottom: "15px !important",
+                              width: "100%",
+                              "& .Mui-selected": {
+                                backgroundColor: `rgba(94,67,236, 0.8) !important`,
+                                color: `#fff !important`,
+                              },
+                              "& .MuiButtonBase-root:first-of-type": {
+                                marginRight: "0px !important",
+                                marginLeft: "0px !important",
+                              },
+                              "& .MuiButtonBase-root": {
+                                padding: "10px 15px !important",
+                              },
+                              "& .MuiToggleButtonGroup-grouped": {
+                                borderRadius: "4px !important",
+                                minWidth: 241,
+                                marginLeft: "5px !important",
+                                backgroundColor: "#1212121a",
+                                border: "none",
+                              },
+                            }}
+                            exclusive
+                            className="w-full cusscroller overflow-y-hidden  mb-4 pb-1"
+                            onChange={(e: any) => {
+                              if (e.target.value) {
+                                setToggle(e.target.value);
+                              }
+                            }}
+                          >
+                            <ToggleButton
+                              sx={{
+                                textTransform: "capitalize",
+                                fontWeight: "500",
+                              }}
+                              value={"0"}
+                            >
+                              <LuVote className="mr-2" size={20} />
+                              Normal
+                            </ToggleButton>
+                            <ToggleButton
+                              sx={{
+                                textTransform: "capitalize",
+                                fontWeight: "500",
+                              }}
+                              value={"1"}
+                            >
+                              <FaVoteYea className="mr-2" size={20} /> DAO
+                              Change
+                            </ToggleButton>
+                          </ToggleButtonGroup>
+                        </div>
+
+                        <TabPanel padding={0} value={Number(toggle)} index={0}>
+                          <div>
+                            <TextField
+                              fullWidth
+                              id="outlined-basic"
+                              label="Title of Vote"
+                              sx={sx}
+                              variant="outlined"
+                              value={title}
+                              onChange={(
+                                e: React.ChangeEvent<
+                                  HTMLInputElement | HTMLTextAreaElement
+                                >
+                              ) => {
+                                setTitle(e.target.value);
+                                setVoteError("");
+                              }}
+                            />
+                          </div>
+
+                          <div className="mt-4">
+                            <label className="text-[#808080] mb-2 block">
+                              Options
+                            </label>
+
+                            <div className="py-2 w-full items-center flex-nowrap px-0">
+                              {voteOptions.map((v: string, i: number) => (
+                                <div key={i} className="mb-3">
+                                  <TextField
+                                    fullWidth
+                                    id="outlined-basic"
+                                    sx={sx}
+                                    label={`Vote Option ${i + 1}`}
+                                    variant="outlined"
+                                    value={v}
+                                    InputProps={{
+                                      endAdornment: (
+                                        <InputAdornment position="end">
+                                          <MdClose
+                                            className="cursor-pointer"
+                                            onClick={() => {
+                                              if (voteOptions.length > 2) {
+                                                voteOptions.splice(i, 1);
+
+                                                setVoteOptions([
+                                                  ...voteOptions,
+                                                ]);
+                                              }
+                                            }}
+                                            size={20}
+                                            color={"#121212"}
+                                          />
+                                        </InputAdornment>
+                                      ),
+                                    }}
+                                    onChange={(
+                                      e: React.ChangeEvent<
+                                        HTMLInputElement | HTMLTextAreaElement
+                                      >
+                                    ) => {
+                                      const opt = [...voteOptions];
+                                      opt[i] = e.target.value;
+                                      setVoteOptions([...opt]);
+                                      setVoteError("");
+                                    }}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                            <div className="flex w-full items-center justify-center">
+                              <Button
+                                onClick={() => {
+                                  setVoteOptions([...voteOptions, ""]);
+                                }}
+                                className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(94,67,236)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
+                              >
+                                <BsPlus
+                                  color={"inherit"}
+                                  className={"!fill-white"}
+                                  size={25}
+                                />{" "}
+                              </Button>
+                            </div>
+                          </div>
+                        </TabPanel>
+
+                        <TabPanel padding={0} value={Number(toggle)} index={1}>
+                          <div className="flex w-full h-[200px] justify-center items-center">
+                            <h2 className="font-bold text-[20px]">
+                              This feature would be out in a bit.
+                            </h2>
+                          </div>
+                          {/* <div className="mb-4">
+                            <TextField
+                              fullWidth
+                              id="outlined-basic"
+                              label="Title of Vote"
+                              variant="outlined"
+                              value={title}
+                              onChange={(
+                                e: React.ChangeEvent<
+                                  HTMLInputElement | HTMLTextAreaElement
+                                >
+                              ) => {
+                                setTitle(e.target.value);
+                                setVoteError("");
+                              }}
+                            />
+                          </div>
+
+                          <div className="mb-4">
+                            <TextField
+                              fullWidth
+                              id="outlined-basic"
+                              label="Description"
+                              multiline
+                              variant="outlined"
+                              value={voteDesc}
+                              onChange={(
+                                e: React.ChangeEvent<
+                                  HTMLInputElement | HTMLTextAreaElement
+                                >
+                              ) => {
+                                setVoteDesc(e.target.value);
+                                setFailMessage("");
+                              }}
+                            />
+                          </div>
+
+                          <div className="mb-5">
+                            <label className="text-[#808080] mb-2 block">
+                              Select Discussion Channel participants can vote on
+                            </label>
+
+                            <Select
+                              isClearable={false}
+                              value={discussions}
+                              onChange={(e: any) => setDiscussion(e)}
+                              name="Channels"
+                              placeholder={"Channels..."}
+                              options={Object.keys(messData || {})}
+                              styles={{
+                                option: (provided: any, state: any) => {
+                                  return {
+                                    ...provided,
+                                    backgroundColor: state.isSelected
+                                      ? "#dfdfdf"
+                                      : "transparent",
+                                    cursor: "pointer",
+                                    "&:active": {
+                                      backgroundColor: "#dfdfdf",
+
+                                      color: "#121212 !important",
+                                    },
+                                    "&:hover": {
+                                      backgroundColor: state.isSelected
+                                        ? undefined
+                                        : `#dfdfdff2`,
+                                    },
+                                  };
+                                },
+                                container: (provided: any, state: any) => ({
+                                  ...provided,
+                                  "& .select__control": {
+                                    borderWidth: "0px",
+                                    borderRadius: "0px",
+                                    backgroundColor: "transparent",
+                                    borderBottomWidth: "1px",
+                                  },
+                                  "& .select__value-container": {
+                                    paddingLeft: "0px",
+                                  },
+                                  "& .select__control:hover": {
+                                    borderBottomWidth: "2px",
+                                    borderBottomColor: "#121212",
+                                  },
+                                  "& .select__control--is-focused": {
+                                    borderWidth: "0px",
+                                    borderBottomWidth: "2px",
+                                    borderBottomColor: `#5e43ec !important`,
+                                    boxShadow: "none",
+                                  },
+                                }),
+                              }}
+                              classNamePrefix="select"
+                            />
+                          </div> */}
+                        </TabPanel>
                       </FormControl>
                     </Box>
                   </div>
@@ -525,6 +923,8 @@ const Chats = () => {
                 <div className="bg-[#efefef] flex justify-center items-center rounded-b-[.9rem] px-6 py-4">
                   <div className="flex items-center">
                     <Button
+                      onClick={createVote}
+                      disabled={toggle == 1}
                       className="!py-2 !font-bold !px-3 !capitalize !flex !items-center !text-white !fill-white !bg-[#5e43ec] !border !border-solid !border-[rgb(94,67,236)] !transition-all !delay-500 hover:!text-[#f0f0f0] !rounded-lg"
                     >
                       <FaVoteYea
@@ -532,7 +932,7 @@ const Chats = () => {
                         className={"mr-2 !fill-white"}
                         size={20}
                       />{" "}
-                      Vote
+                      Create
                     </Button>
                   </div>
                 </div>
@@ -778,23 +1178,41 @@ const Chats = () => {
                     )}
 
                     {Boolean(vote?.[group || ""]) &&
-                      Array("3", "22").map((e, i) => {
+                      voteData.map((e, i) => {
+                        const { title, options, group } = JSON.parse(e.data);
+
+                        const voteId = e.voteId;
+
+                        const votedata = e.votedata;
+
                         return (
                           <div
                             key={i}
                             className={`chat-msg transition-all !cursor-default !bg-transparent relative z-[1001] delay-[400] ${
-                              address ==
-                              `0x0249b7E6bCbfA9F27829d69f305EaED53c4AaA5E`
-                                ? "owner voting"
-                                : ""
+                              address == e.creator ? "owner voting" : ""
                             }`}
                           >
                             <div className="chat-msg-profile relative">
-                              <RandomAvatar size={40} name={`sender`} />
+                              <RandomAvatar size={40} name={e.creator} />
 
                               <div className="chat-msg-date">
-                                {/* {Boolean(sender) && `${sender?.substring(0, 6)}...${sender?.substring(38, 42)}`}{" "} */}
-                                <span>123/4/54</span>
+                                {Boolean(e.creator) &&
+                                  `${e.creator?.substring(
+                                    0,
+                                    6
+                                  )}...${e.creator?.substring(38, 42)}`}{" "}
+                                <span>
+                                  <Timestamp
+                                    options={{
+                                      format: "date",
+                                    }}
+                                    style={{
+                                      color: "#666",
+                                      marginLeft: '8px'
+                                    }}
+                                    date={e.created_at}
+                                  />
+                                </span>
                               </div>
                             </div>
 
@@ -806,26 +1224,104 @@ const Chats = () => {
                                 >
                                   <div className="mb-2">
                                     <h2 className="font-[600] text-[16px]">
-                                      Vote Title
+                                      {title}
                                     </h2>
                                     <span className="text-[rgb(69,70,73)] font-[400] text-[14px]">
-                                      200 votes
+                                      {votedata.reduce(
+                                        (a: number, b: number) => a + b,
+                                        0
+                                      )}{" "}
+                                      vote(s)
                                     </span>
                                   </div>
 
                                   <ul className="p-0 m-0 pt-1">
-                                    <li className="mb-3">
-                                      <span className="font-[400]">hello</span>
-                                      <div className="h-[20px] bg-[#c9c9c9] rounded-[10px] cursor-pointer">
-                                        <div className="h-[100%] w-[30%] bg-[#454545] text-[11px] flex items-center justify-end rounded-[10px] transition-all duration-[.6s] pr-1">
-                                          10%
+                                    {options.map((v: string, i: number) => (
+                                      <li
+                                        onClick={async () => {
+                                            if (vloading) return false; 
+
+                                            const toasty = toast.loading("Just a Sec...");
+
+                                            setVloading(true);
+                                          try{
+                                             
+
+                                              
+                                            
+                                              const s = signer as any;
+
+                                              const contractInit =
+                                                new ethers.Contract(
+                                                  contract || "",
+                                                  contractjson.abi,
+                                                  s
+                                                );
+
+                                              await contractInit.makeVote(
+                                                voteId,
+                                                i
+                                              );
+
+                                              socket?.emit("send_message");
+
+                                              const vv = await getVotes(
+                                                main,
+                                                name,
+                                                contract
+                                              );
+
+                                              setVoteData(() => vv);
+
+                                              toast.success("Nicee, Voted Successfully")
+
+                                        }catch (err) {
+                                          console.log(err)
+                                          toast.error("Something went wrong, please try again")
+                                        }finally {
+                                          setVloading(false)
+                                          toast.dismiss(toasty)
+                                        }
+
+                                        }}
+                                        key={i}
+                                        className="mb-3"
+                                      >
+                                        <span className="font-[400]">{v}</span>
+                                        <div className="h-[12px] bg-[#c9c9c9] rounded-[10px] cursor-pointer">
+                                          <div
+                                            style={{
+                                              width: `${
+                                                votedata[i]
+                                                  ? (votedata[i] /
+                                                      votedata.reduce(
+                                                        (
+                                                          a: number,
+                                                          b: number
+                                                        ) => a + b,
+                                                        0
+                                                      )) *
+                                                    100
+                                                  : 0
+                                              }%`,
+                                            }}
+                                            className="h-[100%] bg-[#454545] text-[11px] flex items-center justify-end rounded-[10px] transition-all duration-[.6s] pr-1"
+                                          >
+                                            {`${
+                                              votedata[i]
+                                                ? (votedata[i] /
+                                                    votedata.reduce(
+                                                      (a: number, b: number) =>
+                                                        a + b,
+                                                      0
+                                                    )) *
+                                                  100
+                                                : 0
+                                            }%`}
+                                          </div>
                                         </div>
-                                      </div>
-                                    </li>
-                                    <li className="mb-3">
-                                      <span className="font-[400]">hello</span>
-                                      <div className="h-[20px] bg-[#c9c9c9] rounded-[10px] cursor-pointer transition-all duration-[.6s]"></div>
-                                    </li>
+                                      </li>
+                                    ))}
                                   </ul>
                                 </div>
                               </div>
@@ -910,41 +1406,46 @@ const Chats = () => {
                         </>
                       )}
 
-                    {!Boolean(
-                      messData?.[group || ""]?.["messages"]?.length
-                    ) && (
-                      <div
-                        className="empty"
-                        style={{
-                          display: "flex",
-                          width: "100%",
-                          height: "fit-content",
-                          justifyContent: "center",
-                          flexDirection: "column",
-                          alignItems: "center",
-                        }}
-                      >
-                        <div className="h-[259px] justify-center w-full my-5 flex">
-                          <Image
-                            src={empty}
-                            className="mb-3"
-                            width={350}
-                            height={259}
-                            alt="No messages yet"
-                          />
-                        </div>
+                    {(Boolean(vote?.[group || ""]) && !voteData.length) || (!Boolean(vote?.[group || ""]) &&
+                      !Boolean(
+                        messData?.[group || ""]?.["messages"]?.length
+                      )) && (
+                        <div
+                          className="empty"
+                          style={{
+                            display: "flex",
+                            width: "100%",
+                            height: "fit-content",
+                            justifyContent: "center",
+                            flexDirection: "column",
+                            alignItems: "center",
+                          }}
+                        >
+                          <div className="h-[259px] justify-center w-full my-5 flex">
+                            <Image
+                              src={empty}
+                              className="mb-3"
+                              width={350}
+                              height={259}
+                              alt="No messages yet"
+                            />
+                          </div>
 
-                        <div className="mt-2 mb-3">
-                          <h2 className="text-[22px] text-[#666] text-center font-bold">
-                            Hmm nobody is talking here...
-                          </h2>
-                          <span className="mt-2 text-[17px] text-[#999] flex w-full text-center">
-                            Write something in text field down below and start
-                            the conversation😊
-                          </span>
+                          <div className="mt-2 mb-3">
+                            <h2 className="text-[22px] text-[#666] text-center font-bold">
+                              {Boolean(vote?.[group || ""])
+                                ? "Hmm nobody is voting here..."
+                                : "Hmm nobody is talking here..."}
+                            </h2>
+                            <span className="mt-2 text-[17px] text-[#999] flex w-full text-center">
+                              {Boolean(
+                                vote?.[group || ""]
+                              ) ? `Click the button below to start a new vote for members, make basic or DAO changes using votes` : `Write something in text field down below and start
+                              the conversation😊`}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </div>
 
                   <div className="chat-area-footer">

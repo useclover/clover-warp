@@ -236,14 +236,14 @@ export const retrieveGroupChats = async (groups?: any) => {
   return groupChats;
 };
 
-export const retrieveMessages = async (indexx?: number) => {
+export const retrieveMessages = async (indexx?: number, vindex?: number) => {
   
   const token = `Bearer ${localStorage.getItem("clover-x")}`;
 
   const {
-    data: { chatdata },
+    data: { chatdata, votedata },
   } = await axios.get(`/dao/${lq[0]}/chats`, {
-    params: { page: (indexx || 0) + 1 },
+    params: { page: (indexx || 0) + 1, vpage: (vindex || 0) + 1 },
     headers: { Authorization: token },
   });
 
@@ -319,6 +319,7 @@ export const findMessId = (messBox: any[], id: string) => {
   });
 
   return mess;
+  
 };
 
 export const deleteMessagesAll = async (id: string) => {
