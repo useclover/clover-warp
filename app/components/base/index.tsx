@@ -73,6 +73,16 @@ interface TabPanelProps {
   padding?: number;
 }
 
+ const sx = {
+   "& .Mui-focused.MuiFormLabel-root": {
+     color: "#5e43ec",
+   },
+   "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+     borderColor: `#5e43ec !important`,
+   },
+ };
+
+
 const TabPanel = (props: TabPanelProps) => {
   const { children, padding, value, index, className = "", ...other } = props;
 
@@ -451,6 +461,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                             fullWidth
                             id="outlined-basic"
                             label="Name"
+                            sx={sx}
                             variant="outlined"
                             helperText={
                               "Username can only contain alphanumeric characters"
@@ -644,6 +655,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                         <div>
                           <TextField
                             fullWidth
+                            sx={sx}
                             id="outlined-basic"
                             label="Name of discussion channel"
                             variant="outlined"
@@ -710,6 +722,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                           <TextField
                             fullWidth
                             id="outlined-basic"
+                            sx={sx}
                             label="Name"
                             variant="outlined"
                             value={nname}
@@ -728,6 +741,7 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                           <TextField
                             fullWidth
                             id="outlined-basic"
+                            sx={sx}
                             label="Description"
                             multiline
                             variant="outlined"

@@ -549,6 +549,20 @@ body::-webkit-scrollbar-track,
   margin-top: 4px;
 }
 
+.owner.voting span{
+    color: #fff;
+}
+
+.owner.voting ul li>div {
+  background-color:#fff;
+}
+.owner.voting ul li>div div, .owner.voting ul li>div {
+  border-radius: 10px !important;
+}
+
+/* .owner.voting ul li>div div {
+
+} */
 
 .owner {
   flex-direction: row-reverse;
@@ -661,7 +675,7 @@ body .EmojiPickerReact .epr-preview{
   margin-left:5px;
 }
 
-body .EmojiPickerReact .epr-preview img{
+body .EmojiPickerReact .epr-preview img {
   height:30px;
   width:30px;
 }

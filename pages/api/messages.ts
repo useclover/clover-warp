@@ -56,8 +56,6 @@ const SocketMessageHandler = (req: NextApiRequest, res: SocketApiResponse) => {
           }
         );
 
-        console.log("elodd");
-
         socket.to(gps).emit("edit_msg", { id, update });
       });
 
