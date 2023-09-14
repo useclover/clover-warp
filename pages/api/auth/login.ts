@@ -101,11 +101,16 @@ export default function handler(
 
                 if (Number(balance) > 0) {
 
-                  await axios.post(`/dao/${dao[i].id}/user/update`, {
-                    address,
-                  }, {
-                     headers: { "X-App-Key": process.env.APP_KEY || "" }                 
-                  });
+                  await axios.post(
+                    `/dao/${dao[i].id}/user/update`,
+                    {
+                      address,
+                    },
+                    {
+                      baseURL: process.env.NEXT_PUBLIC_APP_URL || "",
+                      headers: { "X-App-Key": process.env.APP_KEY || "" },
+                    }
+                  );
 
                   sdao.push({ ...dao[i] });
                 }
