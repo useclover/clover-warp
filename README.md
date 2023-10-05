@@ -2,7 +2,9 @@
 
 Clover Suite is dedicated to transforming communication for DAO (Decentralized Autonomous Organization) operators. We're building a suite of tools designed to enhance communication, collaboration, and community engagement within your DAO. Completely on Filecoin.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/bEocnupxdzk?si=KVmKrCSOyg6aqqsG" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=bEocnupxdzk" target="_blank">
+ <img src="http://img.youtube.com/vi/bEocnupxdzk/mqdefault.jpg" alt="Watch the video" width="320" height="180" border="2" />
+</a>
 
 ## 🚀 Quick Start
 
