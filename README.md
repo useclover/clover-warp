@@ -6,6 +6,8 @@ Clover Suite is dedicated to transforming communication for DAO (Decentralized A
  <img src="http://img.youtube.com/vi/bEocnupxdzk/mqdefault.jpg" alt="Watch the video" width="320" height="180" border="2" />
 </a>
 
+A demo of Clover
+
 ## 🚀 Quick Start
 
 Here are some quick start guidelines and commands to help you get started with the project:
