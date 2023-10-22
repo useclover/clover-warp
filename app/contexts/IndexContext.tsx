@@ -659,7 +659,7 @@ const IndexContextProvider = ({ children }: { children: JSX.Element | JSX.Elemen
               width: "calc(100% - 8px)",
             },
           }}
-          open={start}
+          open={start && Router.pathname == "/"}
           className="overflow-y-scroll overflow-x-hidden cusscroller flex justify-center"
           onClose={closeStart}
           aria-labelledby="Clover Auth"
@@ -718,7 +718,6 @@ const IndexContextProvider = ({ children }: { children: JSX.Element | JSX.Elemen
                           Try again
                         </Button>
                       </div>
-                      
                     </div>
                   </div>
                 </div>
@@ -734,7 +733,7 @@ const IndexContextProvider = ({ children }: { children: JSX.Element | JSX.Elemen
               width: "calc(100% - 8px)",
             },
           }}
-          open={showModal}
+          open={showModal && Router.pathname == "/"}
           className="overflow-y-scroll overflow-x-hidden cusscroller flex justify-center"
           onClose={useClose}
           aria-labelledby="Select DAO"
@@ -782,7 +781,6 @@ const IndexContextProvider = ({ children }: { children: JSX.Element | JSX.Elemen
                       <button
                         key={i}
                         onClick={async () => {
-                          
                           setLoading(true);
 
                           const name: string = vv.name;
@@ -804,7 +802,7 @@ const IndexContextProvider = ({ children }: { children: JSX.Element | JSX.Elemen
                                   : vv.joined,
                             })
                           );
-                          setShowModal(false)
+                          setShowModal(false);
                           Router.push("/dashboard");
                         }}
                         style={{ fontFamily: "inherit" }}
@@ -834,8 +832,9 @@ const IndexContextProvider = ({ children }: { children: JSX.Element | JSX.Elemen
             </div>
           </Box>
         </Modal>
+
         <Modal
-          open={open}
+          open={open && Router.pathname == "/"}
           sx={{
             "&& .MuiBackdrop-root": {
               backdropFilter: "blur(5px)",
@@ -1299,7 +1298,7 @@ const IndexContextProvider = ({ children }: { children: JSX.Element | JSX.Elemen
           </Box>
         </Modal>
         <Modal
-          open={improve}
+          open={improve && Router.pathname == "/"}
           sx={{
             "&& .MuiBackdrop-root": {
               backdropFilter: "blur(5px)",

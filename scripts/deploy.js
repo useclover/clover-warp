@@ -9,11 +9,11 @@ const hre = require("hardhat");
 async function main() {
 
   const Share = await hre.ethers.getContractFactory("CloverSuiteNFT");
-  const share = await Share.deploy("JOEL", "JOEL", ["0x50794C749F6E0622e69c72F79f370E9ca7859539"], "https://ipfs.io/ipfs");
+  // const share = await Share.deploy("JOEL", "JOEL", ["0x50794C749F6E0622e69c72F79f370E9ca7859539"], "https://ipfs.io/ipfs");
 
-  await share.deployed();
+  // await share.deployed();
 
-  console.log("Contract deployed to:", share.address);
+  // console.log("Contract deployed to:", share.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

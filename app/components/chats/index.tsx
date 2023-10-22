@@ -317,6 +317,8 @@ const Chats = () => {
 
         if (!voteError.length) {
 
+          const toastz = toast.loading("Creating Vote...");
+
           if (
             !connected ||
             chainId?.id != Number(process.env.NEXT_PUBLIC_CHAIN || 314159) ||
@@ -346,7 +348,7 @@ const Chats = () => {
               voteOptions.map(() => 0)
             );
             
-            const voteId = (await contractInit.pollCount()).toNumber() - 1;
+            const voteId = (await contractInit.pollCount()).toNumber();
 
             
             await storeVote(
@@ -360,6 +362,8 @@ const Chats = () => {
               main
             );
 
+            toast.dismiss(toastz);
+            
             toast.success("Vote Created Successfully")
             
 
@@ -391,6 +395,8 @@ const Chats = () => {
                 const error = err as any;
 
                 console.log(error)
+
+                toast.dismiss(toastz);
 
                 toast.error(error.response?.data?.message || "Something went wrong, please try again");
 

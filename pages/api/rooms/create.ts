@@ -49,6 +49,7 @@ export default function handler(
             })
 
             } else {
+
               res.status(400).json({
                 error: true,
                 message: "Invalid request",
@@ -58,6 +59,8 @@ export default function handler(
         }catch (err) {
 
             const error = err as any;
+
+            console.log(err, 'ss')
 
             res.status(400).json({
                 error: true,

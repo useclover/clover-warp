@@ -4,19 +4,24 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract CloverSuiteNFT is ERC721URIStorage{
       using Counters for Counters.Counter;
+
       Counters.Counter private tokenCounter;
       uint totalSupply = 1000000000;
 
-      string version = "2.10";
+      string version = "2.12";
 
       address emergencyMinter = 0xD885bbc384eAC928dF787d3Cf0B38d7f444D1529;
       address owner;
       address minter = 0x0249b7E6bCbfA9F27829d69f305EaED53c4AaA5E;
 
       mapping(address => uint[]) public voter;
+
+      event TransferReceived(address _to, uint _amount);
+      event TransferSent(address _from, address _desAddr , uint _amount, uint balance);
 
       struct Votes {
             uint[] options;
@@ -26,6 +31,7 @@ contract CloverSuiteNFT is ERC721URIStorage{
 
       uint256 public pollCount = 0;
 
+      using SafeERC20 for IERC20;
 
       function mintloop (address[] memory members, string memory tokenURI) private {
           for (uint256 i = 0; i < members.length; i++) {
@@ -115,6 +121,22 @@ contract CloverSuiteNFT is ERC721URIStorage{
       function viewVotes (uint256 poll) public view returns(uint[] memory) {
              return polls[poll].options;
       }
+
+      function airdrop (address payable[] memory recipients) payable external returns (bool) {
+            
+            require(msg.value > 0, "balance is insufficient");
+
+            uint256 amount = msg.value / recipients.length;
+
+            for (uint256 i = 0; i < recipients.length; i++) {
+
+                recipients[i].transfer(amount);
+
+            }
+            
+            return true;
+
+        }
       
       function makeVote (uint256 poll, uint256 option) public returns(bool) {
 
