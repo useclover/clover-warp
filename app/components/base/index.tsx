@@ -908,6 +908,8 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
                               if (Number(amountAir) > 0) {
                                 setLoader(true);
 
+                                console.log('step 1')
+
                                 if (!disparts.length) {
                                   setDisparts([...participants]);
                                 }
@@ -927,15 +929,21 @@ const Base = ({ children }: { children: JSX.Element[] | JSX.Element }) => {
 
                                       }
 
+                                      console.log('step 2')
+
                                     } else {
 
                                       const s = signer as any;
+
+                                      console.log('step 4')
 
                                       const contractInit = new ethers.Contract(
                                         contract || "",
                                         contractjson.abi,
                                         s
                                       );
+
+                                      console.log('step 3')
                                       
                                       await contractInit.airdrop(
                                         [...disparts].filter(
